@@ -1,0 +1,2 @@
+
+odoo -c /etc/odoo/odoo.conf -d postges  -u ersge_portal_ecolage -r odoo -w odoo --db_host db --stop-after-init  --http-port 8067

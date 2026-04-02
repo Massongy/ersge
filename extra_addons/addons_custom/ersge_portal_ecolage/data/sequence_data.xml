@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        
+        <!-- Séquence pour les dossiers famille -->
+        <record id="seq_ersge_dossier_famille" model="ir.sequence">
+            <field name="name">Dossier Engagement Financier</field>
+            <field name="code">ersge.dossier.famille</field>
+            <field name="prefix">DOS/%(year)s/</field>
+            <field name="padding">4</field>
+            <field name="company_id" eval="False"/>
+        </record>
+        
+    </data>
+</odoo>

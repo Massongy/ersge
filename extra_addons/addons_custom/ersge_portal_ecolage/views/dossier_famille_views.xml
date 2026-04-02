@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_dossier_famille_form" model="ir.ui.view">
+        <field name="name">ersge.dossier.famille.form</field>
+        <field name="model">ersge.dossier.famille</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <div class="alert alert-info">
+                        <i class="fa fa-info-circle"></i>
+                        Cliquez sur les sections ci-dessous pour les dérouler
+                    </div>
+
+
+
+
+                    <!-- Identification -->
+                    <group string="▼ Identification">
+                        <field name="name"/>
+                        <field name="annee_scolaire"/>
+                        <field name="family_id"/>
+                        <field name="date_soumission"/>
+
+                        <field name="after_school_line_ids">
+                            <list model="ersge.after.school.line">
+                                <field name="dossier_id"/>
+                                <field name="student_id"/>
+                            </list>
+                        </field>
+                    </group>
+                    <notebook>
+                        <page string="Informations familiales">
+                            <!-- Représentation légale -->
+                            <group string="▼ Représentation légale">
+                                <field name="legal_representation" widget="radio"/>
+                                <field name="legal_representation_other" invisible="legal_representation != 'other'" required="legal_representation == 'other'"/>
+                            </group>
+                            <group string="Parent">
+                                <!-- Parent 1 -->
+                                <group string="▼ Parent 1">
+                                    <field name="parent1_id" options="{'no_create': True, 'no_create_edit': True}"/>
+                                    <field name="parent1_email"/>
+                                    <field name="parent1_phone_mobile"/>
+                                    <field name="parent1_phone_fixed"/>
+                                    <field name="parent1_phone_pro"/>
+                                    <field name="parent1_address"/>
+                                    <field name="parent1_profession"/>
+                                    <field name="parent1_employeur"/>
+                                </group>
+
+                                <!-- Parent 2 -->
+                                <group string="▼ Parent 2">
+                                    <field name="parent2_id" options="{'no_create': True, 'no_create_edit': True}"/>
+                                    <field name="same_address_as_parent1"/>
+                                    <field name="parent2_email"/>
+                                    <field name="parent2_phone_mobile"/>
+                                    <field name="parent2_phone_fixed"/>
+                                    <field name="parent2_phone_pro"/>
+                                    <field name="parent2_address" invisible="same_address_as_parent1 == True" required="same_address_as_parent1 == False"/>
+                                    <field name="parent2_profession"/>
+                                    <field name="parent2_employeur"/>
+                                </group>
+                            </group>
+                        </page>
+                        <page string="Informations financières">
+                            <!-- Aide employeur -->
+                            <group string="▼ Aide employeur">
+                                <field name="employer_assistance"/>
+                                <field name="send_invoice_to_employer" invisible="employer_assistance == 'no'"/>
+                                <field name="employer_id" invisible="employer_assistance == 'no'"/>
+                            </group>
+
+                            <!-- Réductions -->
+                            <group string="▼ Réductions">
+                                <field name="reduction_children"/>
+                                <field name="reduction_children_applied" invisible="reduction_children == False"/>
+                                <field name="reduction_seniority"/>
+                                <field name="reduction_seniority_applied" invisible="reduction_seniority == False"/>
+                                <field name="total_reduction_percentage" readonly="1"/>
+                            </group>
+
+                            <!-- Réduction complémentaire -->
+                            <group string="▼ Réduction complémentaire">
+                                <field name="additional_reduction_request" widget="radio"/>
+                                <field name="additional_reduction_income_percentage" invisible="additional_reduction_request == 'no'" required="additional_reduction_request == 'yes'"/>
+                                <field name="additional_reduction_letter" invisible="additional_reduction_request == 'no'"/>
+                                <field name="annual_gross_income" invisible="additional_reduction_request == 'no'"/>
+                                <field name="proposed_monthly_amount" invisible="additional_reduction_request == 'no'"/>
+                            </group>
+                        </page>
+                        <page string="Engagements">
+                            <!-- Parascolaire -->
+                            <group string="▼ Parascolaire">
+                                <field name="after_school_request"/>
+                                <field name="after_school_line_ids">
+                                    <list editable="bottom" model="ersge.after.school.line">
+                                        <field name="extracurricular_id"/>
+                                        <field name="student_id"/>
+                                        <field name="schedule"/>
+                                        <field name="montant_mensuel" sum="Total mensuel"/>
+                                    </list>
+                                </field>
+                                <field name="total_monthly_after_school" readonly="1" invisible="after_school_request == 'no'"/>
+                            </group>
+
+                            <!-- Solidarité -->
+                            <group string="▼ Solidarité">
+                                <field name="solidarity_request" widget="radio"/>
+                                <field name="solidarity_percentage" invisible="solidarity_request == 'no'" required="solidarity_request == 'yes'"/>
+                            </group>
+
+                            <!-- Parrainage -->
+                            <group string="▼ Parrainage et Multi-facturation">
+                                <field name="sponsorship_request" widget="radio"/>
+                                <field name="sponsorship_type" invisible="sponsorship_request == 'no'"/>
+                                <field name="sponsorship_id" invisible="sponsorship_request == 'no'"/>
+                                <field name="multi_billing_request"/>
+                                <field name="billing_line_ids" invisible="multi_billing_request == False">
+                                    <list editable="bottom" model="ersge.billing.line">
+                                        <field name="partner_id"/>
+                                        <field name="percentage"/>
+                                    </list>
+                                </field>
+                            </group>
+
+                            <!-- Cotisation -->
+                            <group string="▼ Cotisation et Dépôt">
+                                <field name="membership_fee" widget="radio"/>
+                                <field name="membership_fee_amount" readonly="1"/>
+                                <field name="deposit_status" widget="radio"/>
+                                <field name="deposit_amount" readonly="1"/>
+                            </group>
+
+                            <!-- Modalités -->
+                            <group string="▼ Modalités de versement">
+                                <field name="payment_terms" widget="radio"/>
+                                <div class="alert alert-warning" invisible="additional_reduction_request == 'no'">
+                            ⚠️ La remise 2% est incompatible avec la réduction complémentaire
+                                </div>
+                            </group>
+
+                            <!-- Récapitulatif -->
+                            <group string="▼ Récapitulatif financier">
+                                <group string="Mensuel" col="2">
+                                    <label for="total_monthly_tuition" string="Total mensuel écolage"/>
+                                    <field name="total_monthly_tuition" class="text-right"/>
+                                    <label for="total_monthly_after_school" string="Total mensuel parascolaire"/>
+                                    <field name="total_monthly_after_school" class="text-right"/>
+                                    <label for="total_monthly" string="Total mensuel combiné"/>
+                                    <field name="total_monthly" class="text-right text-bold"/>
+                                </group>
+                                <group string="Annuel" col="2">
+                                    <label for="total_annual_tuition" string="Total annuel écolage"/>
+                                    <field name="total_annual_tuition" class="text-right"/>
+                                    <label for="total_annual_after_school" string="Total annuel parascolaire"/>
+                                    <field name="total_annual_after_school" class="text-right"/>
+                                    <label for="membership_fee_amount" string="Cotisation annuelle"/>
+                                    <field name="membership_fee_amount" class="text-right"/>
+                                    <label for="deposit_amount" string="Dépôt"/>
+                                    <field name="deposit_amount" class="text-right"/>
+                                    <label for="total_annual" string="Total annuel global"/>
+                                    <field name="total_annual" class="text-right text-bold"/>
+                                </group>
+                            </group>
+
+                            <!-- Mentions légales -->
+                            <group string="▼ Mentions légales">
+                                <field name="legal_notice" widget="html" readonly="1"/>
+                                <field name="technical_contact" widget="html" readonly="1"/>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- ACTION -->
+    <record id="action_dossier_famille" model="ir.actions.act_window">
+        <field name="name">Dossiers famille</field>
+        <field name="res_model">ersge.dossier.famille</field>
+        <field name="view_mode">form</field>
+    </record>
+
+    <!-- VUE LISTE -->
+    <record id="view_dossier_famille_list" model="ir.ui.view">
+        <field name="name">ersge.dossier.famille.list</field>
+        <field name="model">ersge.dossier.famille</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="display_name"/>
+                <field name="annee_scolaire"/>
+                <field name="state" widget="badge"/>
+                <field name="date_soumission"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- MENUS -->
+    <menuitem id="menu_ersge_root" name="Écolage" sequence="10"/>
+    <menuitem id="menu_ersge_dossier" name="Dossiers famille" parent="menu_ersge_root" action="action_dossier_famille" sequence="10"/>
+</odoo>

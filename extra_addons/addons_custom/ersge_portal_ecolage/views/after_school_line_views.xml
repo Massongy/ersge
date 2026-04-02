@@ -1,0 +1,14 @@
+<odoo>
+    <record id="view_after_school_line_tree" model="ir.ui.view">
+        <field name="name">ersge.after.school.line.tree</field>
+        <field name="model">ersge.after.school.line</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="extracurricular_id"/>
+                <field name="student_id"/>
+                <field name="schedule"/>
+                <field name="montant_mensuel"/>
+            </list>
+        </field>
+    </record>
+</odoo>

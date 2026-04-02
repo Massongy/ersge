@@ -1,0 +1,32 @@
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: odoo
+      POSTGRES_PASSWORD: odoo
+    ports:
+      - "5432:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+
+  odoo:
+    image: odoo:19.0-20260305
+    command: odoo --dev=all -u ersge_portal_ecolage
+    depends_on:
+      - db
+    ports:
+      - "8069:8069"
+    environment:
+      HOST: ${ODOO_HOST}
+      USER: ${ODOO_USER}
+      PASSWORD: ${ODOO_PASSWORD}
+
+    volumes:
+      - odoo_data:/var/lib/odoo
+      - ./extra_addons/addons_custom:/mnt/extra_addons/addons_custom
+      - ./config:/etc/odoo
+    restart: unless-stopped
+
+volumes:
+  db_data:
+  odoo_data:
