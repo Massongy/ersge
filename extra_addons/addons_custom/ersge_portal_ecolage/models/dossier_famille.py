@@ -58,7 +58,6 @@ class DossierFamille(models.Model):
     
     
     # === PARENTS ===
-    # === PARENTS ===
     parent1_id = fields.Many2one('res.partner', string="Parent 1", ondelete='restrict')
     parent1_firstname   = fields.Char(string='Prénom',               related='parent1_id.firstname',   readonly=False, store=False)
     parent1_lastname    = fields.Char(string='Nom',                  related='parent1_id.lastname',    readonly=False, store=False)
@@ -157,7 +156,13 @@ class DossierFamille(models.Model):
 
     membership_fee = fields.Selection([('paid','Payé'),('unpaid','Non payé')])
     deposit_status = fields.Selection([('paid','Payé'),('unpaid','Non payé')])
-    deposit_amount = fields.Monetary(readonly=True, currency_field='currency_id')
+    deposit_amount = fields.Monetary(
+        string="Total Dépôt",
+        readonly=True,
+        currency_field='currency_id',
+        compute='_compute_deposit_amount',
+        store=True
+    )    
     payment_terms = fields.Selection([('monthly','Mensuel'),('annually','Annuel')])
     address_book_optin = fields.Boolean()
 
@@ -275,6 +280,16 @@ class DossierFamille(models.Model):
                 record.membership_fee_amount = 40
             else:
                 record.membership_fee_amount = 0
+
+    @api.depends('deposit_status')
+    def _compute_deposit_amount(self):
+        for record in self:
+            if record.deposit_status == 'paid':
+                record.deposit_amount = 0
+            elif record.deposit_status == 'unpaid':
+                record.deposit_amount = 1000
+            else:
+                record.deposit_amount = 0
         
     
     # -------------------------------------------------------------------------
