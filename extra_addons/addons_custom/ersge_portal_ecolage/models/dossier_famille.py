@@ -38,13 +38,25 @@ class DossierFamille(models.Model):
 
     # === REPRÉSENTATION LÉGALE ===
     legal_representation = fields.Selection([
-        ('father', 'Père'),
-        ('mother', 'Mère'),
-        ('guardian', 'Tuteur'),
+        ('both', 'Père et Mère ayant la pleine autorité parentale'),
+        ('mother_only', 'Mère ayant seule la pleine autorité parentale'),
+        ('father_only', 'Père ayant seul la pleine autorité parentale'),
         ('other', 'Autre')
-    ], string="Représentation légale", required=True, default='father')
-    legal_representation_other = fields.Char(string="Autre représentant légal")
-
+    ], string="Représentation légale", required=True, default='both')
+    legal_representation_other = fields.Char(string="Autre, précisez (ce champ ne peut pas être vide):")
+    
+    
+    # === COTISATION ===
+    
+    membership_fee_amount = fields.Monetary(
+        string="Total Cotisation", 
+        readonly=True, 
+        currency_field='currency_id',
+        compute='_compute_membership_fee_amount',
+        store=True
+)
+    
+    
     # === PARENTS ===
     parent1_id = fields.Many2one('res.partner', string="Parent 1", ondelete='restrict')
     parent1_email = fields.Char()
@@ -133,7 +145,6 @@ class DossierFamille(models.Model):
     billing_line_ids = fields.One2many('ersge.billing.line','dossier_id', string="Lignes de facturation")
 
     membership_fee = fields.Selection([('paid','Payé'),('unpaid','Non payé')])
-    membership_fee_amount = fields.Monetary(readonly=True, currency_field='currency_id')
     deposit_status = fields.Selection([('paid','Payé'),('unpaid','Non payé')])
     deposit_amount = fields.Monetary(readonly=True, currency_field='currency_id')
     payment_terms = fields.Selection([('monthly','Mensuel'),('annually','Annuel')])
@@ -240,6 +251,21 @@ class DossierFamille(models.Model):
         for record in self:
             record.total_reduction_percentage = (record.reduction_children_applied or 0) + (record.reduction_seniority_applied or 0)
 
+    @api.depends('legal_representation')
+    def _compute_membership_fee_amount(self):
+        for record in self:
+            if record.legal_representation == 'both':
+                record.membership_fee_amount = 60
+            elif record.legal_representation == 'mother_only':
+                record.membership_fee_amount = 40
+            elif record.legal_representation == 'father_only':
+                record.membership_fee_amount = 40
+            elif record.legal_representation == 'other':
+                record.membership_fee_amount = 40
+            else:
+                record.membership_fee_amount = 0
+        
+    
     # -------------------------------------------------------------------------
     # UTILITAIRES
     # -------------------------------------------------------------------------

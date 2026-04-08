@@ -1,2 +1,9 @@
 
 odoo -c /etc/odoo/odoo.conf -d postges  -u ersge_portal_ecolage -r odoo -w odoo --db_host db --stop-after-init  --http-port 8067
+
+mettre à jour le module : docker exec -it odoo-ersge-odoo-1 odoo -u ersge_portal_ecolage -d postges --stop-after-init
+
+
+avoir les logs : docker exec -it odoo-ersge-odoo-1 odoo -u ersge -d postges --log-level=debug --stop-after-init
+
+redemarrer : docker restart odoo-ersge-odoo-1
