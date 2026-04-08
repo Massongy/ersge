@@ -54,28 +54,39 @@ class DossierFamille(models.Model):
         currency_field='currency_id',
         compute='_compute_membership_fee_amount',
         store=True
-)
+    )
     
     
     # === PARENTS ===
+    # === PARENTS ===
     parent1_id = fields.Many2one('res.partner', string="Parent 1", ondelete='restrict')
-    parent1_email = fields.Char()
-    parent1_phone_mobile = fields.Char()
-    parent1_phone_fixed = fields.Char()
-    parent1_phone_pro = fields.Char()
-    parent1_address = fields.Text()
-    parent1_profession = fields.Char()
-    parent1_employeur = fields.Char()
+    parent1_firstname   = fields.Char(string='Prénom',               related='parent1_id.firstname',   readonly=False, store=False)
+    parent1_lastname    = fields.Char(string='Nom',                  related='parent1_id.lastname',    readonly=False, store=False)
+    parent1_email       = fields.Char(string='Email',                related='parent1_id.email',       readonly=False, store=False)
+    parent1_phone       = fields.Char(string='Téléphone mobile',     related='parent1_id.phone',       readonly=False, store=False)
+    parent1_phone_fixed = fields.Char(string='Téléphone fixe',       related='parent1_id.phone_fixed', readonly=False, store=False)
+    parent1_phone_pro   = fields.Char(string='Téléphone pro',        related='parent1_id.phone_pro',   readonly=False, store=False)
+    parent1_street      = fields.Char(string='Adresse',              related='parent1_id.street',      readonly=False, store=False)
+    parent1_zip         = fields.Char(string='Code Postal',          related='parent1_id.zip',         readonly=False, store=False)
+    parent1_city        = fields.Char(string='Ville',                related='parent1_id.city',        readonly=False, store=False)
+    parent1_country_id  = fields.Many2one('res.country', string='Pays', related='parent1_id.country_id', readonly=False, store=False)
+    parent1_profession  = fields.Char(string='Profession')
+    parent1_employeur   = fields.Char(string='Employeur')
 
     parent2_id = fields.Many2one('res.partner', string="Parent 2", ondelete='restrict')
     same_address_as_parent1 = fields.Boolean(default=False)
-    parent2_email = fields.Char()
-    parent2_phone_mobile = fields.Char()
-    parent2_phone_fixed = fields.Char()
-    parent2_phone_pro = fields.Char()
-    parent2_address = fields.Text()
-    parent2_profession = fields.Char()
-    parent2_employeur = fields.Char()
+    parent2_firstname   = fields.Char(string='Prénom',               related='parent2_id.firstname',   readonly=False, store=False)
+    parent2_lastname    = fields.Char(string='Nom',                  related='parent2_id.lastname',    readonly=False, store=False)
+    parent2_email       = fields.Char(string='Email',                related='parent2_id.email',       readonly=False, store=False)
+    parent2_phone       = fields.Char(string='Téléphone mobile',     related='parent2_id.phone',       readonly=False, store=False)
+    parent2_phone_fixed = fields.Char(string='Téléphone fixe',       related='parent2_id.phone_fixed', readonly=False, store=False)
+    parent2_phone_pro   = fields.Char(string='Téléphone pro',        related='parent2_id.phone_pro',   readonly=False, store=False)
+    parent2_street      = fields.Char(string='Adresse',              related='parent2_id.street',      readonly=False, store=False)
+    parent2_zip         = fields.Char(string='Code Postal',          related='parent2_id.zip',         readonly=False, store=False)
+    parent2_city        = fields.Char(string='Ville',                related='parent2_id.city',        readonly=False, store=False)
+    parent2_country_id  = fields.Many2one('res.country', string='Pays', related='parent2_id.country_id', readonly=False, store=False)
+    parent2_profession  = fields.Char(string='Profession')
+    parent2_employeur   = fields.Char(string='Employeur')
 
     # === CURRENCY ===
     currency_id = fields.Many2one('res.currency', string='Devise', default=lambda self: self.env.company.currency_id)

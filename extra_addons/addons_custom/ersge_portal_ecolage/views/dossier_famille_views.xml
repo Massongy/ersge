@@ -34,33 +34,61 @@
                                 <field name="membership_fee_amount" readonly="1"/>
                             </group>
 
-                            <group string="Père (ou parent 1)">
-                                <field name="parent1_id" options="{'no_create': True, 'no_create_edit': True}"/>
-                                <field name="parent1_email" widget="email"/>
-                                <field name="parent1_phone_mobile" widget="phone"/>
-                                <field name="parent1_phone_fixed" widget="phone"/>
-                                <field name="parent1_phone_pro" widget="phone"/>
-                                <field name="parent1_address"/>
-                                <field name="parent1_profession"/>
-                                <field name="parent1_employeur"/>
+
+
+                            <!-- Cas : les deux parents -->
+                            <group string="Père (ou parent 1)" invisible="legal_representation != 'both'">
+                                <field name="parent1_id" options="{'no_create': True, 'no_create_edit': True}" required="legal_representation == 'both'"/>
+                                <field name="parent1_firstname" string="Prénom" required="legal_representation == 'both'"/>
+                                <field name="parent1_lastname" string="Nom" required="legal_representation == 'both'"/>
+                                <field name="parent1_email" string="Email" widget="email" required="legal_representation == 'both'"/>
+                                <field name="parent1_phone" string="Téléphone mobile" widget="phone" required="legal_representation == 'both'"/>
+                                <field name="parent1_phone_fixed" string="Téléphone fixe" widget="phone"/>
+                                <field name="parent1_phone_pro" string="Téléphone pro" widget="phone"/>
+                                <field name="parent1_street" string="Adresse" required="legal_representation == 'both'"/>
+                                <field name="parent1_zip" string="Code Postal" required="legal_representation == 'both'"/>
+                                <field name="parent1_city" string="Ville" required="legal_representation == 'both'"/>
+                                <field name="parent1_country_id" string="Pays" required="legal_representation == 'both'"/>
+                                <field name="parent1_profession" string="Profession" required="legal_representation == 'both'"/>
+                                <field name="parent1_employeur" string="Employeur"/>
                             </group>
 
-                            <group string="Mère (ou parent 2)">
-                                <field name="parent2_id" options="{'no_create': True, 'no_create_edit': True}"/>
+                            <group string="Mère (ou parent 2)" invisible="legal_representation != 'both'">
+                                <field name="parent2_id" options="{'no_create': True, 'no_create_edit': True}" required="legal_representation == 'both'"/>
+                                <field name="parent2_firstname" string="Prénom" required="legal_representation == 'both'"/>
+                                <field name="parent2_lastname" string="Nom" required="legal_representation == 'both'"/>
+                                <field name="parent2_email" string="Email" widget="email" required="legal_representation == 'both'"/>
+                                <field name="parent2_phone" string="Téléphone mobile" widget="phone" required="legal_representation == 'both'"/>
+                                <field name="parent2_phone_fixed" string="Téléphone fixe" widget="phone"/>
+                                <field name="parent2_phone_pro" string="Téléphone pro" widget="phone"/>
                                 <field name="same_address_as_parent1"/>
-                                <field name="parent2_email" widget="email"/>
-                                <field name="parent2_phone_mobile" widget="phone"/>
-                                <field name="parent2_phone_fixed" widget="phone"/>
-                                <field name="parent2_phone_pro" widget="phone"/>
-                                <field name="parent2_address" invisible="same_address_as_parent1 == True" required="same_address_as_parent1 == False"/>
-                                <field name="parent2_profession"/>
-                                <field name="parent2_employeur"/>
+                                <field name="parent2_street" string="Adresse" invisible="same_address_as_parent1 == True" required="legal_representation == 'both' and same_address_as_parent1 == False"/>
+                                <field name="parent2_zip" string="Code Postal" invisible="same_address_as_parent1 == True" required="legal_representation == 'both' and same_address_as_parent1 == False"/>
+                                <field name="parent2_city" string="Ville" invisible="same_address_as_parent1 == True" required="legal_representation == 'both' and same_address_as_parent1 == False"/>
+                                <field name="parent2_country_id" string="Pays" invisible="same_address_as_parent1 == True" required="legal_representation == 'both' and same_address_as_parent1 == False"/>
+                                <field name="parent2_profession" string="Profession" required="legal_representation == 'both'"/>
+                                <field name="parent2_employeur" string="Employeur"/>
+                            </group>
+
+                            <!-- Cas : père seul, mère seule, ou autre — groupe sans titre -->
+                            <group invisible="legal_representation == 'both' or legal_representation == False">
+                                <field name="parent1_id" string="Rechercher un contact existant" options="{'no_create': True, 'no_create_edit': True}" required="legal_representation in ('father_only', 'mother_only', 'other')"/>
+                                <field name="parent1_firstname" string="Prénom" required="legal_representation in ('father_only', 'mother_only', 'other')"/>
+                                <field name="parent1_lastname" string="Nom" required="legal_representation in ('father_only', 'mother_only', 'other')"/>
+                                <field name="parent1_email" string="Email" widget="email" required="legal_representation in ('father_only', 'mother_only', 'other')"/>
+                                <field name="parent1_phone" string="Téléphone mobile" widget="phone" required="legal_representation in ('father_only', 'mother_only', 'other')"/>
+                                <field name="parent1_phone_fixed" string="Téléphone fixe" widget="phone"/>
+                                <field name="parent1_phone_pro" string="Téléphone pro" widget="phone"/>
+                                <field name="parent1_street" string="Adresse" required="legal_representation in ('father_only', 'mother_only', 'other')"/>
+                                <field name="parent1_zip" string="Code Postal" required="legal_representation in ('father_only', 'mother_only', 'other')"/>
+                                <field name="parent1_city" string="Ville" required="legal_representation in ('father_only', 'mother_only', 'other')"/>
+                                <field name="parent1_country_id" string="Pays" required="legal_representation in ('father_only', 'mother_only', 'other')"/>
+                                <field name="parent1_profession" string="Profession"/>
+                                <field name="parent1_employeur" string="Employeur"/>
                             </group>
 
                             <group string="Dépôt">
-                                <div class="alert alert-info">
-            Toute nouvelle famille doit verser un dépôt de 1000 CHF
-                                </div>
+                                <div class="alert alert-info">Toute nouvelle famille doit verser un dépôt de 1000 CHF</div>
                                 <field name="deposit_status" widget="radio"/>
                                 <field name="deposit_amount" readonly="1"/>
                             </group>
