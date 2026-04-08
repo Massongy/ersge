@@ -131,6 +131,13 @@ class DossierFamille(models.Model):
         store=True
     )
 
+    # === AIDE EMPLOYEUR ===
+    employer_name   = fields.Char(related='employer_id.name',    string='Nom',         readonly=False, store=False)
+    employer_street = fields.Char(related='employer_id.street',  string='Adresse',     readonly=False, store=False)
+    employer_zip    = fields.Char(related='employer_id.zip',     string='Code Postal', readonly=False, store=False)
+    employer_city   = fields.Char(related='employer_id.city',    string='Ville',       readonly=False, store=False)
+    employer_country_id = fields.Many2one('res.country', related='employer_id.country_id', string='Pays', readonly=False, store=False)
+
     # === RÉDUCTIONS ===
     reduction_children = fields.Integer(string="Réduction fratrie")
     reduction_children_applied = fields.Integer(string="% fratrie sollicité", default=0)
@@ -359,3 +366,9 @@ class DossierFamille(models.Model):
             record.state = 'incomplet'
             record.reopened_by = self.env.user
             record.reopened_date = fields.Datetime.now()
+
+    @api.onchange('employer_assistance')
+    def _onchange_employer_assistance(self):
+        if self.employer_assistance == 'no':
+            self.send_invoice_to_employer = False
+            self.employer_id = False

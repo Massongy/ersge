@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_ersge_family_form" model="ir.ui.view">
+        <field name="name">ersge.family.form</field>
+        <field name="model">ersge.family</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <field name="name"/>
+                        <field name="active"/>
+                    </group>
+                    <notebook>
+                        <page string="Parents">
+                            <field name="parent_ids">
+                                <list>
+                                    <field name="name"/>
+                                    <field name="email"/>
+                                    <field name="phone"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Élèves">
+                            <field name="student_ids">
+                                <list>
+                                    <field name="firstname"/>
+                                    <field name="lastname"/>
+                                    <field name="birthdate"/>
+                                    <field name="gender"/>
+                                    <field name="image_rights"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Dossiers">
+                            <field name="dossier_ids">
+                                <list>
+                                    <field name="name"/>
+                                    <field name="annee_scolaire"/>
+                                    <field name="state" widget="badge"/>
+                                    <field name="date_soumission"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_ersge_family_list" model="ir.ui.view">
+        <field name="name">ersge.family.list</field>
+        <field name="model">ersge.family</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="name"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="action_ersge_family" model="ir.actions.act_window">
+        <field name="name">Familles</field>
+        <field name="res_model">ersge.family</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <menuitem id="menu_ersge_family" name="Familles" parent="menu_ersge_root" action="action_ersge_family" sequence="5"/>
+
+</odoo>

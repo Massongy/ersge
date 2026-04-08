@@ -125,9 +125,13 @@
 
                         <page string="Finances">
                             <group string="Aide employeur">
-                                <field name="employer_assistance"/>
-                                <field name="send_invoice_to_employer" invisible="employer_assistance == 'no'"/>
-                                <field name="employer_id" invisible="employer_assistance == 'no'"/>
+                                <field name="employer_assistance" widget="radio"/>
+                                <field name="send_invoice_to_employer" invisible="employer_assistance != 'yes'"/>
+                                <field name="employer_id" invisible="employer_assistance != 'yes' or not send_invoice_to_employer"/>
+                                <field name="employer_street" invisible="employer_assistance != 'yes' or not send_invoice_to_employer"/>
+                                <field name="employer_zip" invisible="employer_assistance != 'yes' or not send_invoice_to_employer"/>
+                                <field name="employer_city" invisible="employer_assistance != 'yes' or not send_invoice_to_employer"/>
+                                <field name="employer_country_id" invisible="employer_assistance != 'yes' or not send_invoice_to_employer"/>
                             </group>
                             <group string="Réductions">
                                 <field name="reduction_children"/>
@@ -239,6 +243,7 @@
         <field name="name">Dossiers famille</field>
         <field name="res_model">ersge.dossier.famille</field>
         <field name="view_mode">list,form</field>
+        <field name="context">{}</field>
     </record>
 
     <!-- 2. LE MENU : où ça apparaît -->
