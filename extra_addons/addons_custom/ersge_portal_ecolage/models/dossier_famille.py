@@ -323,6 +323,12 @@ class DossierFamille(models.Model):
             if vals.get('name', 'New') == 'New':
                 vals['name'] = self.env['ir.sequence'].next_by_code('ersge.dossier.famille') or 'New'
         return super().create(vals_list)
+    
+    def write(self, vals):
+        result = super().write(vals)
+        for record in self:
+            record.student_line_ids._create_student_if_needed(record)
+        return result
 
     # -------------------------------------------------------------------------
     # ACTIONS WORKFLOW

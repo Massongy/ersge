@@ -109,7 +109,7 @@
                                     <field name="sexe" string="Sexe" required="1"/>
                                     <field name="image_rights" string="Droit à l'image" widget="boolean_toggle"/>
                                     <field name="classe" string="Classe"/>
-                                    <field name="forfait_id" string="Forfait"/>
+                                    <field name="forfait_id" string="Forfait" options="{'no_create': True, 'no_create_edit': True}"/>
                                 </list>
                             </field>
 
