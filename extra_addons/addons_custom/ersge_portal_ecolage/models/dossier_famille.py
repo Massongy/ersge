@@ -91,6 +91,13 @@ class DossierFamille(models.Model):
     currency_id = fields.Many2one('res.currency', string='Devise', default=lambda self: self.env.company.currency_id)
 
     # === ÉLÈVES ===
+    nb_students = fields.Integer(
+        string="Nombre d'enfant(s) à inscrire",
+        compute='_compute_nb_students',
+        store=True
+    )
+
+
     student_line_ids = fields.One2many('ersge.dossier.student.line', 'dossier_id', string="Élèves")
 
     total_monthly_tuition = fields.Monetary(string="Total mensuel écolage", readonly=True, currency_field='currency_id')
@@ -227,6 +234,8 @@ class DossierFamille(models.Model):
     # -------------------------------------------------------------------------
     # COMPUTE
     # -------------------------------------------------------------------------
+    
+    
     @api.depends('family_id', 'annee_scolaire')
     def _compute_display_name(self):
         for record in self:
@@ -250,6 +259,11 @@ class DossierFamille(models.Model):
             else:
                 record.prefilled_info = False
 
+    @api.depends('student_line_ids')
+    def _compute_nb_students(self):
+        for record in self:
+            record.nb_students = len(record.student_line_ids)
+        
     @api.depends('after_school_line_ids.montant_mensuel')
     def _compute_total_after_school(self):
         for record in self:

@@ -94,6 +94,35 @@
                             </group>
                         </page>
 
+                        <page string="Informations élève(s)">
+
+                            <group>
+                                <field name="nb_students" string="Nombre d'enfant(s) à inscrire" readonly="1"/>
+                            </group>
+
+                            <field name="student_line_ids" nolabel="1">
+                                <list editable="bottom">
+                                    <field name="student_id" optional="hide"/>
+                                    <field name="prenom" string="Prénom" required="1"/>
+                                    <field name="nom" string="Nom" required="1"/>
+                                    <field name="date_naissance" string="Date de naissance" required="1"/>
+                                    <field name="sexe" string="Sexe" required="1"/>
+                                    <field name="image_rights" string="Droit à l'image" widget="boolean_toggle"/>
+                                    <field name="classe" string="Classe"/>
+                                    <field name="forfait_id" string="Forfait"/>
+                                </list>
+                            </field>
+
+                            <div class="alert alert-info mt-3">
+                                <i class="fa fa-info-circle"></i>
+        Lors de diverses activités organisées par l'école, les élèves peuvent être amenés à être
+        photographiés ou filmés. Dans le cas de votre accord au droit à l'image, ces images pourront
+        être utilisées à des fins pédagogiques ou pour notre communication en toute vigilance et
+        respect pour les élèves.
+                            </div>
+
+                        </page>
+
                         <page string="Finances">
                             <group string="Aide employeur">
                                 <field name="employer_assistance"/>
