@@ -63,7 +63,6 @@
         <!-- ================================================================
              PARENTS (res.partner)
         ================================================================ -->
-        <!-- Famille Martin - Parent 1 -->
         <record id="demo_parent_martin_pere" model="res.partner">
             <field name="name">Jean Martin</field>
             <field name="firstname">Jean</field>
@@ -79,13 +78,13 @@
             <field name="profession">Ingénieur</field>
         </record>
 
-        <!-- Famille Martin - Parent 2 -->
         <record id="demo_parent_martin_mere" model="res.partner">
             <field name="name">Marie Martin</field>
             <field name="firstname">Marie</field>
             <field name="lastname">Martin</field>
             <field name="email">marie.martin@example.com</field>
             <field name="phone">+41 79 234 56 78</field>
+            <field name="phone_fixed">+41 22 123 45 67</field>
             <field name="street">12 Rue des Alpes</field>
             <field name="zip">1200</field>
             <field name="city">Genève</field>
@@ -94,7 +93,6 @@
             <field name="profession">Médecin</field>
         </record>
 
-        <!-- Famille Dubois - Parent 1 -->
         <record id="demo_parent_dubois_pere" model="res.partner">
             <field name="name">Pierre Dubois</field>
             <field name="firstname">Pierre</field>
@@ -109,7 +107,6 @@
             <field name="profession">Avocat</field>
         </record>
 
-        <!-- Famille Dubois - Parent 2 -->
         <record id="demo_parent_dubois_mere" model="res.partner">
             <field name="name">Sophie Dubois</field>
             <field name="firstname">Sophie</field>
@@ -174,7 +171,6 @@
             <field name="membership_fee">paid</field>
             <field name="deposit_status">paid</field>
             <field name="payment_terms">monthly</field>
-            <!-- Nouveaux champs de réduction -->
             <field name="reduction_requested">True</field>
             <field name="children_count">2</field>
             <field name="seniority_years">6</field>
@@ -200,7 +196,6 @@
             <field name="membership_fee">unpaid</field>
             <field name="deposit_status">unpaid</field>
             <field name="payment_terms">annually</field>
-            <!-- Pas de réduction pour ce dossier -->
             <field name="reduction_requested">False</field>
             <field name="address_book_optin">False</field>
         </record>
@@ -259,41 +254,6 @@
             <field name="extracurricular_id" ref="demo_extra_sport"/>
             <field name="student_id" ref="demo_student_martin_lucas"/>
             <field name="schedule">Mercredi 14h-16h</field>
-        </record>
-
-        <!-- ================================================================
-             LIGNES BUDGET DOSSIER MARTIN
-        ================================================================ -->
-        <record id="demo_budget_salaire_pere" model="ersge.budget.line">
-            <field name="dossier_id" ref="demo_dossier_martin"/>
-            <field name="category">Salaire</field>
-            <field name="description">Salaire net mensuel Parent 1</field>
-            <field name="type">income</field>
-            <field name="amount">5500.0</field>
-        </record>
-
-        <record id="demo_budget_salaire_mere" model="ersge.budget.line">
-            <field name="dossier_id" ref="demo_dossier_martin"/>
-            <field name="category">Salaire</field>
-            <field name="description">Salaire net mensuel Parent 2</field>
-            <field name="type">income</field>
-            <field name="amount">4800.0</field>
-        </record>
-
-        <record id="demo_budget_loyer" model="ersge.budget.line">
-            <field name="dossier_id" ref="demo_dossier_martin"/>
-            <field name="category">Logement</field>
-            <field name="description">Loyer mensuel</field>
-            <field name="type">expense</field>
-            <field name="amount">2200.0</field>
-        </record>
-
-        <record id="demo_budget_assurances" model="ersge.budget.line">
-            <field name="dossier_id" ref="demo_dossier_martin"/>
-            <field name="category">Assurances</field>
-            <field name="description">Assurances maladie et RC</field>
-            <field name="type">expense</field>
-            <field name="amount">600.0</field>
         </record>
 
     </data>

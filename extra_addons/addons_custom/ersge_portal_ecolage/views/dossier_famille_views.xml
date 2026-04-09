@@ -195,8 +195,10 @@
                                 <group invisible="not additional_reduction_request">
                                     <div class="alert alert-info">
                                         <i class="fa fa-info-circle"></i>
-                Merci de prendre impérativement connaissance de ce document :
-                                        <a href="#">Demande de réduction d'écolage</a>
+    Merci de prendre impérativement connaissance de ce document :
+                                        <a href="/ersge_portal_ecolage/static/src/Procedure-demande-reduction-ecolage-2025-26.pdf" target="_blank">
+        Demande de réduction d'écolage
+                                        </a>
                                     </div>
                                     <div class="alert alert-warning">
                 En cas d’impossibilité d'envoi de documents numériques, vous pouvez déposer une version papier
@@ -205,15 +207,46 @@
 
                                     <group string="Revenus">
                                         <field name="additional_reduction_income_percentage" string="Pourcentage que représente le tarif sur votre revenu annuel familial brut" widget="percentage"/>
-                                        <field name="annual_gross_income" string="Revenu annuel brut (CHF)" />
                                     </group>
 
                                     <group string="Justificatifs">
-                                        <field name="tax_notice_attachment" filename="tax_notice_filename" attachment="tax_notice_attachment" help="Dernier avis de taxation (PDF, max 4MB)"/>
-                                        <field name="payslip_parent1_ids" widget="many2many_binary" string="Trois dernières fiches de salaire (parent 1)" help="Vous pouvez télécharger plusieurs fichiers (max 8MB)"/>
-                                        <field name="payslip_parent2_ids" widget="many2many_binary" string="Trois dernières fiches de salaire (parent 2)" help="Vous pouvez télécharger plusieurs fichiers (max 8MB)"/>
-                                        <field name="explanatory_letter_attachment" filename="explanatory_letter_filename" attachment="explanatory_letter_attachment" help="Lettre explicative de la situation familiale (PDF, max 4MB)"/>
-                                        <field name="budget_attachment" filename="budget_attachment_filename" help="Budget familial mensuel (PDF, max 4MB)"/>
+                                        <field name="tax_notice_attachment" filename="tax_notice_filename" attachment="tax_notice_attachment" string="Dernier avis de taxation" help="Dernier avis de taxation (PDF, max 4MB)"/>
+                                        <field name="payslip_ids" widget="many2many_binary" string="Trois dernières fiches de salaire" help="Vous pouvez télécharger plusieurs fichiers (max 8MB)"/>
+                                        <field name="explanatory_letter_attachment" filename="explanatory_letter_filename" attachment="explanatory_letter_attachment" string="Lettre explicative de la situation familiale" help="Lettre explicative de la situation familiale (PDF, max 4MB)"/>
+
+                                        <!-- Budget familial : option téléchargement ou saisie en ligne -->
+                                        <field name="budget_method" widget="radio" options="{'horizontal': true}"/>
+                                        <div invisible="budget_method != 'upload'">
+                                            <field name="budget_attachment" filename="budget_attachment_filename" help="Téléchargez votre budget au format PDF (max 4MB)"/>
+                                        </div>
+                                        <group invisible="budget_method != 'online'">
+                                            <div style="overflow-x: auto;">
+                                                <field name="budget_line_ids" nolabel="1">
+                                                    <list editable="bottom" style="min-width: 500px;">
+                                                        <field name="category" string="Catégorie" readonly="1" width="300"/>
+                                                        <field name="montant_monsieur" string="Monsieur" widget="monetary" options="{'currency_field': 'currency_id'}" width="150"/>
+                                                        <field name="montant_madame" string="Madame" widget="monetary" options="{'currency_field': 'currency_id'}" width="150"/>
+                                                        <field name="type" invisible="1"/>
+                                                        <field name="description" invisible="1"/>
+                                                    </list>
+                                                </field>
+                                            </div>
+
+                                            <!-- Totaux -->
+                                            <group string="Totaux">
+                                                <group string="Revenus">
+                                                    <field name="total_revenus_monsieur"/>
+                                                    <field name="total_revenus_madame"/>
+                                                    <field name="total_revenus"/>
+                                                </group>
+                                                <group string="Charges">
+                                                    <field name="total_charges_monsieur"/>
+                                                    <field name="total_charges_madame"/>
+                                                    <field name="total_charges"/>
+                                                </group>
+                                                <field name="solde" decoration="text-danger:solde &lt; 0"/>
+                                            </group>
+                                        </group>
                                     </group>
 
                                     <group string="Proposition">
@@ -228,6 +261,8 @@
                                 </group>
                             </group>
                         </page>
+
+
 
                         <page string="Engagements">
                             <group string="Parascolaire">

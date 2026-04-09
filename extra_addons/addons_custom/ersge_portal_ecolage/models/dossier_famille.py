@@ -182,11 +182,11 @@ class DossierFamille(models.Model):
     base_monthly_fee = fields.Monetary(string="Base mensuelle (hors réduction)", compute='_compute_base_monthly_fee', store=True, currency_field='currency_id')
 
     # === RÉDUCTION COMPLÉMENTAIRE ===
-    # === RÉDUCTION COMPLÉMENTAIRE ===
     additional_reduction_request = fields.Boolean(string="Demande réduction complémentaire", default=False)
     additional_reduction_income_percentage = fields.Float(string="Pourcentage du revenu")
     annual_gross_income = fields.Monetary(string="Revenu annuel brut", currency_field='currency_id')
     proposed_monthly_amount = fields.Monetary(string="Montant mensuel proposé", currency_field='currency_id')
+    
     # === PARASCOLAIRE ===
     after_school_request = fields.Selection([('yes','Oui'),('no','Non')], string="Demande parascolaire")
     after_school_line_ids = fields.One2many('ersge.after.school.line','dossier_id', string="Activités parascolaires")
@@ -229,10 +229,8 @@ class DossierFamille(models.Model):
     explanatory_letter_filename = fields.Char()
     explanatory_letter_status = fields.Selection([('draft','Brouillon'),('received','Reçu'),('validated','Validé')])
 
+    # Budget
     budget_line_ids = fields.One2many('ersge.budget.line','dossier_id')
-    total_monthly_income = fields.Monetary(readonly=True, currency_field='currency_id')
-    total_monthly_expenses = fields.Monetary(readonly=True, currency_field='currency_id')
-    net_monthly_balance = fields.Monetary(readonly=True, currency_field='currency_id')
     budget_attachment = fields.Binary()
     budget_attachment_filename = fields.Char()
 
@@ -241,11 +239,101 @@ class DossierFamille(models.Model):
     tax_notice_status = fields.Selection([('draft','Brouillon'),('received','Reçu'),('validated','Validé')])
     tax_notice_date = fields.Date()
 
-    payslip_parent1_ids = fields.Many2many('ir.attachment', relation='ersge_dossier_payslip_parent1_rel')
-    payslip_parent1_status = fields.Selection([('draft','Brouillon'),('received','Reçu'),('validated','Validé')])
-    payslip_parent2_ids = fields.Many2many('ir.attachment', relation='ersge_dossier_payslip_parent2_rel')
-    payslip_parent2_status = fields.Selection([('draft','Brouillon'),('received','Reçu'),('validated','Validé')])
-    attachment_ids = fields.Many2many('ir.attachment')
+    payslip_ids = fields.Many2many(
+        'ir.attachment',
+        string="Fiches de salaire",
+        help="Vous pouvez télécharger plusieurs fichiers (max 8MB)"
+    )
+
+    budget_method = fields.Selection([
+        ('upload', 'Télécharger un document'),
+        ('online', 'Remplir en ligne')
+    ], string="Mode de saisie du budget", default='upload')
+
+    # Totaux budget (par type et par colonne)
+    total_revenus_monsieur = fields.Monetary(
+        string="Revenus Monsieur",
+        compute='_compute_budget_totals',
+        store=True,
+        currency_field='currency_id'
+    )
+    total_revenus_madame = fields.Monetary(
+        string="Revenus Madame",
+        compute='_compute_budget_totals',
+        store=True,
+        currency_field='currency_id'
+    )
+    total_charges_monsieur = fields.Monetary(
+        string="Charges Monsieur",
+        compute='_compute_budget_totals',
+        store=True,
+        currency_field='currency_id'
+    )
+    total_charges_madame = fields.Monetary(
+        string="Charges Madame",
+        compute='_compute_budget_totals',
+        store=True,
+        currency_field='currency_id'
+    )
+    total_revenus = fields.Monetary(
+        string="Total revenus",
+        compute='_compute_budget_totals',
+        store=True,
+        currency_field='currency_id'
+    )
+    total_charges = fields.Monetary(
+        string="Total charges",
+        compute='_compute_budget_totals',
+        store=True,
+        currency_field='currency_id'
+    )
+    solde = fields.Monetary(
+        string="Solde",
+        compute='_compute_budget_totals',
+        store=True,
+        currency_field='currency_id'
+    )
+
+    def _ensure_budget_lines(self):
+        """Crée les lignes budget standard si elles n'existent pas et si le mode online est choisi."""
+        if self.budget_method == 'online' and not self.budget_line_ids:
+            categories = [
+                # Revenus
+                ("Salaire brut (indiquez aussi le net)", "income"),
+                ("Allocations familiales", "income"),
+                ("Pension alimentaire (reçue)", "income"),
+                ("Autres revenus", "income"),
+                ("Fortune (immobilière, etc)", "income"),
+                # Charges
+                ("Logement", "expense"),
+                ("Impôts", "expense"),
+                ("Assurance-maladie", "expense"),
+                ("Frais médicaux non remboursés", "expense"),
+                ("Autres assurances", "expense"),
+                ("Énergie (gaz, électricité)", "expense"),
+                ("Télécommunications", "expense"),
+                ("Alimentation", "expense"),
+                ("Pension alimentaire (versée)", "expense"),
+                ("Transports", "expense"),
+                ("Vêtements", "expense"),
+                ("Écolage", "expense"),
+                ("Activités extrascolaires", "expense"),
+                ("Cadeaux", "expense"),
+                ("Argent de poche enfants", "expense"),
+                ("Formations", "expense"),
+                ("Loisirs – vacances", "expense"),
+                ("Dettes", "expense"),
+                ("Autre", "expense"),
+                ("Autre", "expense"),
+            ]
+            for cat, typ in categories:
+                self.env['ersge.budget.line'].create({
+                    'dossier_id': self.id,
+                    'category': cat,
+                    'type': typ,
+                    'montant_monsieur': 0.0,
+                    'montant_madame': 0.0,
+                })
 
     # === SIGNATURE & ACCEPTATION ===
     contract_accepted = fields.Boolean()
@@ -306,6 +394,7 @@ class DossierFamille(models.Model):
             total = sum(line.forfait_montant_mensuel for line in record.student_line_ids)
             record.total_monthly_tuition = total
             record.total_annual_tuition = total * 12
+
     @api.depends('after_school_line_ids.montant_mensuel')
     def _compute_total_monthly_after_school(self):
         for record in self:
@@ -355,27 +444,37 @@ class DossierFamille(models.Model):
     @api.depends('student_line_ids', 'student_line_ids.forfait_montant_mensuel', 'after_school_line_ids.montant_mensuel')
     def _compute_base_monthly_fee(self):
         for rec in self:
-            # Écolage : utiliser forfait_montant_mensuel (stocké)
             tuition = sum(line.forfait_montant_mensuel for line in rec.student_line_ids)
             after_school = sum(line.montant_mensuel for line in rec.after_school_line_ids)
             rec.base_monthly_fee = tuition + after_school
-    
+
     @api.depends('base_monthly_fee', 'max_children_discount', 'max_seniority_discount',
                  'apply_children_discount', 'apply_seniority_discount', 'requested_discount')
     def _compute_discounted_fees(self):
         for rec in self:
-            # Enfants
             children_disc = rec.max_children_discount if rec.apply_children_discount else 0.0
             rec.monthly_fee_after_children = rec.base_monthly_fee * (1 - children_disc / 100.0)
-            # Ancienneté
             seniority_disc = rec.max_seniority_discount if rec.apply_seniority_discount else 0.0
             rec.monthly_fee_after_seniority = rec.base_monthly_fee * (1 - seniority_disc / 100.0)
-            # Max cumulé
             max_disc = rec.max_total_discount
             rec.monthly_fee_at_max = rec.base_monthly_fee * (1 - max_disc / 100.0)
-            # Sollicité (plafonné au max)
             requested = min(rec.requested_discount, max_disc) if rec.reduction_requested else 0.0
             rec.monthly_fee_after_requested = rec.base_monthly_fee * (1 - requested / 100.0)
+
+    @api.depends('budget_line_ids.montant_monsieur', 'budget_line_ids.montant_madame', 'budget_line_ids.type')
+    def _compute_budget_totals(self):
+        for rec in self:
+            revenus_m = sum(line.montant_monsieur for line in rec.budget_line_ids if line.type == 'income')
+            revenus_f = sum(line.montant_madame for line in rec.budget_line_ids if line.type == 'income')
+            charges_m = sum(line.montant_monsieur for line in rec.budget_line_ids if line.type == 'expense')
+            charges_f = sum(line.montant_madame for line in rec.budget_line_ids if line.type == 'expense')
+            rec.total_revenus_monsieur = revenus_m
+            rec.total_revenus_madame = revenus_f
+            rec.total_charges_monsieur = charges_m
+            rec.total_charges_madame = charges_f
+            rec.total_revenus = revenus_m + revenus_f
+            rec.total_charges = charges_m + charges_f
+            rec.solde = rec.total_revenus - rec.total_charges
 
     # -------------------------------------------------------------------------
     # CONSTRAINTS
@@ -402,11 +501,17 @@ class DossierFamille(models.Model):
         for vals in vals_list:
             if vals.get('name', 'New') == 'New':
                 vals['name'] = self.env['ir.sequence'].next_by_code('ersge.dossier.famille') or 'New'
-        return super().create(vals_list)
+        records = super().create(vals_list)
+        # Création des lignes budget si nécessaire (après création)
+        for record in records:
+            record._ensure_budget_lines()
+        return records
 
     def write(self, vals):
         result = super().write(vals)
+        # Si le mode budget a changé ou si le dossier est passé en mode online, créer les lignes
         for record in self:
+            record._ensure_budget_lines()
             record.student_line_ids._create_student_if_needed(record)
         return result
 

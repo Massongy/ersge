@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
-from odoo import models, fields
-
+from odoo import models, fields, api
 
 class BudgetLine(models.Model):
     _name = 'ersge.budget.line'
@@ -13,4 +11,16 @@ class BudgetLine(models.Model):
         ('income', 'Revenu'),
         ('expense', 'Charge'),
     ], string='Type', required=True)
-    amount = fields.Float(string='Montant (CHF)', required=True)
+
+    # Nouveaux champs pour les deux colonnes
+    montant_monsieur = fields.Monetary(string='Monsieur', currency_field='currency_id')
+    montant_madame = fields.Monetary(string='Madame', currency_field='currency_id')
+    currency_id = fields.Many2one('res.currency', related='dossier_id.currency_id', store=True)
+
+    # Champ calculé (optionnel) pour avoir un total par ligne
+    total_ligne = fields.Monetary(string='Total ligne', compute='_compute_total_ligne', store=True, currency_field='currency_id')
+
+    @api.depends('montant_monsieur', 'montant_madame')
+    def _compute_total_ligne(self):
+        for line in self:
+            line.total_ligne = (line.montant_monsieur or 0.0) + (line.montant_madame or 0.0)
