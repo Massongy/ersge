@@ -44,10 +44,8 @@ class DossierFamille(models.Model):
         ('other', 'Autre')
     ], string="Représentation légale", required=True, default='both')
     legal_representation_other = fields.Char(string="Autre, précisez (ce champ ne peut pas être vide):")
-    
-    
+
     # === COTISATION ===
-    
     membership_fee_amount = fields.Monetary(
         string="Total Cotisation", 
         readonly=True, 
@@ -55,8 +53,7 @@ class DossierFamille(models.Model):
         compute='_compute_membership_fee_amount',
         store=True
     )
-    
-    
+
     # === PARENTS ===
     parent1_id = fields.Many2one('res.partner', string="Parent 1", ondelete='restrict')
     parent1_firstname   = fields.Char(string='Prénom',               related='parent1_id.firstname',   readonly=False, store=False)
@@ -97,30 +94,38 @@ class DossierFamille(models.Model):
         store=True
     )
 
-
     student_line_ids = fields.One2many('ersge.dossier.student.line', 'dossier_id', string="Élèves")
 
-    total_monthly_tuition = fields.Monetary(string="Total mensuel écolage", readonly=True, currency_field='currency_id')
+    # Totaux mensuels et annuels (avec compute)
+    total_monthly_tuition = fields.Monetary(
+        string="Total mensuel écolage",
+        compute='_compute_total_monthly_tuition',
+        store=True,
+        currency_field='currency_id'
+    )
     total_monthly_after_school = fields.Monetary(
         string="Total mensuel parascolaire",
-        readonly=True,
-        currency_field='currency_id',
-        compute='_compute_total_after_school',
-        store=True
+        compute='_compute_total_monthly_after_school',
+        store=True,
+        currency_field='currency_id'
+    )
+    total_annual_tuition = fields.Monetary(
+        string="Total annuel écolage",
+        compute='_compute_total_monthly_tuition',
+        store=True,
+        currency_field='currency_id'
+    )
+    total_annual_after_school = fields.Monetary(
+        string="Total annuel parascolaire",
+        compute='_compute_total_monthly_after_school',
+        store=True,
+        currency_field='currency_id'
     )
     total_monthly = fields.Monetary(
         string="Total mensuel combiné",
         readonly=True,
         currency_field='currency_id',
         compute='_compute_total_combined',
-        store=True
-    )
-    total_annual_tuition = fields.Monetary(string="Total annuel écolage", readonly=True, currency_field='currency_id')
-    total_annual_after_school = fields.Monetary(
-        string="Total annuel parascolaire",
-        readonly=True,
-        currency_field='currency_id',
-        compute='_compute_total_after_school',
         store=True
     )
     total_annual = fields.Monetary(
@@ -139,22 +144,49 @@ class DossierFamille(models.Model):
     employer_country_id = fields.Many2one('res.country', related='employer_id.country_id', string='Pays', readonly=False, store=False)
 
     # === RÉDUCTIONS ===
-    reduction_children = fields.Integer(string="Réduction fratrie")
-    reduction_children_applied = fields.Integer(string="% fratrie sollicité", default=0)
-    reduction_seniority = fields.Integer(string="Réduction ancienneté")
-    reduction_seniority_applied = fields.Integer(string="% ancienneté sollicité", default=0)
-    total_reduction_percentage = fields.Float(
-        string="Total réduction",
-        compute="_compute_total_reduction",
-        store=True
-    )
+    reduction_requested = fields.Boolean(string="Je sollicite une réduction", default=False)
 
-    additional_reduction_request = fields.Selection([('yes','Oui'),('no','Non')], string="Demande réduction complémentaire")
-    additional_reduction_income_percentage = fields.Float()
-    additional_reduction_letter = fields.Text()
-    annual_gross_income = fields.Float()
-    proposed_monthly_amount = fields.Float()
+    # Nombre d'enfants
+    children_count = fields.Selection([
+        ('1', '1 enfant'),
+        ('2', '2 enfants'),
+        ('3', '3 enfants'),
+        ('4', '4 enfants et plus'),
+    ], string="Nombre d'enfants inscrits", default='1')
+    max_children_discount = fields.Float(string="Réduction max enfants (%)", compute='_compute_max_discounts', store=True)
+    apply_children_discount = fields.Boolean(string="Appliquer réduction enfants", default=True)
 
+    # Ancienneté
+    seniority_years = fields.Selection([
+        ('5', 'Moins de 6 ans'),
+        ('6', '6 années'),
+        ('7', '7 années'),
+        ('8', '8 années'),
+        ('9', '9 années'),
+        ('10', '10 ans et plus'),
+    ], string="Années d'ancienneté", default='5')
+    max_seniority_discount = fields.Float(string="Réduction max ancienneté (%)", compute='_compute_max_discounts', store=True)
+    apply_seniority_discount = fields.Boolean(string="Appliquer réduction ancienneté", default=True)
+
+    # Ajustement
+    max_total_discount = fields.Float(string="Réduction maximale totale (%)", compute='_compute_max_discounts', store=True)
+    requested_discount = fields.Float(string="Pourcentage sollicité (%)", default=0.0)
+
+    # Montants calculés après réduction
+    monthly_fee_after_children = fields.Monetary(string="Total mensuel après rabais enfants", compute='_compute_discounted_fees', store=True, currency_field='currency_id')
+    monthly_fee_after_seniority = fields.Monetary(string="Total mensuel après rabais ancienneté", compute='_compute_discounted_fees', store=True, currency_field='currency_id')
+    monthly_fee_at_max = fields.Monetary(string="Total mensuel après rabais max", compute='_compute_discounted_fees', store=True, currency_field='currency_id')
+    monthly_fee_after_requested = fields.Monetary(string="Total mensuel après rabais sollicité", compute='_compute_discounted_fees', store=True, currency_field='currency_id')
+
+    # Base mensuelle (hors réduction)
+    base_monthly_fee = fields.Monetary(string="Base mensuelle (hors réduction)", compute='_compute_base_monthly_fee', store=True, currency_field='currency_id')
+
+    # === RÉDUCTION COMPLÉMENTAIRE ===
+    # === RÉDUCTION COMPLÉMENTAIRE ===
+    additional_reduction_request = fields.Boolean(string="Demande réduction complémentaire", default=False)
+    additional_reduction_income_percentage = fields.Float(string="Pourcentage du revenu")
+    annual_gross_income = fields.Monetary(string="Revenu annuel brut", currency_field='currency_id')
+    proposed_monthly_amount = fields.Monetary(string="Montant mensuel proposé", currency_field='currency_id')
     # === PARASCOLAIRE ===
     after_school_request = fields.Selection([('yes','Oui'),('no','Non')], string="Demande parascolaire")
     after_school_line_ids = fields.One2many('ersge.after.school.line','dossier_id', string="Activités parascolaires")
@@ -185,12 +217,10 @@ class DossierFamille(models.Model):
         ('yes', 'Oui'),
         ('no', 'Non')
     ], string="Aide employeur", default='no')
-
     send_invoice_to_employer = fields.Boolean(string="Envoyer la facture à l'employeur")
     employer_id = fields.Many2one('res.partner', string="Employeur")
     
     # === FRAIS NON COMPRIS ===
-
     excluded_fees_info = fields.Html(string="Frais non compris", readonly=True)
 
     # === DOCUMENTS ET ATTACHEMENTS ===
@@ -239,10 +269,9 @@ class DossierFamille(models.Model):
     technical_contact = fields.Html(readonly=True)
 
     # -------------------------------------------------------------------------
-    # COMPUTE
+    # COMPUTE METHODS
     # -------------------------------------------------------------------------
-    
-    
+
     @api.depends('family_id', 'annee_scolaire')
     def _compute_display_name(self):
         for record in self:
@@ -270,34 +299,35 @@ class DossierFamille(models.Model):
     def _compute_nb_students(self):
         for record in self:
             record.nb_students = len(record.student_line_ids)
-        
-    @api.depends('after_school_line_ids.montant_mensuel')
-    def _compute_total_after_school(self):
-        for record in self:
-            record.total_monthly_after_school = sum(line.montant_mensuel for line in record.after_school_line_ids)
-            record.total_annual_after_school = record.total_monthly_after_school * 12
 
-    @api.depends('total_monthly_tuition','total_monthly_after_school')
+    @api.depends('student_line_ids.forfait_montant_mensuel')
+    def _compute_total_monthly_tuition(self):
+        for record in self:
+            total = sum(line.forfait_montant_mensuel for line in record.student_line_ids)
+            record.total_monthly_tuition = total
+            record.total_annual_tuition = total * 12
+    @api.depends('after_school_line_ids.montant_mensuel')
+    def _compute_total_monthly_after_school(self):
+        for record in self:
+            total = sum(line.montant_mensuel for line in record.after_school_line_ids)
+            record.total_monthly_after_school = total
+            record.total_annual_after_school = total * 12
+
+    @api.depends('total_monthly_tuition', 'total_monthly_after_school', 'reduction_requested', 'monthly_fee_after_requested')
     def _compute_total_combined(self):
         for record in self:
-            record.total_monthly = (record.total_monthly_tuition or 0) + (record.total_monthly_after_school or 0)
-            record.total_annual = (record.total_annual_tuition or 0) + (record.total_annual_after_school or 0)
-
-    @api.depends('reduction_children_applied','reduction_seniority_applied')
-    def _compute_total_reduction(self):
-        for record in self:
-            record.total_reduction_percentage = (record.reduction_children_applied or 0) + (record.reduction_seniority_applied or 0)
+            if record.reduction_requested:
+                record.total_monthly = record.monthly_fee_after_requested
+            else:
+                record.total_monthly = (record.total_monthly_tuition or 0) + (record.total_monthly_after_school or 0)
+            record.total_annual = record.total_monthly * 12
 
     @api.depends('legal_representation')
     def _compute_membership_fee_amount(self):
         for record in self:
             if record.legal_representation == 'both':
                 record.membership_fee_amount = 60
-            elif record.legal_representation == 'mother_only':
-                record.membership_fee_amount = 40
-            elif record.legal_representation == 'father_only':
-                record.membership_fee_amount = 40
-            elif record.legal_representation == 'other':
+            elif record.legal_representation in ('mother_only', 'father_only', 'other'):
                 record.membership_fee_amount = 40
             else:
                 record.membership_fee_amount = 0
@@ -311,8 +341,51 @@ class DossierFamille(models.Model):
                 record.deposit_amount = 1000
             else:
                 record.deposit_amount = 0
-        
+
+    # --- Réductions ---
+    @api.depends('children_count', 'seniority_years')
+    def _compute_max_discounts(self):
+        children_map = {'1': 0.0, '2': 10.0, '3': 20.0, '4': 30.0}
+        seniority_map = {'5': 0.0, '6': 2.0, '7': 4.0, '8': 6.0, '9': 8.0, '10': 10.0}
+        for rec in self:
+            rec.max_children_discount = children_map.get(rec.children_count, 0.0)
+            rec.max_seniority_discount = seniority_map.get(rec.seniority_years, 0.0)
+            rec.max_total_discount = rec.max_children_discount + rec.max_seniority_discount
+
+    @api.depends('student_line_ids', 'student_line_ids.forfait_montant_mensuel', 'after_school_line_ids.montant_mensuel')
+    def _compute_base_monthly_fee(self):
+        for rec in self:
+            # Écolage : utiliser forfait_montant_mensuel (stocké)
+            tuition = sum(line.forfait_montant_mensuel for line in rec.student_line_ids)
+            after_school = sum(line.montant_mensuel for line in rec.after_school_line_ids)
+            rec.base_monthly_fee = tuition + after_school
     
+    @api.depends('base_monthly_fee', 'max_children_discount', 'max_seniority_discount',
+                 'apply_children_discount', 'apply_seniority_discount', 'requested_discount')
+    def _compute_discounted_fees(self):
+        for rec in self:
+            # Enfants
+            children_disc = rec.max_children_discount if rec.apply_children_discount else 0.0
+            rec.monthly_fee_after_children = rec.base_monthly_fee * (1 - children_disc / 100.0)
+            # Ancienneté
+            seniority_disc = rec.max_seniority_discount if rec.apply_seniority_discount else 0.0
+            rec.monthly_fee_after_seniority = rec.base_monthly_fee * (1 - seniority_disc / 100.0)
+            # Max cumulé
+            max_disc = rec.max_total_discount
+            rec.monthly_fee_at_max = rec.base_monthly_fee * (1 - max_disc / 100.0)
+            # Sollicité (plafonné au max)
+            requested = min(rec.requested_discount, max_disc) if rec.reduction_requested else 0.0
+            rec.monthly_fee_after_requested = rec.base_monthly_fee * (1 - requested / 100.0)
+
+    # -------------------------------------------------------------------------
+    # CONSTRAINTS
+    # -------------------------------------------------------------------------
+    @api.constrains('requested_discount', 'max_total_discount', 'reduction_requested')
+    def _check_requested_discount(self):
+        for rec in self:
+            if rec.reduction_requested and rec.requested_discount > rec.max_total_discount + 0.01:
+                raise ValidationError("Le pourcentage sollicité ne peut pas dépasser la réduction maximale totale (%.2f%%)" % rec.max_total_discount)
+
     # -------------------------------------------------------------------------
     # UTILITAIRES
     # -------------------------------------------------------------------------
@@ -330,7 +403,7 @@ class DossierFamille(models.Model):
             if vals.get('name', 'New') == 'New':
                 vals['name'] = self.env['ir.sequence'].next_by_code('ersge.dossier.famille') or 'New'
         return super().create(vals_list)
-    
+
     def write(self, vals):
         result = super().write(vals)
         for record in self:

@@ -174,8 +174,13 @@
             <field name="membership_fee">paid</field>
             <field name="deposit_status">paid</field>
             <field name="payment_terms">monthly</field>
-            <field name="reduction_children_applied">10</field>
-            <field name="reduction_seniority_applied">5</field>
+            <!-- Nouveaux champs de réduction -->
+            <field name="reduction_requested">True</field>
+            <field name="children_count">2</field>
+            <field name="seniority_years">6</field>
+            <field name="apply_children_discount">True</field>
+            <field name="apply_seniority_discount">True</field>
+            <field name="requested_discount">12.0</field>
             <field name="address_book_optin">True</field>
             <field name="contract_accepted">True</field>
             <field name="terms_accepted">True</field>
@@ -195,6 +200,8 @@
             <field name="membership_fee">unpaid</field>
             <field name="deposit_status">unpaid</field>
             <field name="payment_terms">annually</field>
+            <!-- Pas de réduction pour ce dossier -->
+            <field name="reduction_requested">False</field>
             <field name="address_book_optin">False</field>
         </record>
 

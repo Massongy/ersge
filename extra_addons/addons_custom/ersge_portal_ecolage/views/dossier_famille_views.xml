@@ -57,10 +57,10 @@
                                 <field name="parent2_phone_fixed" widget="phone"/>
                                 <field name="parent2_phone_pro" widget="phone"/>
                                 <field name="same_address_as_parent1"/>
-                                <field name="parent2_street" invisible="same_address_as_parent1 == True" required="legal_representation == 'both' and same_address_as_parent1 == False"/>
-                                <field name="parent2_zip" invisible="same_address_as_parent1 == True" required="legal_representation == 'both' and same_address_as_parent1 == False"/>
-                                <field name="parent2_city" invisible="same_address_as_parent1 == True" required="legal_representation == 'both' and same_address_as_parent1 == False"/>
-                                <field name="parent2_country_id" invisible="same_address_as_parent1 == True" required="legal_representation == 'both' and same_address_as_parent1 == False"/>
+                                <field name="parent2_street" invisible="same_address_as_parent1" required="legal_representation == 'both' and not same_address_as_parent1"/>
+                                <field name="parent2_zip" invisible="same_address_as_parent1" required="legal_representation == 'both' and not same_address_as_parent1"/>
+                                <field name="parent2_city" invisible="same_address_as_parent1" required="legal_representation == 'both' and not same_address_as_parent1"/>
+                                <field name="parent2_country_id" invisible="same_address_as_parent1" required="legal_representation == 'both' and not same_address_as_parent1"/>
                                 <field name="parent2_profession" required="legal_representation == 'both'"/>
                                 <field name="parent2_employeur"/>
                             </group>
@@ -117,6 +117,7 @@
                                 <field name="employer_city" invisible="employer_assistance != 'yes' or not send_invoice_to_employer"/>
                                 <field name="employer_country_id" invisible="employer_assistance != 'yes' or not send_invoice_to_employer"/>
                             </group>
+
                             <group string="Forfaits">
                                 <field name="student_line_ids" nolabel="1">
                                     <list editable="bottom">
@@ -127,18 +128,104 @@
                                     </list>
                                 </field>
                             </group>
+
                             <group string="Réductions">
-                                <field name="reduction_children"/>
-                                <field name="reduction_children_applied" invisible="reduction_children == False"/>
-                                <field name="reduction_seniority"/>
-                                <field name="reduction_seniority_applied" invisible="reduction_seniority == False"/>
-                                <field name="total_reduction_percentage" readonly="1"/>
+                                <field name="base_monthly_fee" readonly="1"/>
+                                <field name="reduction_requested" widget="boolean_button" options='{"terminology": "boolean"}'/>
+
+                                <group invisible="not reduction_requested">
+                                    <group string="DEMANDE DE RÉDUCTION EN RAISON DU NOMBRE D’ENFANTS">
+                                        <field name="children_count" widget="radio" options="{'horizontal': true}"/>
+                                        <div>
+                                            <strong>Réduction maximale possible :</strong>
+                                            <field name="max_children_discount" readonly="1"/>
+ %
+                                        </div>
+                                        <field name="apply_children_discount"/>
+                                        <div invisible="not apply_children_discount">
+                                            <label for="monthly_fee_after_children"/>
+                                            <field name="monthly_fee_after_children" readonly="1" class="oe_inline"/>
+ CHF
+                                        </div>
+                                    </group>
+
+                                    <group string="DEMANDE DE RÉDUCTION SELON L’ANCIENNETÉ">
+                                        <field name="seniority_years" widget="radio" options="{'horizontal': true}"/>
+                                        <div>
+                                            <strong>Réduction maximale possible :</strong>
+                                            <field name="max_seniority_discount" readonly="1"/>
+ %
+                                        </div>
+                                        <field name="apply_seniority_discount"/>
+                                        <div invisible="not apply_seniority_discount">
+                                            <label for="monthly_fee_after_seniority"/>
+                                            <field name="monthly_fee_after_seniority" readonly="1" class="oe_inline"/>
+ CHF
+                                        </div>
+                                    </group>
+
+                                    <group string="AJUSTEZ VOS RÉDUCTIONS">
+                                        <div>
+                                            <strong>Réduction maximale cumulable (ancienneté + enfants) :</strong>
+                                            <field name="max_total_discount" readonly="1"/>
+ %
+                                        </div>
+                                        <div>
+                                            <label for="monthly_fee_at_max"/>
+                                            <field name="monthly_fee_at_max" readonly="1" class="oe_inline"/>
+ CHF
+                                        </div>
+                                        <field name="requested_discount" string="Compte tenu de votre situation personnelle, vous sollicitez une réduction moindre, indiquez le pourcentage" required="1"/>
+                                        <div>
+                                            <label for="monthly_fee_after_requested"/>
+                                            <field name="monthly_fee_after_requested" readonly="1" class="oe_inline"/>
+ CHF
+                                        </div>
+                                        <div class="alert alert-warning" role="alert" invisible="requested_discount &lt;= max_total_discount">
+                    Le pourcentage sollicité ne doit pas dépasser la réduction maximale !
+                                        </div>
+                                    </group>
+                                </group>
                             </group>
+
+                            <!-- Demande de réduction complémentaire -->
                             <group string="Réduction complémentaire">
-                                <field name="additional_reduction_request" widget="radio"/>
-                                <field name="additional_reduction_income_percentage" invisible="additional_reduction_request == 'no'" required="additional_reduction_request == 'yes'"/>
-                                <field name="annual_gross_income" invisible="additional_reduction_request == 'no'"/>
-                                <field name="proposed_monthly_amount" invisible="additional_reduction_request == 'no'"/>
+                                <field name="additional_reduction_request" widget="boolean_button" options='{"terminology": "boolean"}'/>
+
+                                <group invisible="not additional_reduction_request">
+                                    <div class="alert alert-info">
+                                        <i class="fa fa-info-circle"></i>
+                Merci de prendre impérativement connaissance de ce document :
+                                        <a href="#">Demande de réduction d'écolage</a>
+                                    </div>
+                                    <div class="alert alert-warning">
+                En cas d’impossibilité d'envoi de documents numériques, vous pouvez déposer une version papier
+                de ces documents au secrétariat.
+                                    </div>
+
+                                    <group string="Revenus">
+                                        <field name="additional_reduction_income_percentage" string="Pourcentage que représente le tarif sur votre revenu annuel familial brut" widget="percentage"/>
+                                        <field name="annual_gross_income" string="Revenu annuel brut (CHF)" />
+                                    </group>
+
+                                    <group string="Justificatifs">
+                                        <field name="tax_notice_attachment" filename="tax_notice_filename" attachment="tax_notice_attachment" help="Dernier avis de taxation (PDF, max 4MB)"/>
+                                        <field name="payslip_parent1_ids" widget="many2many_binary" string="Trois dernières fiches de salaire (parent 1)" help="Vous pouvez télécharger plusieurs fichiers (max 8MB)"/>
+                                        <field name="payslip_parent2_ids" widget="many2many_binary" string="Trois dernières fiches de salaire (parent 2)" help="Vous pouvez télécharger plusieurs fichiers (max 8MB)"/>
+                                        <field name="explanatory_letter_attachment" filename="explanatory_letter_filename" attachment="explanatory_letter_attachment" help="Lettre explicative de la situation familiale (PDF, max 4MB)"/>
+                                        <field name="budget_attachment" filename="budget_attachment_filename" help="Budget familial mensuel (PDF, max 4MB)"/>
+                                    </group>
+
+                                    <group string="Proposition">
+                                        <label for="proposed_monthly_amount" string="Je propose à la CEF un montant mensuel"/>
+                                        <field name="proposed_monthly_amount" string="Merci d'indiquer l'écolage mensuel que vous proposez"/>
+                                        <div>
+                                            <strong>Total proposé :</strong>
+                                            <field name="proposed_monthly_amount" readonly="1" class="oe_inline"/>
+ CHF
+                                        </div>
+                                    </group>
+                                </group>
                             </group>
                         </page>
 
@@ -164,7 +251,7 @@
                                 <field name="sponsorship_type" invisible="sponsorship_request == 'no'"/>
                                 <field name="sponsorship_id" invisible="sponsorship_request == 'no'"/>
                                 <field name="multi_billing_request"/>
-                                <field name="billing_line_ids" invisible="multi_billing_request == False">
+                                <field name="billing_line_ids" invisible="not multi_billing_request">
                                     <list editable="bottom">
                                         <field name="partner_id"/>
                                         <field name="percentage"/>
@@ -179,9 +266,6 @@
                             </group>
                             <group string="Modalités">
                                 <field name="payment_terms" widget="radio"/>
-                                <div class="alert alert-warning" invisible="additional_reduction_request == 'no'">
-                                    ⚠️ La remise 2% est incompatible avec la réduction complémentaire
-                                </div>
                             </group>
                         </page>
 
