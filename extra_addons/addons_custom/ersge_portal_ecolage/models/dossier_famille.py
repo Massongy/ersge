@@ -230,6 +230,9 @@ class DossierFamille(models.Model):
     explanatory_letter_status = fields.Selection([('draft','Brouillon'),('received','Reçu'),('validated','Validé')])
 
     # Budget
+
+    
+            
     budget_line_ids = fields.One2many('ersge.budget.line','dossier_id')
     budget_income_line_ids = fields.One2many(
         'ersge.budget.line', 'dossier_id',
@@ -297,7 +300,18 @@ class DossierFamille(models.Model):
         compute='_compute_budget_totals',
         currency_field='currency_id'
     )
-
+    def action_save_budget(self):
+            for line in self.budget_income_line_ids:
+                line.write({
+                    'montant_monsieur': line.montant_monsieur,
+                    'montant_madame': line.montant_madame,
+                })
+            for line in self.budget_expense_line_ids:
+                line.write({
+                    'montant_monsieur': line.montant_monsieur,
+                    'montant_madame': line.montant_madame,
+                })
+                
     def _ensure_budget_lines(self):
         if self.budget_method != 'online':
             return
@@ -630,3 +644,15 @@ class DossierFamille(models.Model):
         self.total_revenus = revenus_m + revenus_f
         self.total_charges = charges_m + charges_f
         self.solde = self.total_revenus - self.total_charges
+
+    @api.onchange('after_school_request')
+    def _onchange_after_school_request(self):
+        if self.after_school_request == 'yes' and not self.after_school_line_ids:
+            students = self.env['ersge.student'].search([('family_id', '=', self.family_id.id)])
+            for student in students:
+                self.update({
+                    'after_school_line_ids': [(0, 0, {
+                        'student_id': student.id,
+                        'selected': True,
+                    })]
+                })

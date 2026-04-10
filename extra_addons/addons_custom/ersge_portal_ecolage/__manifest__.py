@@ -14,7 +14,6 @@
     ],
     'data': [
         'security/ir.model.access.csv',
-        'views/after_school_line_views.xml',
         'views/dossier_famille_views.xml',
         'views/partners.xml',
     ],

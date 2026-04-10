@@ -222,6 +222,9 @@
 
                                         <div invisible="budget_method != 'online'">
                                             <div style="overflow-x: auto;">
+                                                <div invisible="budget_method != 'online'">
+                                                    <button string="💾 Enregistrer le budget" type="object" name="action_save_budget" class="btn-primary"/>
+                                                </div>
 
                                                 <!-- Entrées -->
                                                 <h4>Entrées</h4>
@@ -276,48 +279,46 @@
                                 </group>
                             </group>
                         </page>
-
-
-
-                        <page string="Engagements">
-                            <group string="Parascolaire">
-                                <field name="after_school_request"/>
-                                <field name="after_school_line_ids">
-                                    <list editable="bottom">
-                                        <field name="extracurricular_id"/>
-                                        <field name="student_id"/>
-                                        <field name="schedule"/>
-                                        <field name="montant_mensuel" sum="Total mensuel"/>
+                        <page string="Parascolaire">
+                            <group string="Demande parascolaire">
+                                <field name="after_school_request" widget="radio"/>
+                                <field name="after_school_line_ids" invisible="after_school_request == 'no'">
+                                    <list editable="bottom" delete="false" create="false" editable="top">
+                                        <field name="selected" widget="boolean_toggle"/>
+                                        <field name="student_id" readonly="1"/>
+                                        <field name="accueil_type" required="1" attrs="{'invisible': [('selected', '=', False)]}"/>
+                                        <control>
+                                            <create string="Ajouter un élève"/>
+                                        </control>
+                                        <!-- Champ invisible pour forcer le chargement de family_id -->
+                                        <field name="family_id" invisible="1"/>
+                                        <field name="student_id" domain="[('family_id', '=', family_id)]" options="{'no_create': True}" required="1"/>
+                                        <field name="accueil_type" required="1" widget="selection"/>
+                                        <!-- Affichage dynamique selon le type d'accueil -->
+                                        <field name="lundi_midi" invisible="accueil_type == False"/>
+                                        <field name="lundi_soir" invisible="accueil_type == False"/>
+                                        <field name="lundi_cirque" invisible="accueil_type != 'classe'"/>
+                                        <field name="mardi_midi"/>
+                                        <field name="mardi_soir"/>
+                                        <field name="mardi_cirque" invisible="accueil_type != 'classe'"/>
+                                        <field name="mercredi_midi"/>
+                                        <field name="mercredi_soir"/>
+                                        <field name="mercredi_cirque" invisible="accueil_type != 'classe'"/>
+                                        <field name="jeudi_midi"/>
+                                        <field name="jeudi_soir"/>
+                                        <field name="jeudi_cirque" invisible="accueil_type != 'classe'"/>
+                                        <field name="vendredi_midi"/>
+                                        <field name="vendredi_soir"/>
+                                        <field name="vendredi_cirque" invisible="accueil_type != 'classe'"/>
+                                        <field name="montant_mensuel" aggregate="sum" readonly="1"/>
                                     </list>
                                 </field>
-                                <field name="total_monthly_after_school" readonly="1" invisible="after_school_request == 'no'"/>
-                            </group>
-                            <group string="Solidarité">
-                                <field name="solidarity_request" widget="radio"/>
-                                <field name="solidarity_percentage" invisible="solidarity_request == 'no'" required="solidarity_request == 'yes'"/>
-                            </group>
-                            <group string="Parrainage">
-                                <field name="sponsorship_request" widget="radio"/>
-                                <field name="sponsorship_type" invisible="sponsorship_request == 'no'"/>
-                                <field name="sponsorship_id" invisible="sponsorship_request == 'no'"/>
-                                <field name="multi_billing_request"/>
-                                <field name="billing_line_ids" invisible="not multi_billing_request">
-                                    <list editable="bottom">
-                                        <field name="partner_id"/>
-                                        <field name="percentage"/>
-                                    </list>
-                                </field>
-                            </group>
-                            <group string="Cotisation">
-                                <field name="membership_fee" widget="radio"/>
-                                <field name="membership_fee_amount" readonly="1"/>
-                                <field name="deposit_status" widget="radio"/>
-                                <field name="deposit_amount" readonly="1"/>
-                            </group>
-                            <group string="Modalités">
-                                <field name="payment_terms" widget="radio"/>
+                                <field name="total_monthly_after_school" readonly="1" attrs="{'invisible': [('after_school_request', '=', 'no')]}" class="oe_inline"/>
                             </group>
                         </page>
+
+
+
 
                         <page string="Récapitulatif">
                             <group string="Mensuel">
