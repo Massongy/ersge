@@ -219,34 +219,49 @@
                                         <div invisible="budget_method != 'upload'">
                                             <field name="budget_attachment" filename="budget_attachment_filename" help="Téléchargez votre budget au format PDF (max 4MB)"/>
                                         </div>
-                                        <group invisible="budget_method != 'online'">
+
+                                        <div invisible="budget_method != 'online'">
                                             <div style="overflow-x: auto;">
+
+                                                <!-- Tableau des REVENUS (Entrées) -->
+                                                <h4>Entrées</h4>
                                                 <field name="budget_line_ids" nolabel="1">
-                                                    <list editable="bottom" style="min-width: 500px;">
-                                                        <field name="category" string="Catégorie" readonly="1" width="300"/>
-                                                        <field name="montant_monsieur" string="Monsieur" widget="monetary" options="{'currency_field': 'currency_id'}" width="150"/>
+                                                    <list editable="bottom" create="false" delete="false" style="min-width: 800px;">
+                                                        <field name="category" string="Catégorie" readonly="1" width="350"/>
                                                         <field name="montant_madame" string="Madame" widget="monetary" options="{'currency_field': 'currency_id'}" width="150"/>
+                                                        <field name="montant_monsieur" string="Monsieur" widget="monetary" options="{'currency_field': 'currency_id'}" width="150"/>
                                                         <field name="type" invisible="1"/>
-                                                        <field name="description" invisible="1"/>
                                                     </list>
                                                 </field>
+
+                                                <!-- Tableau des CHARGES (Sorties) -->
+                                                <h4>Sorties</h4>
+                                                <field name="budget_line_ids" nolabel="1">
+                                                    <list editable="bottom" create="false" delete="false" style="min-width: 800px;">
+                                                        <field name="category" string="Catégorie" readonly="1" width="350"/>
+                                                        <field name="montant_madame" string="Madame" widget="monetary" options="{'currency_field': 'currency_id'}" width="150"/>
+                                                        <field name="montant_monsieur" string="Monsieur" widget="monetary" options="{'currency_field': 'currency_id'}" width="150"/>
+                                                        <field name="type" invisible="1"/>
+                                                    </list>
+                                                </field>
+
                                             </div>
 
-                                            <!-- Totaux -->
-                                            <group string="Totaux">
+                                            <!-- Totaux du budget -->
+                                            <group string="Totaux du budget">
                                                 <group string="Revenus">
-                                                    <field name="total_revenus_monsieur"/>
-                                                    <field name="total_revenus_madame"/>
-                                                    <field name="total_revenus"/>
+                                                    <field name="total_revenus_madame" widget="monetary"/>
+                                                    <field name="total_revenus_monsieur" widget="monetary"/>
+                                                    <field name="total_revenus" widget="monetary"/>
                                                 </group>
                                                 <group string="Charges">
-                                                    <field name="total_charges_monsieur"/>
-                                                    <field name="total_charges_madame"/>
-                                                    <field name="total_charges"/>
+                                                    <field name="total_charges_madame" widget="monetary"/>
+                                                    <field name="total_charges_monsieur" widget="monetary"/>
+                                                    <field name="total_charges" widget="monetary"/>
                                                 </group>
-                                                <field name="solde" decoration="text-danger:solde &lt; 0"/>
+                                                <field name="solde" widget="monetary" decoration="text-danger:solde &lt; 0"/>
                                             </group>
-                                        </group>
+                                        </div>
                                     </group>
 
                                     <group string="Proposition">

@@ -12,6 +12,8 @@ class BudgetLine(models.Model):
         ('expense', 'Charge'),
     ], string='Type', required=True)
 
+    include_in_totals = fields.Boolean(string="Inclure dans les totaux", default=True)
+
     # Nouveaux champs pour les deux colonnes
     montant_monsieur = fields.Monetary(string='Monsieur', currency_field='currency_id')
     montant_madame = fields.Monetary(string='Madame', currency_field='currency_id')

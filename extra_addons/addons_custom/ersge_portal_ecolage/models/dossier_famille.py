@@ -295,45 +295,72 @@ class DossierFamille(models.Model):
     )
 
     def _ensure_budget_lines(self):
-        """Crée les lignes budget standard si elles n'existent pas et si le mode online est choisi."""
-        if self.budget_method == 'online' and not self.budget_line_ids:
+    # Si le mode n'est pas online, on ne fait rien (mais on pourrait quand même réparer ? non)
+        if self.budget_method != 'online':
+            return
+
+        # 1. Réparer les lignes existantes qui auraient un type vide
+        revenus_categories = [
+            "Salaire brut (indiquez svp aussi le net entre parenthèses)",
+            "dont Salaire net (à titre indicatif)",
+            "Allocations familiales",
+            "Pension alimentaire (reçue)",
+            "Autres revenus",
+            "Fortune (immobilière, etc)"
+        ]
+        for line in self.budget_line_ids:
+            if not line.type:
+                # Déterminer le type selon la catégorie
+                if line.category in revenus_categories:
+                    line.type = 'income'
+                else:
+                    line.type = 'expense'
+            # Optionnel : s'assurer que include_in_totals est correct (si False pour salaire net)
+            if line.category == "dont Salaire net (à titre indicatif)":
+                line.include_in_totals = False
+
+        # 2. Créer les lignes manquantes (si aucune ligne du tout)
+        if not self.budget_line_ids:
             categories = [
-                # Revenus
-                ("Salaire brut (indiquez aussi le net)", "income"),
-                ("Allocations familiales", "income"),
-                ("Pension alimentaire (reçue)", "income"),
-                ("Autres revenus", "income"),
-                ("Fortune (immobilière, etc)", "income"),
-                # Charges
-                ("Logement", "expense"),
-                ("Impôts", "expense"),
-                ("Assurance-maladie", "expense"),
-                ("Frais médicaux non remboursés", "expense"),
-                ("Autres assurances", "expense"),
-                ("Énergie (gaz, électricité)", "expense"),
-                ("Télécommunications", "expense"),
-                ("Alimentation", "expense"),
-                ("Pension alimentaire (versée)", "expense"),
-                ("Transports", "expense"),
-                ("Vêtements", "expense"),
-                ("Écolage", "expense"),
-                ("Activités extrascolaires", "expense"),
-                ("Cadeaux", "expense"),
-                ("Argent de poche enfants", "expense"),
-                ("Formations", "expense"),
-                ("Loisirs – vacances", "expense"),
-                ("Dettes", "expense"),
-                ("Autre", "expense"),
-                ("Autre", "expense"),
+                # REVENUS
+                ("Salaire brut (indiquez svp aussi le net entre parenthèses)", "income", True),
+                ("dont Salaire net (à titre indicatif)", "income", False),
+                ("Allocations familiales", "income", True),
+                ("Pension alimentaire (reçue)", "income", True),
+                ("Autres revenus", "income", True),
+                ("Fortune (immobilière, etc)", "income", True),
+                # CHARGES
+                ("Logement", "expense", True),
+                ("Impôts", "expense", True),
+                ("Assurance-maladie", "expense", True),
+                ("Frais médicaux non remboursés (lunette, dentiste, etc)", "expense", True),
+                ("Autres assurances (ménage, voiture)", "expense", True),
+                ("Energie (gaz, électricité, etc)", "expense", True),
+                ("Télécommunications (TV, internet, fixe, mobile, etc)", "expense", True),
+                ("Alimentation", "expense", True),
+                ("Pension alimentaire (versée)", "expense", True),
+                ("Transports (bus, voiture, scooter)", "expense", True),
+                ("Vêtements", "expense", True),
+                ("Ecolage (École Rudolf Steiner)", "expense", True),
+                ("Activités extrascolaires (musique, sport, etc)", "expense", True),
+                ("Cadeaux", "expense", True),
+                ("Argent de poche enfants", "expense", True),
+                ("Formations", "expense", True),
+                ("Loisirs – vacances", "expense", True),
+                ("Dettes (carte crédit, autres)", "expense", True),
+                ("Autre :", "expense", True),
+                ("Autre :", "expense", True),
             ]
-            for cat, typ in categories:
-                self.env['ersge.budget.line'].create({
-                    'dossier_id': self.id,
-                    'category': cat,
-                    'type': typ,
-                    'montant_monsieur': 0.0,
-                    'montant_madame': 0.0,
-                })
+            commands = [(0, 0, {
+                'category': cat,
+                'type': typ,
+                'include_in_totals': include,
+                'montant_monsieur': 0.0,
+                'montant_madame': 0.0,
+            }) for cat, typ, include in categories]
+            self.budget_line_ids = commands
+
+            
 
     # === SIGNATURE & ACCEPTATION ===
     contract_accepted = fields.Boolean()
@@ -461,13 +488,13 @@ class DossierFamille(models.Model):
             requested = min(rec.requested_discount, max_disc) if rec.reduction_requested else 0.0
             rec.monthly_fee_after_requested = rec.base_monthly_fee * (1 - requested / 100.0)
 
-    @api.depends('budget_line_ids.montant_monsieur', 'budget_line_ids.montant_madame', 'budget_line_ids.type')
+    @api.depends('budget_line_ids.montant_monsieur', 'budget_line_ids.montant_madame', 'budget_line_ids.type', 'budget_line_ids.include_in_totals')
     def _compute_budget_totals(self):
         for rec in self:
-            revenus_m = sum(line.montant_monsieur for line in rec.budget_line_ids if line.type == 'income')
-            revenus_f = sum(line.montant_madame for line in rec.budget_line_ids if line.type == 'income')
-            charges_m = sum(line.montant_monsieur for line in rec.budget_line_ids if line.type == 'expense')
-            charges_f = sum(line.montant_madame for line in rec.budget_line_ids if line.type == 'expense')
+            revenus_m = sum(line.montant_monsieur for line in rec.budget_line_ids if line.type == 'income' and line.include_in_totals)
+            revenus_f = sum(line.montant_madame for line in rec.budget_line_ids if line.type == 'income' and line.include_in_totals)
+            charges_m = sum(line.montant_monsieur for line in rec.budget_line_ids if line.type == 'expense' and line.include_in_totals)
+            charges_f = sum(line.montant_madame for line in rec.budget_line_ids if line.type == 'expense' and line.include_in_totals)
             rec.total_revenus_monsieur = revenus_m
             rec.total_revenus_madame = revenus_f
             rec.total_charges_monsieur = charges_m
@@ -550,3 +577,11 @@ class DossierFamille(models.Model):
         if self.employer_assistance == 'no':
             self.send_invoice_to_employer = False
             self.employer_id = False
+
+    # ========================================================================
+    # AJOUT : onchange pour créer les lignes budget dès le basculement en mode "online"
+    # ========================================================================
+    @api.onchange('budget_method')
+    def _onchange_budget_method(self):
+        if self.budget_method == 'online':
+            self._ensure_budget_lines()
