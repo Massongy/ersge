@@ -265,43 +265,36 @@ class DossierFamille(models.Model):
     total_revenus_monsieur = fields.Monetary(
         string="Revenus Monsieur",
         compute='_compute_budget_totals',
-        store=True,
         currency_field='currency_id'
     )
     total_revenus_madame = fields.Monetary(
         string="Revenus Madame",
         compute='_compute_budget_totals',
-        store=True,
         currency_field='currency_id'
     )
     total_charges_monsieur = fields.Monetary(
         string="Charges Monsieur",
         compute='_compute_budget_totals',
-        store=True,
         currency_field='currency_id'
     )
     total_charges_madame = fields.Monetary(
         string="Charges Madame",
         compute='_compute_budget_totals',
-        store=True,
         currency_field='currency_id'
     )
     total_revenus = fields.Monetary(
         string="Total revenus",
         compute='_compute_budget_totals',
-        store=True,
         currency_field='currency_id'
     )
     total_charges = fields.Monetary(
         string="Total charges",
         compute='_compute_budget_totals',
-        store=True,
         currency_field='currency_id'
     )
     solde = fields.Monetary(
         string="Solde",
         compute='_compute_budget_totals',
-        store=True,
         currency_field='currency_id'
     )
 
@@ -474,7 +467,16 @@ class DossierFamille(models.Model):
             requested = min(rec.requested_discount, max_disc) if rec.reduction_requested else 0.0
             rec.monthly_fee_after_requested = rec.base_monthly_fee * (1 - requested / 100.0)
 
-    @api.depends('budget_line_ids.montant_monsieur', 'budget_line_ids.montant_madame', 'budget_line_ids.type', 'budget_line_ids.include_in_totals')
+    @api.depends(
+        'budget_line_ids.montant_monsieur', 
+        'budget_line_ids.montant_madame', 
+        'budget_line_ids.type', 
+        'budget_line_ids.include_in_totals',
+        'budget_income_line_ids.montant_monsieur',
+        'budget_income_line_ids.montant_madame',
+        'budget_expense_line_ids.montant_monsieur',
+        'budget_expense_line_ids.montant_madame',
+    )
     def _compute_budget_totals(self):
         for rec in self:
             revenus_m = sum(line.montant_monsieur for line in rec.budget_line_ids if line.type == 'income' and line.include_in_totals)
@@ -615,3 +617,16 @@ class DossierFamille(models.Model):
         # Force Odoo à recalculer les vues filtrées
         self.budget_income_line_ids = self.budget_line_ids.filtered(lambda l: l.type == 'income')
         self.budget_expense_line_ids = self.budget_line_ids.filtered(lambda l: l.type == 'expense')
+    @api.onchange('budget_income_line_ids', 'budget_expense_line_ids')
+    def _onchange_budget_lines_totals(self):
+        revenus_m = sum(line.montant_monsieur for line in self.budget_income_line_ids if line.include_in_totals)
+        revenus_f = sum(line.montant_madame for line in self.budget_income_line_ids if line.include_in_totals)
+        charges_m = sum(line.montant_monsieur for line in self.budget_expense_line_ids if line.include_in_totals)
+        charges_f = sum(line.montant_madame for line in self.budget_expense_line_ids if line.include_in_totals)
+        self.total_revenus_monsieur = revenus_m
+        self.total_revenus_madame = revenus_f
+        self.total_charges_monsieur = charges_m
+        self.total_charges_madame = charges_f
+        self.total_revenus = revenus_m + revenus_f
+        self.total_charges = charges_m + charges_f
+        self.solde = self.total_revenus - self.total_charges
