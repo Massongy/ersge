@@ -231,6 +231,17 @@ class DossierFamille(models.Model):
 
     # Budget
     budget_line_ids = fields.One2many('ersge.budget.line','dossier_id')
+    budget_income_line_ids = fields.One2many(
+        'ersge.budget.line', 'dossier_id',
+        domain=[('type', '=', 'income')],
+        string='Revenus'
+    )
+
+    budget_expense_line_ids = fields.One2many(
+        'ersge.budget.line', 'dossier_id',
+        domain=[('type', '=', 'expense')],
+        string='Charges'
+    )
     budget_attachment = fields.Binary()
     budget_attachment_filename = fields.Char()
 
@@ -295,41 +306,17 @@ class DossierFamille(models.Model):
     )
 
     def _ensure_budget_lines(self):
-    # Si le mode n'est pas online, on ne fait rien (mais on pourrait quand même réparer ? non)
         if self.budget_method != 'online':
             return
-
-        # 1. Réparer les lignes existantes qui auraient un type vide
-        revenus_categories = [
-            "Salaire brut (indiquez svp aussi le net entre parenthèses)",
-            "dont Salaire net (à titre indicatif)",
-            "Allocations familiales",
-            "Pension alimentaire (reçue)",
-            "Autres revenus",
-            "Fortune (immobilière, etc)"
-        ]
-        for line in self.budget_line_ids:
-            if not line.type:
-                # Déterminer le type selon la catégorie
-                if line.category in revenus_categories:
-                    line.type = 'income'
-                else:
-                    line.type = 'expense'
-            # Optionnel : s'assurer que include_in_totals est correct (si False pour salaire net)
-            if line.category == "dont Salaire net (à titre indicatif)":
-                line.include_in_totals = False
-
-        # 2. Créer les lignes manquantes (si aucune ligne du tout)
-        if not self.budget_line_ids:
+        existing = self.env['ersge.budget.line'].search([('dossier_id', '=', self.id)])
+        if not existing:
             categories = [
-                # REVENUS
                 ("Salaire brut (indiquez svp aussi le net entre parenthèses)", "income", True),
                 ("dont Salaire net (à titre indicatif)", "income", False),
                 ("Allocations familiales", "income", True),
                 ("Pension alimentaire (reçue)", "income", True),
                 ("Autres revenus", "income", True),
                 ("Fortune (immobilière, etc)", "income", True),
-                # CHARGES
                 ("Logement", "expense", True),
                 ("Impôts", "expense", True),
                 ("Assurance-maladie", "expense", True),
@@ -351,16 +338,15 @@ class DossierFamille(models.Model):
                 ("Autre :", "expense", True),
                 ("Autre :", "expense", True),
             ]
-            commands = [(0, 0, {
-                'category': cat,
-                'type': typ,
-                'include_in_totals': include,
-                'montant_monsieur': 0.0,
-                'montant_madame': 0.0,
-            }) for cat, typ, include in categories]
-            self.budget_line_ids = commands
-
-            
+            for cat, typ, include in categories:
+                self.env['ersge.budget.line'].create({
+                    'dossier_id': self.id,
+                    'category': cat,
+                    'type': typ,
+                    'include_in_totals': include,
+                    'montant_monsieur': 0.0,
+                    'montant_madame': 0.0,
+                })
 
     # === SIGNATURE & ACCEPTATION ===
     contract_accepted = fields.Boolean()
@@ -536,7 +522,6 @@ class DossierFamille(models.Model):
 
     def write(self, vals):
         result = super().write(vals)
-        # Si le mode budget a changé ou si le dossier est passé en mode online, créer les lignes
         for record in self:
             record._ensure_budget_lines()
             record.student_line_ids._create_student_if_needed(record)
@@ -583,5 +568,50 @@ class DossierFamille(models.Model):
     # ========================================================================
     @api.onchange('budget_method')
     def _onchange_budget_method(self):
-        if self.budget_method == 'online':
-            self._ensure_budget_lines()
+        if self.budget_method == 'online' and not self.budget_line_ids:
+            categories = [
+                ("Salaire brut (indiquez svp aussi le net entre parenthèses)", "income", True),
+                ("dont Salaire net (à titre indicatif)", "income", False),
+                ("Allocations familiales", "income", True),
+                ("Pension alimentaire (reçue)", "income", True),
+                ("Autres revenus", "income", True),
+                ("Fortune (immobilière, etc)", "income", True),
+                ("Logement", "expense", True),
+                ("Impôts", "expense", True),
+                ("Assurance-maladie", "expense", True),
+                ("Frais médicaux non remboursés (lunette, dentiste, etc)", "expense", True),
+                ("Autres assurances (ménage, voiture)", "expense", True),
+                ("Energie (gaz, électricité, etc)", "expense", True),
+                ("Télécommunications (TV, internet, fixe, mobile, etc)", "expense", True),
+                ("Alimentation", "expense", True),
+                ("Pension alimentaire (versée)", "expense", True),
+                ("Transports (bus, voiture, scooter)", "expense", True),
+                ("Vêtements", "expense", True),
+                ("Ecolage (École Rudolf Steiner)", "expense", True),
+                ("Activités extrascolaires (musique, sport, etc)", "expense", True),
+                ("Cadeaux", "expense", True),
+                ("Argent de poche enfants", "expense", True),
+                ("Formations", "expense", True),
+                ("Loisirs – vacances", "expense", True),
+                ("Dettes (carte crédit, autres)", "expense", True),
+                ("Autre :", "expense", True),
+                ("Autre :", "expense", True),
+            ]
+            vals = [
+                (0, 0, {
+                    'category': cat,
+                    'type': typ,
+                    'include_in_totals': include,
+                    'montant_monsieur': 0.0,
+                    'montant_madame': 0.0,
+                }) for cat, typ, include in categories
+            ]
+            self.budget_line_ids = vals
+        # Forcer les champs filtrés depuis les lignes en mémoire
+        self.budget_income_line_ids = self.budget_line_ids.filtered(lambda l: l.type == 'income')
+        self.budget_expense_line_ids = self.budget_line_ids.filtered(lambda l: l.type == 'expense')
+    @api.onchange('budget_line_ids')
+    def _onchange_budget_line_ids(self):
+        # Force Odoo à recalculer les vues filtrées
+        self.budget_income_line_ids = self.budget_line_ids.filtered(lambda l: l.type == 'income')
+        self.budget_expense_line_ids = self.budget_line_ids.filtered(lambda l: l.type == 'expense')

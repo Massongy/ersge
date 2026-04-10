@@ -10,8 +10,7 @@ class BudgetLine(models.Model):
     type = fields.Selection([
         ('income', 'Revenu'),
         ('expense', 'Charge'),
-    ], string='Type', required=True)
-
+    ], string='Type', required=True, default='expense')
     include_in_totals = fields.Boolean(string="Inclure dans les totaux", default=True)
 
     # Nouveaux champs pour les deux colonnes
