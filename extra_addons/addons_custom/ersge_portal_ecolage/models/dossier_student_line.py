@@ -46,6 +46,7 @@ class DossierStudentLine(models.Model):
         readonly=True
     )
 
+
     # Création automatique de l'élève à la sauvegarde
     def _create_student_if_needed(self, dossier):
         for line in self:

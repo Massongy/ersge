@@ -7,6 +7,14 @@ class AfterSchoolLine(models.Model):
     _rec_name = 'display_name'
 
     dossier_id = fields.Many2one('ersge.dossier.famille', string='Dossier', required=True, ondelete='cascade')
+    family_id = fields.Many2one(
+        'ersge.family',
+        string='Famille',
+        related='student_id.family_id',  # Récupéré depuis l'élève
+        store=True,  # Stocké en base pour le domaine
+        readonly=True
+    )
+    
     student_id = fields.Many2one('ersge.student', string='Élève', required=True)
     selected = fields.Boolean(string="Inscrire", default=True)  # Case à cocher
 

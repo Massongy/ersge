@@ -19,8 +19,6 @@ access_ersge_billing_line_manager,access.ersge.billing.line.manager,model_ersge_
 access_ersge_billing_line_portal,access.ersge.billing.line.portal,model_ersge_billing_line,base.group_portal,1,1,1,0
 access_ersge_forfait_user,access.ersge.forfait.user,model_ersge_forfait,base.group_user,1,1,1,0
 access_ersge_forfait_manager,access.ersge.forfait.manager,model_ersge_forfait,base.group_system,1,1,1,1
-access_ersge_extracurricular_user,access.ersge.extrurricular.user,model_ersge_extracurricular,base.group_user,1,1,1,0
-access_ersge_extracurricular_manager,access.ersge.extracurricular.manager,model_ersge_extracurricular,base.group_system,1,1,1,1
 access_ersge_budget_line_user,access.ersge.budget.line.user,model_ersge_budget_line,base.group_user,1,1,1,0
 access_ersge_budget_line_manager,access.ersge.budget.line.manager,model_ersge_budget_line,base.group_system,1,1,1,1
 access_ersge_after_school_line_user,access.ersge.after.school.line.user,model_ersge_after_school_line,base.group_user,1,1,1,0

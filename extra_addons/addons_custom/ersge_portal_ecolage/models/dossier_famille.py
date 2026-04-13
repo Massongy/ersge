@@ -188,7 +188,7 @@ class DossierFamille(models.Model):
     proposed_monthly_amount = fields.Monetary(string="Montant mensuel proposé", currency_field='currency_id')
     
     # === PARASCOLAIRE ===
-    after_school_request = fields.Selection([('yes','Oui'),('no','Non')], string="Demande parascolaire")
+    after_school_request = fields.Selection([('yes','Oui'),('no','Non')], string="Demande parascolaire", default='no')
     after_school_line_ids = fields.One2many('ersge.after.school.line','dossier_id', string="Activités parascolaires")
 
     # === SOLIDARITÉ / SPONSORSHIP ===

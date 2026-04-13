@@ -92,7 +92,7 @@
                             </group>
                             <field name="student_line_ids" nolabel="1">
                                 <list editable="bottom">
-                                    <field name="student_id" optional="hide"/>
+                                    <field name="student_id" domain="[('family_id', '=', parent.family_id)]" options="{'no_create': True}"/>
                                     <field name="prenom" required="1"/>
                                     <field name="nom" required="1"/>
                                     <field name="date_naissance" required="1"/>
@@ -102,8 +102,8 @@
                             </field>
                             <div class="alert alert-info mt-3">
                                 <i class="fa fa-info-circle"></i>
-                                Lors de diverses activités organisées par l'école, les élèves peuvent être amenés à être
-                                photographiés ou filmés.
+        Lors de diverses activités organisées par l'école, les élèves peuvent être amenés à être
+        photographiés ou filmés.
                             </div>
                         </page>
 
@@ -283,16 +283,14 @@
                             <group string="Demande parascolaire">
                                 <field name="after_school_request" widget="radio"/>
                                 <field name="after_school_line_ids" invisible="after_school_request == 'no'">
-                                    <list editable="bottom" delete="false" create="false" editable="top">
+                                    <list editable="bottom" delete="false" create="false">
                                         <field name="selected" widget="boolean_toggle"/>
-                                        <field name="student_id" readonly="1"/>
-                                        <field name="accueil_type" required="1" attrs="{'invisible': [('selected', '=', False)]}"/>
                                         <control>
                                             <create string="Ajouter un élève"/>
                                         </control>
                                         <!-- Champ invisible pour forcer le chargement de family_id -->
                                         <field name="family_id" invisible="1"/>
-                                        <field name="student_id" domain="[('family_id', '=', family_id)]" options="{'no_create': True}" required="1"/>
+                                        <field name="student_id" domain="[('family_id', '=', parent.family_id)]" options="{'no_create': True}" required="1"/>
                                         <field name="accueil_type" required="1" widget="selection"/>
                                         <!-- Affichage dynamique selon le type d'accueil -->
                                         <field name="lundi_midi" invisible="accueil_type == False"/>
