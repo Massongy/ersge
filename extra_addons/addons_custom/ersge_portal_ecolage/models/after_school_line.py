@@ -7,6 +7,7 @@ class AfterSchoolLine(models.Model):
     _rec_name = 'display_name'
 
     dossier_id = fields.Many2one('ersge.dossier.famille', string='Dossier', required=True, ondelete='cascade')
+    
     family_id = fields.Many2one(
         'ersge.family',
         string='Famille',
@@ -16,7 +17,7 @@ class AfterSchoolLine(models.Model):
     )
     
     student_id = fields.Many2one('ersge.student', string='Élève', required=True)
-    selected = fields.Boolean(string="Inscrire", default=True)  # Case à cocher
+    selected = fields.Boolean(string="Inscrire", default=False)  # Case à cocher
 
     # Type d'accueil
     accueil_type = fields.Selection([

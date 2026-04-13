@@ -282,17 +282,11 @@
                         <page string="Parascolaire">
                             <group string="Demande parascolaire">
                                 <field name="after_school_request" widget="radio"/>
-                                <field name="after_school_line_ids" invisible="after_school_request == 'no'">
-                                    <list editable="bottom" delete="false" create="false">
+                                <field name="after_school_line_ids" invisible="after_school_request != 'yes'">
+                                    <list editable="bottom">
                                         <field name="selected" widget="boolean_toggle"/>
-                                        <control>
-                                            <create string="Ajouter un élève"/>
-                                        </control>
-                                        <!-- Champ invisible pour forcer le chargement de family_id -->
-                                        <field name="family_id" invisible="1"/>
-                                        <field name="student_id" domain="[('family_id', '=', parent.family_id)]" options="{'no_create': True}" required="1"/>
-                                        <field name="accueil_type" required="1" widget="selection"/>
-                                        <!-- Affichage dynamique selon le type d'accueil -->
+                                        <field name="student_id" domain="[('family_id', '=', parent.family_id)]" options="{'no_create': True}" required="1" readonly="1" />
+                                        <field name="accueil_type" required="1" widget="selection" attrs="{'invisible': [('selected', '=', False)]}"/>
                                         <field name="lundi_midi" invisible="accueil_type == False"/>
                                         <field name="lundi_soir" invisible="accueil_type == False"/>
                                         <field name="lundi_cirque" invisible="accueil_type != 'classe'"/>
@@ -311,7 +305,7 @@
                                         <field name="montant_mensuel" aggregate="sum" readonly="1"/>
                                     </list>
                                 </field>
-                                <field name="total_monthly_after_school" readonly="1" attrs="{'invisible': [('after_school_request', '=', 'no')]}" class="oe_inline"/>
+                                <field name="total_monthly_after_school" readonly="1" attrs="{'invisible': [('after_school_request', '!=', 'yes')]}" class="oe_inline"/>
                             </group>
                         </page>
 
