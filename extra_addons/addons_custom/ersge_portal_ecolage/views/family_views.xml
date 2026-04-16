@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_ersge_family_list" model="ir.ui.view">
+        <field name="name">ersge.family.list</field>
+        <field name="model">ersge.family</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="name"/>
+                <field name="is_teacher"/>
+                <field name="email"/>
+                <field name="parent_ids" widget="many2many_tags" string="Parents"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_ersge_family_form" model="ir.ui.view">
+        <field name="name">ersge.family.form</field>
+        <field name="model">ersge.family</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <field name="name"/>
+                        <field name="is_teacher"/>
+                        <field name="email"/>
+                        <field name="parent_ids" widget="many2many_tags" string="Parents"/>
+                    </group>
+                    <notebook>
+                        <page string="Dossiers">
+                            <field name="dossier_ids" context="{'default_family_id': id}">
+                                <list>
+                                    <field name="name"/>
+                                    <field name="annee_scolaire"/>
+                                    <field name="state" widget="badge"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_ersge_family" model="ir.actions.act_window">
+        <field name="name">Familles</field>
+        <field name="res_model">ersge.family</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <menuitem id="menu_ersge_family" name="Familles" parent="menu_ersge_root" action="action_ersge_family" sequence="5"/>
+</odoo>

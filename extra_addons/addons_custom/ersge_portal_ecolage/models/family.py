@@ -10,10 +10,14 @@ class ErsgeFamily(models.Model):
         'res.partner', 'family_id',
         string='Parents'
     )
+
+    is_teacher = fields.Boolean(string="Famille enseignante", default=False)
+    
     student_ids = fields.One2many(
         'ersge.student', 'family_id',
         string='Élèves'
     )
+    
     dossier_ids = fields.One2many(
         'ersge.dossier.famille', 'family_id',
         string='Dossiers'
@@ -26,3 +30,13 @@ class ErsgeFamily(models.Model):
         string='Parrains'
     )
     active = fields.Boolean(default=True)
+
+    email = fields.Char(string="Email principal", compute='_compute_email', store=False)
+
+    def _compute_email(self):
+        for family in self:
+            # Prend l'email du premier parent
+            if family.parent_ids:
+                family.email = family.parent_ids[0].email
+            else:
+                family.email = False

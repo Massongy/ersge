@@ -5,9 +5,9 @@ class ErsgeStudent(models.Model):
     _name = 'ersge.student'
     _description = 'Élève'
 
-    name = fields.Char(string='Nom complet', required=True)
-    firstname = fields.Char(string='Prénom', required=True)
-    lastname = fields.Char(string='Nom', required=True)
+    name = fields.Char(string='Nom complet', required=False)
+    firstname = fields.Char(string='Prénom', required=False)
+    lastname = fields.Char(string='Nom', required=False)
     birthdate = fields.Date(string='Date de naissance')
     gender = fields.Selection([
         ('M', 'Masculin'),

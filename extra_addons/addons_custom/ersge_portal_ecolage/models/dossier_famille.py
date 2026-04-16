@@ -1,7 +1,10 @@
 # -*- coding: utf-8 -*-
+import logging  # <---- AJOUTEZ CECI TOUT EN HAUT
 from odoo import models, fields, api
 from odoo.exceptions import ValidationError
 import datetime
+
+_logger = logging.getLogger(__name__)  # <---- AJOUTEZ CECI JUSTE APRÈS LES IMPORTS
 
 class DossierFamille(models.Model):
     _name = 'ersge.dossier.famille'
@@ -17,7 +20,7 @@ class DossierFamille(models.Model):
     date_soumission = fields.Datetime(string="Date de soumission", readonly=True)
 
     # === LIEN PRINCIPAL ===
-    family_id = fields.Many2one('ersge.family', string='Famille', required=True, ondelete='restrict')
+    family_id = fields.Many2one('ersge.family', string='Famille', required=False, ondelete='restrict')
 
     # === PREFILL ===
     prefilled_from_previous = fields.Boolean(default=False)
@@ -42,45 +45,45 @@ class DossierFamille(models.Model):
         ('mother_only', 'Mère ayant seule la pleine autorité parentale'),
         ('father_only', 'Père ayant seul la pleine autorité parentale'),
         ('other', 'Autre')
-    ], string="Représentation légale", required=True, default='both')
+    ], string="Représentation légale", required=False, default='both')
     legal_representation_other = fields.Char(string="Autre, précisez (ce champ ne peut pas être vide):")
 
     # === COTISATION ===
     membership_fee_amount = fields.Monetary(
-        string="Total Cotisation", 
-        readonly=True, 
+        string="Total Cotisation",
+        readonly=True,
         currency_field='currency_id',
         compute='_compute_membership_fee_amount',
         store=True
     )
 
-    # === PARENTS ===
+   # === PARENTS ===
     parent1_id = fields.Many2one('res.partner', string="Parent 1", ondelete='restrict')
-    parent1_firstname   = fields.Char(string='Prénom',               related='parent1_id.firstname',   readonly=False, store=False)
-    parent1_lastname    = fields.Char(string='Nom',                  related='parent1_id.lastname',    readonly=False, store=False)
-    parent1_email       = fields.Char(string='Email',                related='parent1_id.email',       readonly=False, store=False)
-    parent1_phone       = fields.Char(string='Téléphone mobile',     related='parent1_id.phone',       readonly=False, store=False)
-    parent1_phone_fixed = fields.Char(string='Téléphone fixe',       related='parent1_id.phone_fixed', readonly=False, store=False)
-    parent1_phone_pro   = fields.Char(string='Téléphone pro',        related='parent1_id.phone_pro',   readonly=False, store=False)
-    parent1_street      = fields.Char(string='Adresse',              related='parent1_id.street',      readonly=False, store=False)
-    parent1_zip         = fields.Char(string='Code Postal',          related='parent1_id.zip',         readonly=False, store=False)
-    parent1_city        = fields.Char(string='Ville',                related='parent1_id.city',        readonly=False, store=False)
-    parent1_country_id  = fields.Many2one('res.country', string='Pays', related='parent1_id.country_id', readonly=False, store=False)
+    parent1_firstname   = fields.Char(string='Prénom',               related='parent1_id.firstname',   readonly=False, store=True)
+    parent1_lastname    = fields.Char(string='Nom',                  related='parent1_id.lastname',    readonly=False, store=True)
+    parent1_email       = fields.Char(string='Email',                related='parent1_id.email',       readonly=False, store=True)
+    parent1_phone       = fields.Char(string='Téléphone mobile',     related='parent1_id.phone',       readonly=False, store=True)
+    parent1_phone_fixed = fields.Char(string='Téléphone fixe',       related='parent1_id.phone_fixed', readonly=False, store=True)
+    parent1_phone_pro   = fields.Char(string='Téléphone pro',        related='parent1_id.phone_pro',   readonly=False, store=True)
+    parent1_street      = fields.Char(string='Adresse',              related='parent1_id.street',      readonly=False, store=True)
+    parent1_zip         = fields.Char(string='Code Postal',          related='parent1_id.zip',         readonly=False, store=True)
+    parent1_city        = fields.Char(string='Ville',                related='parent1_id.city',        readonly=False, store=True)
+    parent1_country_id  = fields.Many2one('res.country', string='Pays', related='parent1_id.country_id', readonly=False, store=True)
     parent1_profession  = fields.Char(string='Profession')
     parent1_employeur   = fields.Char(string='Employeur')
 
     parent2_id = fields.Many2one('res.partner', string="Parent 2", ondelete='restrict')
     same_address_as_parent1 = fields.Boolean(default=False)
-    parent2_firstname   = fields.Char(string='Prénom',               related='parent2_id.firstname',   readonly=False, store=False)
-    parent2_lastname    = fields.Char(string='Nom',                  related='parent2_id.lastname',    readonly=False, store=False)
-    parent2_email       = fields.Char(string='Email',                related='parent2_id.email',       readonly=False, store=False)
-    parent2_phone       = fields.Char(string='Téléphone mobile',     related='parent2_id.phone',       readonly=False, store=False)
-    parent2_phone_fixed = fields.Char(string='Téléphone fixe',       related='parent2_id.phone_fixed', readonly=False, store=False)
-    parent2_phone_pro   = fields.Char(string='Téléphone pro',        related='parent2_id.phone_pro',   readonly=False, store=False)
-    parent2_street      = fields.Char(string='Adresse',              related='parent2_id.street',      readonly=False, store=False)
-    parent2_zip         = fields.Char(string='Code Postal',          related='parent2_id.zip',         readonly=False, store=False)
-    parent2_city        = fields.Char(string='Ville',                related='parent2_id.city',        readonly=False, store=False)
-    parent2_country_id  = fields.Many2one('res.country', string='Pays', related='parent2_id.country_id', readonly=False, store=False)
+    parent2_firstname   = fields.Char(string='Prénom',               related='parent2_id.firstname',   readonly=False, store=True)
+    parent2_lastname    = fields.Char(string='Nom',                  related='parent2_id.lastname',    readonly=False, store=True)
+    parent2_email       = fields.Char(string='Email',                related='parent2_id.email',       readonly=False, store=True)
+    parent2_phone       = fields.Char(string='Téléphone mobile',     related='parent2_id.phone',       readonly=False, store=True)
+    parent2_phone_fixed = fields.Char(string='Téléphone fixe',       related='parent2_id.phone_fixed', readonly=False, store=True)
+    parent2_phone_pro   = fields.Char(string='Téléphone pro',        related='parent2_id.phone_pro',   readonly=False, store=True)
+    parent2_street      = fields.Char(string='Adresse',              related='parent2_id.street',      readonly=False, store=True)
+    parent2_zip         = fields.Char(string='Code Postal',          related='parent2_id.zip',         readonly=False, store=True)
+    parent2_city        = fields.Char(string='Ville',                related='parent2_id.city',        readonly=False, store=True)
+    parent2_country_id  = fields.Many2one('res.country', string='Pays', related='parent2_id.country_id', readonly=False, store=True)
     parent2_profession  = fields.Char(string='Profession')
     parent2_employeur   = fields.Char(string='Employeur')
 
@@ -186,7 +189,7 @@ class DossierFamille(models.Model):
     additional_reduction_income_percentage = fields.Float(string="Pourcentage du revenu")
     annual_gross_income = fields.Monetary(string="Revenu annuel brut", currency_field='currency_id')
     proposed_monthly_amount = fields.Monetary(string="Montant mensuel proposé", currency_field='currency_id')
-    
+
     # === PARASCOLAIRE ===
     after_school_request = fields.Selection([('yes','Oui'),('no','Non')], string="Demande parascolaire", default='no')
     after_school_line_ids = fields.One2many('ersge.after.school.line','dossier_id', string="Activités parascolaires")
@@ -208,7 +211,7 @@ class DossierFamille(models.Model):
         currency_field='currency_id',
         compute='_compute_deposit_amount',
         store=True
-    )    
+    )
     payment_terms = fields.Selection([('monthly','Mensuel'),('annually','Annuel')])
     address_book_optin = fields.Boolean()
 
@@ -219,7 +222,7 @@ class DossierFamille(models.Model):
     ], string="Aide employeur", default='no')
     send_invoice_to_employer = fields.Boolean(string="Envoyer la facture à l'employeur")
     employer_id = fields.Many2one('res.partner', string="Employeur")
-    
+
     # === FRAIS NON COMPRIS ===
     excluded_fees_info = fields.Html(string="Frais non compris", readonly=True)
 
@@ -230,16 +233,12 @@ class DossierFamille(models.Model):
     explanatory_letter_status = fields.Selection([('draft','Brouillon'),('received','Reçu'),('validated','Validé')])
 
     # Budget
-
-    
-            
     budget_line_ids = fields.One2many('ersge.budget.line','dossier_id')
     budget_income_line_ids = fields.One2many(
         'ersge.budget.line', 'dossier_id',
         domain=[('type', '=', 'income')],
         string='Revenus'
     )
-
     budget_expense_line_ids = fields.One2many(
         'ersge.budget.line', 'dossier_id',
         domain=[('type', '=', 'expense')],
@@ -300,60 +299,6 @@ class DossierFamille(models.Model):
         compute='_compute_budget_totals',
         currency_field='currency_id'
     )
-    def action_save_budget(self):
-            for line in self.budget_income_line_ids:
-                line.write({
-                    'montant_monsieur': line.montant_monsieur,
-                    'montant_madame': line.montant_madame,
-                })
-            for line in self.budget_expense_line_ids:
-                line.write({
-                    'montant_monsieur': line.montant_monsieur,
-                    'montant_madame': line.montant_madame,
-                })
-                
-    def _ensure_budget_lines(self):
-        if self.budget_method != 'online':
-            return
-        existing = self.env['ersge.budget.line'].search([('dossier_id', '=', self.id)])
-        if not existing:
-            categories = [
-                ("Salaire brut (indiquez svp aussi le net entre parenthèses)", "income", True),
-                ("dont Salaire net (à titre indicatif)", "income", False),
-                ("Allocations familiales", "income", True),
-                ("Pension alimentaire (reçue)", "income", True),
-                ("Autres revenus", "income", True),
-                ("Fortune (immobilière, etc)", "income", True),
-                ("Logement", "expense", True),
-                ("Impôts", "expense", True),
-                ("Assurance-maladie", "expense", True),
-                ("Frais médicaux non remboursés (lunette, dentiste, etc)", "expense", True),
-                ("Autres assurances (ménage, voiture)", "expense", True),
-                ("Energie (gaz, électricité, etc)", "expense", True),
-                ("Télécommunications (TV, internet, fixe, mobile, etc)", "expense", True),
-                ("Alimentation", "expense", True),
-                ("Pension alimentaire (versée)", "expense", True),
-                ("Transports (bus, voiture, scooter)", "expense", True),
-                ("Vêtements", "expense", True),
-                ("Ecolage (École Rudolf Steiner)", "expense", True),
-                ("Activités extrascolaires (musique, sport, etc)", "expense", True),
-                ("Cadeaux", "expense", True),
-                ("Argent de poche enfants", "expense", True),
-                ("Formations", "expense", True),
-                ("Loisirs – vacances", "expense", True),
-                ("Dettes (carte crédit, autres)", "expense", True),
-                ("Autre :", "expense", True),
-                ("Autre :", "expense", True),
-            ]
-            for cat, typ, include in categories:
-                self.env['ersge.budget.line'].create({
-                    'dossier_id': self.id,
-                    'category': cat,
-                    'type': typ,
-                    'include_in_totals': include,
-                    'montant_monsieur': 0.0,
-                    'montant_madame': 0.0,
-                })
 
     # === SIGNATURE & ACCEPTATION ===
     contract_accepted = fields.Boolean()
@@ -482,9 +427,9 @@ class DossierFamille(models.Model):
             rec.monthly_fee_after_requested = rec.base_monthly_fee * (1 - requested / 100.0)
 
     @api.depends(
-        'budget_line_ids.montant_monsieur', 
-        'budget_line_ids.montant_madame', 
-        'budget_line_ids.type', 
+        'budget_line_ids.montant_monsieur',
+        'budget_line_ids.montant_madame',
+        'budget_line_ids.type',
         'budget_line_ids.include_in_totals',
         'budget_income_line_ids.montant_monsieur',
         'budget_income_line_ids.montant_madame',
@@ -521,28 +466,256 @@ class DossierFamille(models.Model):
     def _get_current_school_year(self):
         today = datetime.date.today()
         year = today.year
-        if today.month >= 8:
-            return f"{year}-{year+1}"
-        return f"{year-1}-{year}"
+        # On est en avril 2026 → inscription pour 2026-2027
+        # On est en septembre 2026 → inscription pour 2026-2027 aussi
+        return f"{year}-{year+1}"
 
+    def _ensure_budget_lines(self):
+        if self.budget_method != 'online':
+            return
+        existing = self.env['ersge.budget.line'].search([('dossier_id', '=', self.id)])
+        if not existing:
+            categories = [
+                ("Salaire brut (indiquez svp aussi le net entre parenthèses)", "income", True),
+                ("dont Salaire net (à titre indicatif)", "income", False),
+                ("Allocations familiales", "income", True),
+                ("Pension alimentaire (reçue)", "income", True),
+                ("Autres revenus", "income", True),
+                ("Fortune (immobilière, etc)", "income", True),
+                ("Logement", "expense", True),
+                ("Impôts", "expense", True),
+                ("Assurance-maladie", "expense", True),
+                ("Frais médicaux non remboursés (lunette, dentiste, etc)", "expense", True),
+                ("Autres assurances (ménage, voiture)", "expense", True),
+                ("Energie (gaz, électricité, etc)", "expense", True),
+                ("Télécommunications (TV, internet, fixe, mobile, etc)", "expense", True),
+                ("Alimentation", "expense", True),
+                ("Pension alimentaire (versée)", "expense", True),
+                ("Transports (bus, voiture, scooter)", "expense", True),
+                ("Vêtements", "expense", True),
+                ("Ecolage (École Rudolf Steiner)", "expense", True),
+                ("Activités extrascolaires (musique, sport, etc)", "expense", True),
+                ("Cadeaux", "expense", True),
+                ("Argent de poche enfants", "expense", True),
+                ("Formations", "expense", True),
+                ("Loisirs – vacances", "expense", True),
+                ("Dettes (carte crédit, autres)", "expense", True),
+                ("Autre :", "expense", True),
+                ("Autre :", "expense", True),
+            ]
+            for cat, typ, include in categories:
+                self.env['ersge.budget.line'].create({
+                    'dossier_id': self.id,
+                    'category': cat,
+                    'type': typ,
+                    'include_in_totals': include,
+                    'montant_monsieur': 0.0,
+                    'montant_madame': 0.0,
+                })
+
+    def action_save_budget(self):
+        for line in self.budget_income_line_ids:
+            line.write({
+                'montant_monsieur': line.montant_monsieur,
+                'montant_madame': line.montant_madame,
+            })
+        for line in self.budget_expense_line_ids:
+            line.write({
+                'montant_monsieur': line.montant_monsieur,
+                'montant_madame': line.montant_madame,
+            })
+
+    # -------------------------------------------------------------------------
+    # PRÉ-REMPLISSAGE DEPUIS LE DOSSIER PRÉCÉDENT
+    # -------------------------------------------------------------------------
+    @api.model
+    def default_get(self, fields_list):
+        defaults = super().default_get(fields_list)
+        
+        family_id = (self._context.get('default_family_id') or 
+                    self._context.get('parent_id') or 
+                    defaults.get('family_id'))
+        
+        _logger.warning(f"family_id = {family_id}")
+        
+        if not family_id:
+            return defaults
+        
+        # Chercher le dernier dossier de cette famille
+        dernier_dossier = self.search(
+            [('family_id', '=', family_id)],
+            order='id desc',
+            limit=1
+        )
+        
+        _logger.warning(f"dernier_dossier = {dernier_dossier.id if dernier_dossier else 'None'}")
+        
+        if not dernier_dossier:
+            return defaults
+        
+        _logger.warning(f"parent1_firstname de l'ancien dossier = {dernier_dossier.parent1_firstname}")
+        _logger.warning(f"parent1_lastname de l'ancien dossier = {dernier_dossier.parent1_lastname}")
+        
+        # Copier les champs parent1
+        defaults['parent1_firstname'] = dernier_dossier.parent1_firstname
+        defaults['parent1_lastname'] = dernier_dossier.parent1_lastname
+        defaults['parent1_email'] = dernier_dossier.parent1_email
+        defaults['parent1_phone'] = dernier_dossier.parent1_phone
+        defaults['parent1_phone_fixed'] = dernier_dossier.parent1_phone_fixed
+        defaults['parent1_phone_pro'] = dernier_dossier.parent1_phone_pro
+        defaults['parent1_street'] = dernier_dossier.parent1_street
+        defaults['parent1_zip'] = dernier_dossier.parent1_zip
+        defaults['parent1_city'] = dernier_dossier.parent1_city
+        if dernier_dossier.parent1_country_id:
+            defaults['parent1_country_id'] = dernier_dossier.parent1_country_id.id
+        defaults['parent1_profession'] = dernier_dossier.parent1_profession
+        defaults['parent1_employeur'] = dernier_dossier.parent1_employeur
+        
+        # Copier les champs parent2
+        defaults['parent2_firstname'] = dernier_dossier.parent2_firstname
+        defaults['parent2_lastname'] = dernier_dossier.parent2_lastname
+        defaults['parent2_email'] = dernier_dossier.parent2_email
+        defaults['parent2_phone'] = dernier_dossier.parent2_phone
+        defaults['parent2_phone_fixed'] = dernier_dossier.parent2_phone_fixed
+        defaults['parent2_phone_pro'] = dernier_dossier.parent2_phone_pro
+        defaults['parent2_street'] = dernier_dossier.parent2_street
+        defaults['parent2_zip'] = dernier_dossier.parent2_zip
+        defaults['parent2_city'] = dernier_dossier.parent2_city
+        if dernier_dossier.parent2_country_id:
+            defaults['parent2_country_id'] = dernier_dossier.parent2_country_id.id
+        defaults['parent2_profession'] = dernier_dossier.parent2_profession
+        defaults['parent2_employeur'] = dernier_dossier.parent2_employeur
+        defaults['same_address_as_parent1'] = dernier_dossier.same_address_as_parent1
+        
+        # Copier le budget
+        if dernier_dossier.budget_line_ids:
+            budget_lines = []
+            for line in dernier_dossier.budget_line_ids:
+                budget_lines.append((0, 0, {
+                    'category': line.category,
+                    'type': line.type,
+                    'include_in_totals': line.include_in_totals,
+                    'montant_monsieur': line.montant_monsieur,
+                    'montant_madame': line.montant_madame,
+                }))
+            defaults['budget_line_ids'] = budget_lines
+            _logger.warning(f"Budget copié: {len(budget_lines)} lignes")
+        
+        defaults['prefilled_from_previous'] = True
+        
+        return defaults
+
+    # -------------------------------------------------------------------------
+    # CRUD
+    # -------------------------------------------------------------------------
     @api.model_create_multi
     def create(self, vals_list):
+        _logger.warning("=== METHODE CREATE EXECUTEE ===")
+        _logger.warning(f"vals_list: {vals_list}")
+
         for vals in vals_list:
+            _logger.warning(f"family_id dans vals: {vals.get('family_id')}")
+            _logger.warning(f"prefilled_from_previous dans vals: {vals.get('prefilled_from_previous')}")
+            _logger.warning(f"parent1_firstname dans vals: {vals.get('parent1_firstname')}")
+            # Génération de la séquence
             if vals.get('name', 'New') == 'New':
                 vals['name'] = self.env['ir.sequence'].next_by_code('ersge.dossier.famille') or 'New'
+
         records = super().create(vals_list)
-        # Création des lignes budget si nécessaire (après création)
+        
         for record in records:
+            # Post-création : lignes budget et création étudiants
             record._ensure_budget_lines()
+            if hasattr(record.student_line_ids, '_create_student_if_needed'):
+                record.student_line_ids._create_student_if_needed(record)
+            
+            # Créer ou lier les parents (si le dossier a été pré-rempli)
+            if record.family_id and record.parent1_firstname and record.parent1_lastname:                
+                # Parent 1
+                if record.parent1_firstname and record.parent1_lastname:
+                    partner1 = self.env['res.partner'].search([
+                        ('firstname', '=', record.parent1_firstname),
+                        ('lastname', '=', record.parent1_lastname),
+                        ('family_id', '=', record.family_id.id)
+                    ], limit=1)
+                    
+                    if not partner1:
+                        partner1 = self.env['res.partner'].create({
+                            'name': f"{record.parent1_firstname} {record.parent1_lastname}",  # ← AJOUTEZ CECI
+                            'firstname': record.parent1_firstname,
+                            'lastname': record.parent1_lastname,
+                            'email': record.parent1_email,
+                            'phone': record.parent1_phone,
+                            'phone_fixed': record.parent1_phone_fixed,
+                            'phone_pro': record.parent1_phone_pro,
+                            'street': record.parent1_street,
+                            'zip': record.parent1_zip,
+                            'city': record.parent1_city,
+                            'country_id': record.parent1_country_id.id if record.parent1_country_id else False,
+                            'profession': record.parent1_profession,
+                            'employer_name': record.parent1_employeur,
+                            'is_parent': True,
+                            'family_id': record.family_id.id,
+                        })
+                    else:
+                        partner1.write({
+                            'email': record.parent1_email,
+                            'phone': record.parent1_phone,
+                            'phone_fixed': record.parent1_phone_fixed,
+                            'phone_pro': record.parent1_phone_pro,
+                            'street': record.parent1_street,
+                            'zip': record.parent1_zip,
+                            'city': record.parent1_city,
+                            'country_id': record.parent1_country_id.id if record.parent1_country_id else False,
+                            'profession': record.parent1_profession,
+                            'employer_name': record.parent1_employeur,
+                        })
+                    
+                    record.parent1_id = partner1.id
+                
+                # Parent 2
+                if record.parent2_firstname and record.parent2_lastname:
+                    partner2 = self.env['res.partner'].search([
+                        ('firstname', '=', record.parent2_firstname),
+                        ('lastname', '=', record.parent2_lastname),
+                        ('family_id', '=', record.family_id.id)
+                    ], limit=1)
+                    
+                    if not partner2:
+                        partner2 = self.env['res.partner'].create({
+                            'name': f"{record.parent2_firstname} {record.parent2_lastname}",  # ← AJOUTEZ CECI
+                            'firstname': record.parent2_firstname,
+                            'lastname': record.parent2_lastname,
+                            'email': record.parent2_email,
+                            'phone': record.parent2_phone,
+                            'phone_fixed': record.parent2_phone_fixed,
+                            'phone_pro': record.parent2_phone_pro,
+                            'street': record.parent2_street if not record.same_address_as_parent1 else record.parent1_street,
+                            'zip': record.parent2_zip if not record.same_address_as_parent1 else record.parent1_zip,
+                            'city': record.parent2_city if not record.same_address_as_parent1 else record.parent1_city,
+                            'country_id': record.parent2_country_id.id if not record.same_address_as_parent1 else (record.parent1_country_id.id if record.parent1_country_id else False),
+                            'profession': record.parent2_profession,
+                            'employer_name': record.parent2_employeur,
+                            'is_parent': True,
+                            'family_id': record.family_id.id,
+                        })
+                    else:
+                        partner2.write({
+                            'email': record.parent2_email,
+                            'phone': record.parent2_phone,
+                            'phone_fixed': record.parent2_phone_fixed,
+                            'phone_pro': record.parent2_phone_pro,
+                            'street': record.parent2_street if not record.same_address_as_parent1 else record.parent1_street,
+                            'zip': record.parent2_zip if not record.same_address_as_parent1 else record.parent1_zip,
+                            'city': record.parent2_city if not record.same_address_as_parent1 else record.parent1_city,
+                            'country_id': record.parent2_country_id.id if not record.same_address_as_parent1 else (record.parent1_country_id.id if record.parent1_country_id else False),
+                            'profession': record.parent2_profession,
+                            'employer_name': record.parent2_employeur,
+                        })
+                    
+                    record.parent2_id = partner2.id
+        
         return records
-
-    def write(self, vals):
-        result = super().write(vals)
-        for record in self:
-            record._ensure_budget_lines()
-            record.student_line_ids._create_student_if_needed(record)
-        return result
-
     # -------------------------------------------------------------------------
     # ACTIONS WORKFLOW
     # -------------------------------------------------------------------------
@@ -573,15 +746,15 @@ class DossierFamille(models.Model):
             record.reopened_by = self.env.user
             record.reopened_date = fields.Datetime.now()
 
+    # -------------------------------------------------------------------------
+    # ONCHANGE
+    # -------------------------------------------------------------------------
     @api.onchange('employer_assistance')
     def _onchange_employer_assistance(self):
         if self.employer_assistance == 'no':
             self.send_invoice_to_employer = False
             self.employer_id = False
 
-    # ========================================================================
-    # AJOUT : onchange pour créer les lignes budget dès le basculement en mode "online"
-    # ========================================================================
     @api.onchange('budget_method')
     def _onchange_budget_method(self):
         if self.budget_method == 'online' and not self.budget_line_ids:
@@ -626,11 +799,12 @@ class DossierFamille(models.Model):
         # Forcer les champs filtrés depuis les lignes en mémoire
         self.budget_income_line_ids = self.budget_line_ids.filtered(lambda l: l.type == 'income')
         self.budget_expense_line_ids = self.budget_line_ids.filtered(lambda l: l.type == 'expense')
+
     @api.onchange('budget_line_ids')
     def _onchange_budget_line_ids(self):
-        # Force Odoo à recalculer les vues filtrées
         self.budget_income_line_ids = self.budget_line_ids.filtered(lambda l: l.type == 'income')
         self.budget_expense_line_ids = self.budget_line_ids.filtered(lambda l: l.type == 'expense')
+
     @api.onchange('budget_income_line_ids', 'budget_expense_line_ids')
     def _onchange_budget_lines_totals(self):
         revenus_m = sum(line.montant_monsieur for line in self.budget_income_line_ids if line.include_in_totals)

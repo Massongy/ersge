@@ -34,7 +34,6 @@
                                 <field name="membership_fee_amount" readonly="1"/>
                             </group>
                             <group string="Père (ou parent 1)" invisible="legal_representation != 'both'">
-                                <field name="parent1_id" options="{'no_create': True, 'no_create_edit': True}" required="legal_representation == 'both'"/>
                                 <field name="parent1_firstname" required="legal_representation == 'both'"/>
                                 <field name="parent1_lastname" required="legal_representation == 'both'"/>
                                 <field name="parent1_email" widget="email" required="legal_representation == 'both'"/>
@@ -49,7 +48,6 @@
                                 <field name="parent1_employeur"/>
                             </group>
                             <group string="Mère (ou parent 2)" invisible="legal_representation != 'both'">
-                                <field name="parent2_id" options="{'no_create': True, 'no_create_edit': True}" required="legal_representation == 'both'"/>
                                 <field name="parent2_firstname" required="legal_representation == 'both'"/>
                                 <field name="parent2_lastname" required="legal_representation == 'both'"/>
                                 <field name="parent2_email" widget="email" required="legal_representation == 'both'"/>
@@ -65,7 +63,6 @@
                                 <field name="parent2_employeur"/>
                             </group>
                             <group invisible="legal_representation == 'both' or legal_representation == False">
-                                <field name="parent1_id" options="{'no_create': True, 'no_create_edit': True}" required="legal_representation in ('father_only', 'mother_only', 'other')"/>
                                 <field name="parent1_firstname" required="legal_representation in ('father_only', 'mother_only', 'other')"/>
                                 <field name="parent1_lastname" required="legal_representation in ('father_only', 'mother_only', 'other')"/>
                                 <field name="parent1_email" widget="email" required="legal_representation in ('father_only', 'mother_only', 'other')"/>
@@ -286,7 +283,7 @@
                                     <list editable="bottom">
                                         <field name="selected" widget="boolean_toggle"/>
                                         <field name="student_id" domain="[('family_id', '=', parent.family_id)]" options="{'no_create': True}" required="1" readonly="1" />
-                                        <field name="accueil_type" required="1" widget="selection" attrs="{'invisible': [('selected', '=', False)]}"/>
+                                        <field name="accueil_type" required="1" widget="selection" invisible="not selected"/>
                                         <field name="lundi_midi" invisible="accueil_type == False"/>
                                         <field name="lundi_soir" invisible="accueil_type == False"/>
                                         <field name="lundi_cirque" invisible="accueil_type != 'classe'"/>
@@ -305,7 +302,7 @@
                                         <field name="montant_mensuel" aggregate="sum" readonly="1"/>
                                     </list>
                                 </field>
-                                <field name="total_monthly_after_school" readonly="1" attrs="{'invisible': [('after_school_request', '!=', 'yes')]}" class="oe_inline"/>
+                                <field name="total_monthly_after_school" readonly="1" invisible="after_school_request == 'no'" class="oe_inline"/>
                             </group>
                         </page>
 
@@ -367,6 +364,5 @@
     </record>
 
     <menuitem id="menu_ersge_root" name="Écolage" sequence="10"/>
-    <menuitem id="menu_ersge_dossier" name="Dossiers famille" parent="menu_ersge_root" action="action_dossier_famille" sequence="10"/>
 
 </odoo>
