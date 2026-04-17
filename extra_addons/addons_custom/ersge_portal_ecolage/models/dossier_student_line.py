@@ -22,15 +22,27 @@ class DossierStudentLine(models.Model):
     forfait_montant_mensuel = fields.Float(related='forfait_id.montant_mensuel', store=True, readonly=True)
 
     @api.model
-    def create(self, vals):
-        if not vals.get('student_id') and vals.get('prenom') and vals.get('nom'):
-            student = self.env['ersge.student'].create({
-                'firstname': vals['prenom'],
-                'lastname': vals['nom'],
-                'birthdate': vals.get('date_naissance'),
-                'gender': vals.get('sexe'),
-                'image_rights': vals.get('image_rights', True),
-                'family_id': self.env.context.get('default_dossier_id') or vals.get('dossier_id'),
-            })
-            vals['student_id'] = student.id
-        return super().create(vals)
+    def create(self, vals_list):
+        # Si c'est un dict, transforme en liste
+        if isinstance(vals_list, dict):
+            vals_list = [vals_list]
+        
+        for vals in vals_list:
+            # DEBUG - Ajoute ces 2 lignes
+            print("DEBUG vals:", vals)
+            
+            if not vals.get('student_id') and vals.get('prenom') and vals.get('nom'):
+                # DEBUG - Ajoute cette ligne
+                print("DEBUG: Création d'un étudiant pour", vals.get('prenom'), vals.get('nom'))
+                
+                student = self.env['ersge.student'].create({
+                    'firstname': vals['prenom'],
+                    'lastname': vals['nom'],
+                    'birthdate': vals.get('date_naissance'),
+                    'gender': vals.get('sexe'),
+                    'image_rights': vals.get('image_rights', True),
+                    'family_id': self.env.context.get('default_dossier_id') or vals.get('dossier_id'),
+                })
+                vals['student_id'] = student.id
+        
+        return super().create(vals_list)

@@ -12,7 +12,7 @@ class ErsgeStudent(models.Model):
     gender = fields.Selection([
         ('M', 'Masculin'),
         ('F', 'Féminin'),
-    ], string='Sexe')
+    ], string='Sexe', readonly=True)
     image_rights = fields.Boolean(string='Droit à l\'image', default=True)
     pronote_id = fields.Char(string='Identifiant ProNote')
 
