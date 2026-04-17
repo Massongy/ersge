@@ -112,11 +112,7 @@
                             <group string="Aide employeur">
                                 <field name="employer_assistance" widget="radio"/>
                                 <field name="send_invoice_to_employer" invisible="employer_assistance != 'yes'"/>
-                                <field name="employer_id" invisible="employer_assistance != 'yes' or not send_invoice_to_employer"/>
-                                <field name="employer_street" invisible="employer_assistance != 'yes' or not send_invoice_to_employer"/>
-                                <field name="employer_zip" invisible="employer_assistance != 'yes' or not send_invoice_to_employer"/>
-                                <field name="employer_city" invisible="employer_assistance != 'yes' or not send_invoice_to_employer"/>
-                                <field name="employer_country_id" invisible="employer_assistance != 'yes' or not send_invoice_to_employer"/>
+                                <field name="employer_id" invisible="employer_assistance != 'yes' or not send_invoice_to_employer" context="{'default_is_employer': True}" options="{'no_create': False}"/>
                             </group>
 
                             <group string="Forfaits">
