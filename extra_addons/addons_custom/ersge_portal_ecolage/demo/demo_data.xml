@@ -3,51 +3,6 @@
     <data noupdate="1">
 
         <!-- ================================================================
-             FORFAITS SCOLAIRES
-        ================================================================ -->
-        <record id="demo_forfait_maternelle" model="ersge.forfait">
-            <field name="name">Maternelle (3-6 ans)</field>
-            <field name="montant_mensuel">800.0</field>
-            <field name="description">Forfait pour les élèves de maternelle</field>
-            <field name="active">True</field>
-        </record>
-
-        <record id="demo_forfait_primaire" model="ersge.forfait">
-            <field name="name">Primaire (6-12 ans)</field>
-            <field name="montant_mensuel">950.0</field>
-            <field name="description">Forfait pour les élèves du primaire</field>
-            <field name="active">True</field>
-        </record>
-
-        <record id="demo_forfait_secondaire" model="ersge.forfait">
-            <field name="name">Secondaire (12-16 ans)</field>
-            <field name="montant_mensuel">1100.0</field>
-            <field name="description">Forfait pour les élèves du secondaire</field>
-            <field name="active">True</field>
-        </record>
-
-        <!-- ================================================================
-             ACTIVITÉS PARASCOLAIRES
-        ================================================================ -->
-        <record id="demo_extra_musique" model="ersge.extracurricular">
-            <field name="name">Cours de musique</field>
-            <field name="montant_mensuel">120.0</field>
-            <field name="active">True</field>
-        </record>
-
-        <record id="demo_extra_sport" model="ersge.extracurricular">
-            <field name="name">Sport collectif</field>
-            <field name="montant_mensuel">80.0</field>
-            <field name="active">True</field>
-        </record>
-
-        <record id="demo_extra_theatre" model="ersge.extracurricular">
-            <field name="name">Théâtre</field>
-            <field name="montant_mensuel">90.0</field>
-            <field name="active">True</field>
-        </record>
-
-        <!-- ================================================================
              FAMILLES
         ================================================================ -->
         <record id="demo_family_martin" model="ersge.family">
@@ -60,9 +15,15 @@
             <field name="active">True</field>
         </record>
 
+        <record id="demo_family_robert" model="ersge.family">
+            <field name="name">Famille Robert</field>
+            <field name="active">True</field>
+        </record>
+
         <!-- ================================================================
              PARENTS (res.partner)
         ================================================================ -->
+        <!-- Famille Martin -->
         <record id="demo_parent_martin_pere" model="res.partner">
             <field name="name">Jean Martin</field>
             <field name="firstname">Jean</field>
@@ -93,6 +54,7 @@
             <field name="profession">Médecin</field>
         </record>
 
+        <!-- Famille Dubois -->
         <record id="demo_parent_dubois_pere" model="res.partner">
             <field name="name">Pierre Dubois</field>
             <field name="firstname">Pierre</field>
@@ -121,11 +83,40 @@
             <field name="profession">Architecte</field>
         </record>
 
+        <!-- Famille Robert -->
+        <record id="demo_parent_robert_pere" model="res.partner">
+            <field name="name">Thomas Robert</field>
+            <field name="firstname">Thomas</field>
+            <field name="lastname">Robert</field>
+            <field name="email">thomas.robert@example.com</field>
+            <field name="phone">+41 79 567 89 01</field>
+            <field name="street">7 Rue du Rhône</field>
+            <field name="zip">1204</field>
+            <field name="city">Genève</field>
+            <field name="is_parent">True</field>
+            <field name="family_id" ref="demo_family_robert"/>
+            <field name="profession">Consultant</field>
+        </record>
+
+        <record id="demo_parent_robert_mere" model="res.partner">
+            <field name="name">Julie Robert</field>
+            <field name="firstname">Julie</field>
+            <field name="lastname">Robert</field>
+            <field name="email">julie.robert@example.com</field>
+            <field name="phone">+41 79 678 90 12</field>
+            <field name="street">7 Rue du Rhône</field>
+            <field name="zip">1204</field>
+            <field name="city">Genève</field>
+            <field name="is_parent">True</field>
+            <field name="family_id" ref="demo_family_robert"/>
+            <field name="profession">Enseignante</field>
+        </record>
+
         <!-- ================================================================
              ÉLÈVES
         ================================================================ -->
+        <!-- Famille Martin -->
         <record id="demo_student_martin_emma" model="ersge.student">
-            <field name="name">Emma Martin</field>
             <field name="firstname">Emma</field>
             <field name="lastname">Martin</field>
             <field name="birthdate">2017-03-15</field>
@@ -135,7 +126,6 @@
         </record>
 
         <record id="demo_student_martin_lucas" model="ersge.student">
-            <field name="name">Lucas Martin</field>
             <field name="firstname">Lucas</field>
             <field name="lastname">Martin</field>
             <field name="birthdate">2015-07-22</field>
@@ -144,8 +134,8 @@
             <field name="family_id" ref="demo_family_martin"/>
         </record>
 
+        <!-- Famille Dubois -->
         <record id="demo_student_dubois_lea" model="ersge.student">
-            <field name="name">Léa Dubois</field>
             <field name="firstname">Léa</field>
             <field name="lastname">Dubois</field>
             <field name="birthdate">2016-11-08</field>
@@ -154,9 +144,29 @@
             <field name="family_id" ref="demo_family_dubois"/>
         </record>
 
+        <!-- Famille Robert -->
+        <record id="demo_student_robert_chloe" model="ersge.student">
+            <field name="firstname">Chloé</field>
+            <field name="lastname">Robert</field>
+            <field name="birthdate">2018-05-10</field>
+            <field name="gender">F</field>
+            <field name="image_rights">True</field>
+            <field name="family_id" ref="demo_family_robert"/>
+        </record>
+
+        <record id="demo_student_robert_maxime" model="ersge.student">
+            <field name="firstname">Maxime</field>
+            <field name="lastname">Robert</field>
+            <field name="birthdate">2014-08-20</field>
+            <field name="gender">M</field>
+            <field name="image_rights">True</field>
+            <field name="family_id" ref="demo_family_robert"/>
+        </record>
+
         <!-- ================================================================
              DOSSIERS FAMILLE
         ================================================================ -->
+        <!-- Dossier Martin 2025-2026 -->
         <record id="demo_dossier_martin" model="ersge.dossier.famille">
             <field name="name">DOS-2025-001</field>
             <field name="annee_scolaire">2025-2026</field>
@@ -173,7 +183,7 @@
             <field name="payment_terms">monthly</field>
             <field name="reduction_requested">True</field>
             <field name="children_count">2</field>
-            <field name="seniority_years">6</field>
+            <field name="seniority_years">6</field>            <!-- clé valide : '6 années' -->
             <field name="apply_children_discount">True</field>
             <field name="apply_seniority_discount">True</field>
             <field name="requested_discount">12.0</field>
@@ -182,6 +192,7 @@
             <field name="terms_accepted">True</field>
         </record>
 
+        <!-- Dossier Dubois 2025-2026 -->
         <record id="demo_dossier_dubois" model="ersge.dossier.famille">
             <field name="name">DOS-2025-002</field>
             <field name="annee_scolaire">2025-2026</field>
@@ -200,60 +211,71 @@
             <field name="address_book_optin">False</field>
         </record>
 
+        <!-- Dossier Robert 2025-2026 -->
+        <record id="demo_dossier_robert" model="ersge.dossier.famille">
+            <field name="name">DOS-2025-003</field>
+            <field name="annee_scolaire">2025-2026</field>
+            <field name="family_id" ref="demo_family_robert"/>
+            <field name="state">en_cours</field>
+            <field name="legal_representation">both</field>
+            <field name="parent1_id" ref="demo_parent_robert_pere"/>
+            <field name="parent1_profession">Consultant</field>
+            <field name="parent2_id" ref="demo_parent_robert_mere"/>
+            <field name="parent2_profession">Enseignante</field>
+            <field name="after_school_request">yes</field>
+            <field name="membership_fee">paid</field>
+            <field name="deposit_status">paid</field>
+            <field name="payment_terms">monthly</field>
+            <field name="reduction_requested">True</field>
+            <field name="children_count">2</field>
+            <field name="seniority_years">5</field>            <!-- CORRIGÉ : '3' invalide → '5' = Moins de 6 ans -->
+            <field name="apply_children_discount">True</field>
+            <field name="apply_seniority_discount">True</field>
+            <field name="requested_discount">8.0</field>
+            <field name="address_book_optin">True</field>
+            <field name="contract_accepted">True</field>
+            <field name="terms_accepted">True</field>
+        </record>
+
         <!-- ================================================================
              LIGNES ÉLÈVES DU DOSSIER
         ================================================================ -->
+        <!-- Dossier Martin -->
         <record id="demo_dossier_student_emma" model="ersge.dossier.student.line">
             <field name="dossier_id" ref="demo_dossier_martin"/>
             <field name="student_id" ref="demo_student_martin_emma"/>
-            <field name="prenom">Emma</field>
-            <field name="nom">Martin</field>
-            <field name="date_naissance">2017-03-15</field>
-            <field name="sexe">F</field>
             <field name="classe">CP</field>
-            <field name="forfait_id" ref="demo_forfait_maternelle"/>
             <field name="image_rights">True</field>
         </record>
 
         <record id="demo_dossier_student_lucas" model="ersge.dossier.student.line">
             <field name="dossier_id" ref="demo_dossier_martin"/>
             <field name="student_id" ref="demo_student_martin_lucas"/>
-            <field name="prenom">Lucas</field>
-            <field name="nom">Martin</field>
-            <field name="date_naissance">2015-07-22</field>
-            <field name="sexe">M</field>
             <field name="classe">CE2</field>
-            <field name="forfait_id" ref="demo_forfait_primaire"/>
             <field name="image_rights">True</field>
         </record>
 
+        <!-- Dossier Dubois -->
         <record id="demo_dossier_student_lea" model="ersge.dossier.student.line">
             <field name="dossier_id" ref="demo_dossier_dubois"/>
             <field name="student_id" ref="demo_student_dubois_lea"/>
-            <field name="prenom">Léa</field>
-            <field name="nom">Dubois</field>
-            <field name="date_naissance">2016-11-08</field>
-            <field name="sexe">F</field>
             <field name="classe">CE1</field>
-            <field name="forfait_id" ref="demo_forfait_primaire"/>
             <field name="image_rights">True</field>
         </record>
 
-        <!-- ================================================================
-             ACTIVITÉS PARASCOLAIRES DU DOSSIER MARTIN
-        ================================================================ -->
-        <record id="demo_after_school_emma_musique" model="ersge.after.school.line">
-            <field name="dossier_id" ref="demo_dossier_martin"/>
-            <field name="extracurricular_id" ref="demo_extra_musique"/>
-            <field name="student_id" ref="demo_student_martin_emma"/>
-            <field name="schedule">Lundi 16h-17h</field>
+        <!-- Dossier Robert -->
+        <record id="demo_dossier_student_chloe" model="ersge.dossier.student.line">
+            <field name="dossier_id" ref="demo_dossier_robert"/>
+            <field name="student_id" ref="demo_student_robert_chloe"/>
+            <field name="classe">CP</field>
+            <field name="image_rights">True</field>
         </record>
 
-        <record id="demo_after_school_lucas_sport" model="ersge.after.school.line">
-            <field name="dossier_id" ref="demo_dossier_martin"/>
-            <field name="extracurricular_id" ref="demo_extra_sport"/>
-            <field name="student_id" ref="demo_student_martin_lucas"/>
-            <field name="schedule">Mercredi 14h-16h</field>
+        <record id="demo_dossier_student_maxime" model="ersge.dossier.student.line">
+            <field name="dossier_id" ref="demo_dossier_robert"/>
+            <field name="student_id" ref="demo_student_robert_maxime"/>
+            <field name="classe">CM1</field>
+            <field name="image_rights">True</field>
         </record>
 
     </data>
