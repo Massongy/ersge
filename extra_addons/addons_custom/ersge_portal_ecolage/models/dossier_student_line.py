@@ -5,59 +5,32 @@ from odoo import models, fields, api
 class DossierStudentLine(models.Model):
     _name = 'ersge.dossier.student.line'
     _description = 'Ligne élève du dossier'
-    _rec_name = 'prenom'
+    _rec_name = 'student_id'
 
-    # Lien vers le dossier
-    dossier_id = fields.Many2one(
-        'ersge.dossier.famille',
-        string='Dossier',
-        required=True,
-        ondelete='cascade'
-    )
+    dossier_id = fields.Many2one('ersge.dossier.famille', required=True, ondelete='cascade')
+    student_id = fields.Many2one('ersge.student', string='Élève', required=True)
 
-    # Lien vers l'élève — plus required
-    student_id = fields.Many2one(
-        'ersge.student',
-        string='Élève',
-        required=False
-    )
-
-    # Champs directs (plus de related)
-    prenom = fields.Char(string='Prénom', readonly=False)
-    nom = fields.Char(string='Nom', readonly=False)
-    date_naissance = fields.Date(string='Date de naissance', readonly=False)
-    sexe = fields.Selection([
-        ('M', 'Masculin'),
-        ('F', 'Féminin'),
-    ], string='Sexe', readonly=False)
+    # Ces champs sont des "fenêtres" sur student_id (une seule source de vérité)
+    prenom = fields.Char(string='Prénom', related='student_id.firstname', store=True, readonly=False)
+    nom = fields.Char(string='Nom', related='student_id.lastname', store=True, readonly=False)
+    date_naissance = fields.Date(string='Date de naissance', related='student_id.birthdate', store=True, readonly=False)
+    sexe = fields.Selection([('M', 'Masculin'), ('F', 'Féminin')], string='Sexe', related='student_id.gender', store=True, readonly=False)
+    image_rights = fields.Boolean(string="Droit à l'image", related='student_id.image_rights', store=True, readonly=False)
+    
     classe = fields.Char(string='Classe')
-    image_rights = fields.Boolean(
-        string="Droit à l'image",
-        readonly=False,
-        default=True
-    )
-
-    # Forfait
     forfait_id = fields.Many2one('ersge.forfait', string='Forfait')
-    forfait_montant_mensuel = fields.Float(
-        related='forfait_id.montant_mensuel',
-        string='Montant mensuel',
-        store=True,
-        readonly=True
-    )
+    forfait_montant_mensuel = fields.Float(related='forfait_id.montant_mensuel', store=True, readonly=True)
 
-
-    # Création automatique de l'élève à la sauvegarde
-    def _create_student_if_needed(self, dossier):
-        for line in self:
-            if not line.student_id and line.prenom and line.nom:
-                student = self.env['ersge.student'].create({
-                    'firstname': line.prenom,
-                    'lastname': line.nom,
-                    'name': f"{line.prenom} {line.nom}",
-                    'birthdate': line.date_naissance,
-                    'gender': line.sexe,
-                    'image_rights': line.image_rights,
-                    'family_id': dossier.family_id.id,
-                })
-                line.student_id = student
+    @api.model
+    def create(self, vals):
+        if not vals.get('student_id') and vals.get('prenom') and vals.get('nom'):
+            student = self.env['ersge.student'].create({
+                'firstname': vals['prenom'],
+                'lastname': vals['nom'],
+                'birthdate': vals.get('date_naissance'),
+                'gender': vals.get('sexe'),
+                'image_rights': vals.get('image_rights', True),
+                'family_id': self.env.context.get('default_dossier_id') or vals.get('dossier_id'),
+            })
+            vals['student_id'] = student.id
+        return super().create(vals)

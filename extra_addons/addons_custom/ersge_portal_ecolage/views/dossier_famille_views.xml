@@ -87,16 +87,16 @@
                             <group>
                                 <field name="nb_students" readonly="1"/>
                             </group>
+
                             <field name="student_line_ids" nolabel="1">
-                                <list editable="bottom">
-                                    <field name="student_id" domain="[('family_id', '=', parent.family_id)]" options="{'no_create': True}"/>
-                                    <field name="prenom" required="1"/>
-                                    <field name="nom" required="1"/>
-                                    <field name="date_naissance" required="1"/>
-                                    <field name="sexe" required="1"/>
+                                <list editable="bottom" create="1" delete="1">
+                                    <!-- Un seul champ : la liaison vers l'étudiant -->
+                                    <field name="student_id" string="Élève" domain="[('family_id', '=', parent.family_id)]" options="{'no_create': False, 'no_create_edit': False, 'always_reload': True}" context="{'default_family_id': parent.family_id}"/>
                                     <field name="image_rights" widget="boolean_toggle"/>
                                 </list>
                             </field>
+
+                            <!-- Info-bande comme avant -->
                             <div class="alert alert-info mt-3">
                                 <i class="fa fa-info-circle"></i>
         Lors de diverses activités organisées par l'école, les élèves peuvent être amenés à être
