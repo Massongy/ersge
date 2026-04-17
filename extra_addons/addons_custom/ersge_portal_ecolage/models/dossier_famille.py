@@ -601,6 +601,19 @@ class DossierFamille(models.Model):
             defaults['budget_line_ids'] = budget_lines
             _logger.warning(f"Budget copié: {len(budget_lines)} lignes")
         
+        # === AJOUT : Copier les enfants ===
+        if dernier_dossier.student_line_ids:
+            student_lines = []
+            for line in dernier_dossier.student_line_ids:
+                student_lines.append((0, 0, {
+                    'student_id': line.student_id.id,
+                    'image_rights': line.image_rights,
+                    'classe': line.classe,
+                    'forfait_id': line.forfait_id.id,
+                }))
+            defaults['student_line_ids'] = student_lines  # ← Correction : student_line_ids
+            _logger.warning(f"Enfants copiés: {len(student_lines)} lignes")
+            
         defaults['prefilled_from_previous'] = True
         
         return defaults
