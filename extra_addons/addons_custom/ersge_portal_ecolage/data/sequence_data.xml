@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <data noupdate="1">
-        
+
         <!-- Séquence pour les dossiers famille -->
         <record id="seq_ersge_dossier_famille" model="ir.sequence">
             <field name="name">Dossier Engagement Financier</field>
@@ -10,6 +10,246 @@
             <field name="padding">4</field>
             <field name="company_id" eval="False"/>
         </record>
-        
+
+        <!-- Forfaits Jardins d'Enfants - 2 à 3 ans -->
+        <record id="forfait_2_3_3m_8h12" model="ersge.forfait">
+            <field name="name">Jardins d'Enfants - 2 à 3 ans - 8h&gt;12h - 3 matinées</field>
+            <field name="montant_mensuel">840</field>
+            <field name="active">True</field>
+        </record>
+
+        <record id="forfait_2_3_4m_8h12" model="ersge.forfait">
+            <field name="name">Jardins d'Enfants - 2 à 3 ans - 8h&gt;12h - 4 matinées</field>
+            <field name="montant_mensuel">940</field>
+            <field name="active">True</field>
+        </record>
+
+        <record id="forfait_2_3_5m_8h12" model="ersge.forfait">
+            <field name="name">Jardins d'Enfants - 2 à 3 ans - 8h&gt;12h - 5 matinées</field>
+            <field name="montant_mensuel">1040</field>
+            <field name="active">True</field>
+        </record>
+
+        <record id="forfait_2_3_3m_8h13" model="ersge.forfait">
+            <field name="name">Jardins d'Enfants - 2 à 3 ans - 8h&gt;13h - 3 matinées</field>
+            <field name="montant_mensuel">1080</field>
+            <field name="active">True</field>
+        </record>
+
+        <record id="forfait_2_3_4m_8h13" model="ersge.forfait">
+            <field name="name">Jardins d'Enfants - 2 à 3 ans - 8h&gt;13h - 4 matinées</field>
+            <field name="montant_mensuel">1270</field>
+            <field name="active">True</field>
+        </record>
+
+        <record id="forfait_2_3_5m_8h13" model="ersge.forfait">
+            <field name="name">Jardins d'Enfants - 2 à 3 ans - 8h&gt;13h - 5 matinées</field>
+            <field name="montant_mensuel">1370</field>
+            <field name="active">True</field>
+        </record>
+
+        <!-- Forfaits Jardins d'Enfants - 3 à 6 ans -->
+        <record id="forfait_3_6_3m_8h12" model="ersge.forfait">
+            <field name="name">Jardins d'Enfants - 3 à 6 ans - 8h&gt;12h - 3 matinées</field>
+            <field name="montant_mensuel">840</field>
+            <field name="active">True</field>
+        </record>
+
+        <record id="forfait_3_6_4m_8h12" model="ersge.forfait">
+            <field name="name">Jardins d'Enfants - 3 à 6 ans - 8h&gt;12h - 4 matinées</field>
+            <field name="montant_mensuel">940</field>
+            <field name="active">True</field>
+        </record>
+
+        <record id="forfait_3_6_5m_8h12" model="ersge.forfait">
+            <field name="name">Jardins d'Enfants - 3 à 6 ans - 8h&gt;12h - 5 matinées</field>
+            <field name="montant_mensuel">1040</field>
+            <field name="active">True</field>
+        </record>
+
+        <record id="forfait_3_6_8h15h30" model="ersge.forfait">
+            <field name="name">Jardins d'Enfants - 3 à 6 ans - 8h&gt;15h30</field>
+            <field name="montant_mensuel">1470</field>
+            <field name="active">True</field>
+        </record>
+
+        <record id="forfait_3_6_8h17h45" model="ersge.forfait">
+            <field name="name">Jardins d'Enfants - 3 à 6 ans - 8h&gt;17h45</field>
+            <field name="montant_mensuel">1630</field>
+            <field name="active">True</field>
+        </record>
+
+        <!-- 1ère classe -->
+        <record id="forfait_1ere_sans_para" model="ersge.forfait">
+            <field name="name">1ère classe - Forfait sans parascolaire</field>
+            <field name="montant_mensuel">1120</field>
+            <field name="active">True</field>
+        </record>
+
+        <record id="forfait_1ere_8h15h30" model="ersge.forfait">
+            <field name="name">1ère classe - Forfait 8h&gt;15h30</field>
+            <field name="montant_mensuel">1540</field>
+            <field name="active">True</field>
+        </record>
+
+        <record id="forfait_1ere_8h17h45" model="ersge.forfait">
+            <field name="name">1ère classe - Forfait 8h&gt;17h45</field>
+            <field name="montant_mensuel">1730</field>
+            <field name="active">True</field>
+        </record>
+
+        <!-- 2e classe -->
+        <record id="forfait_2e_sans_para" model="ersge.forfait">
+            <field name="name">2e classe - Forfait sans parascolaire</field>
+            <field name="montant_mensuel">1200</field>
+            <field name="active">True</field>
+        </record>
+
+        <record id="forfait_2e_8h15h30" model="ersge.forfait">
+            <field name="name">2e classe - Forfait 8h&gt;15h30</field>
+            <field name="montant_mensuel">1540</field>
+            <field name="active">True</field>
+        </record>
+
+        <record id="forfait_2e_8h17h45" model="ersge.forfait">
+            <field name="name">2e classe - Forfait 8h&gt;17h45</field>
+            <field name="montant_mensuel">1730</field>
+            <field name="active">True</field>
+        </record>
+
+        <!-- 3e classe -->
+        <record id="forfait_3e_sans_para" model="ersge.forfait">
+            <field name="name">3e classe - Forfait sans parascolaire</field>
+            <field name="montant_mensuel">1270</field>
+            <field name="active">True</field>
+        </record>
+
+        <record id="forfait_3e_8h15h30" model="ersge.forfait">
+            <field name="name">3e classe - Forfait 8h&gt;15h30</field>
+            <field name="montant_mensuel">1540</field>
+            <field name="active">True</field>
+        </record>
+
+        <record id="forfait_3e_8h17h45" model="ersge.forfait">
+            <field name="name">3e classe - Forfait 8h&gt;17h45</field>
+            <field name="montant_mensuel">1730</field>
+            <field name="active">True</field>
+        </record>
+
+        <!-- 4e classe -->
+        <record id="forfait_4e_sans_para" model="ersge.forfait">
+            <field name="name">4e classe - Forfait sans parascolaire</field>
+            <field name="montant_mensuel">1350</field>
+            <field name="active">True</field>
+        </record>
+
+        <record id="forfait_4e_8h15h30" model="ersge.forfait">
+            <field name="name">4e classe - Forfait 8h&gt;15h30</field>
+            <field name="montant_mensuel">1540</field>
+            <field name="active">True</field>
+        </record>
+
+        <record id="forfait_4e_8h17h45" model="ersge.forfait">
+            <field name="name">4e classe - Forfait 8h&gt;17h45</field>
+            <field name="montant_mensuel">1730</field>
+            <field name="active">True</field>
+        </record>
+
+        <!-- 5e classe -->
+        <record id="forfait_5e_sans_para" model="ersge.forfait">
+            <field name="name">5e classe - Forfait sans parascolaire</field>
+            <field name="montant_mensuel">1430</field>
+            <field name="active">True</field>
+        </record>
+
+        <record id="forfait_5e_8h15h30" model="ersge.forfait">
+            <field name="name">5e classe - Forfait 8h&gt;15h30</field>
+            <field name="montant_mensuel">1540</field>
+            <field name="active">True</field>
+        </record>
+
+        <record id="forfait_5e_8h17h45" model="ersge.forfait">
+            <field name="name">5e classe - Forfait 8h&gt;17h45</field>
+            <field name="montant_mensuel">1730</field>
+            <field name="active">True</field>
+        </record>
+
+        <!-- 6e classe -->
+        <record id="forfait_6e_sans_para" model="ersge.forfait">
+            <field name="name">6e classe - Forfait sans parascolaire</field>
+            <field name="montant_mensuel">1510</field>
+            <field name="active">True</field>
+        </record>
+
+        <record id="forfait_6e_8h17h45" model="ersge.forfait">
+            <field name="name">6e classe - Forfait 8h&gt;17h45</field>
+            <field name="montant_mensuel">1730</field>
+            <field name="active">True</field>
+        </record>
+
+        <!-- 7e classe -->
+        <record id="forfait_7e_sans_para" model="ersge.forfait">
+            <field name="name">7e classe - Forfait sans parascolaire</field>
+            <field name="montant_mensuel">1670</field>
+            <field name="active">True</field>
+        </record>
+
+        <record id="forfait_7e_8h17h45" model="ersge.forfait">
+            <field name="name">7e classe - Forfait 8h&gt;17h45</field>
+            <field name="montant_mensuel">1840</field>
+            <field name="active">True</field>
+        </record>
+
+        <!-- 8e classe -->
+        <record id="forfait_8e_sans_para" model="ersge.forfait">
+            <field name="name">8e classe - Forfait sans parascolaire</field>
+            <field name="montant_mensuel">1670</field>
+            <field name="active">True</field>
+        </record>
+
+        <record id="forfait_8e_8h17h45" model="ersge.forfait">
+            <field name="name">8e classe - Forfait 8h&gt;17h45</field>
+            <field name="montant_mensuel">1840</field>
+            <field name="active">True</field>
+        </record>
+
+        <!-- 9e classe -->
+        <record id="forfait_9e_sans_para" model="ersge.forfait">
+            <field name="name">9e classe - Forfait sans parascolaire</field>
+            <field name="montant_mensuel">1670</field>
+            <field name="active">True</field>
+        </record>
+
+        <record id="forfait_9e_8h17h45" model="ersge.forfait">
+            <field name="name">9e classe - Forfait 8h&gt;17h45</field>
+            <field name="montant_mensuel">1840</field>
+            <field name="active">True</field>
+        </record>
+
+        <!-- 10e à 13e classe -->
+        <record id="forfait_10e" model="ersge.forfait">
+            <field name="name">10e classe</field>
+            <field name="montant_mensuel">1870</field>
+            <field name="active">True</field>
+        </record>
+
+        <record id="forfait_11e" model="ersge.forfait">
+            <field name="name">11e classe</field>
+            <field name="montant_mensuel">1870</field>
+            <field name="active">True</field>
+        </record>
+
+        <record id="forfait_12e" model="ersge.forfait">
+            <field name="name">12e classe</field>
+            <field name="montant_mensuel">1870</field>
+            <field name="active">True</field>
+        </record>
+
+        <record id="forfait_13e" model="ersge.forfait">
+            <field name="name">13e classe</field>
+            <field name="montant_mensuel">1870</field>
+            <field name="active">True</field>
+        </record>
+
     </data>
 </odoo>

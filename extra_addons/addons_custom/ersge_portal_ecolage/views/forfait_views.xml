@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Menu racine -->
+    <menuitem id="menu_ersge_root" name="Écolage" sequence="10"/>
+
+    <!-- Vue liste -->
+    <record id="view_ersge_forfait_list" model="ir.ui.view">
+        <field name="name">ersge.forfait.list</field>
+        <field name="model">ersge.forfait</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="name" string="Forfait"/>
+                <field name="montant_mensuel" string="Montant mensuel (CHF)" sum="Total"/>
+                <field name="active" string="Actif" widget="boolean_toggle"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Vue formulaire -->
+    <record id="view_ersge_forfait_form" model="ir.ui.view">
+        <field name="name">ersge.forfait.form</field>
+        <field name="model">ersge.forfait</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <field name="name" string="Nom du forfait" required="1"/>
+                        <field name="montant_mensuel" string="Montant mensuel (CHF)" required="1"/>
+                        <field name="description" string="Description"/>
+                        <field name="active" string="Actif"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Action -->
+    <record id="action_ersge_forfait" model="ir.actions.act_window">
+        <field name="name">Forfaits scolaires</field>
+        <field name="res_model">ersge.forfait</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Créez vos forfaits scolaires
+            </p>
+        </field>
+    </record>
+
+    <!-- Menu forfaits -->
+    <menuitem id="menu_ersge_forfait" name="Forfaits" parent="menu_ersge_root" action="action_ersge_forfait" sequence="15"/>
+
+</odoo>
