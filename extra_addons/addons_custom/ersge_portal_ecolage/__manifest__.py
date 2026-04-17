@@ -16,7 +16,8 @@
         'security/ir.model.access.csv',
         'views/family_views.xml',
         'views/dossier_famille_views.xml',
-        'views/partners.xml',
+        'views/partners_views.xml',
+        'views/student_views.xml',
     ],
     'demo': [
         'demo/demo_data.xml',
