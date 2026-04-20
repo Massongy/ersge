@@ -15,7 +15,7 @@
                     <group>
                         <field name="name"/>
                         <field name="annee_scolaire"/>
-                        <field name="family_id"/>
+                        <field name="family_id" options="{'no_create': True, 'no_create_edit': True}" readonly="1"/>
                         <field name="date_soumission"/>
                     </group>
 
@@ -84,10 +84,6 @@
                         </page>
 
                         <page string="Informations élève(s)">
-                            <group>
-                                <field name="nb_students" readonly="1"/>
-                            </group>
-
 
                             <!-- Un seul champ : la liaison vers l'étudiant -->
 
@@ -115,254 +111,274 @@
                                 <field name="employer_id" invisible="employer_assistance != 'yes' or not send_invoice_to_employer" context="{'default_is_employer': True}" options="{'no_create': False}"/>
                             </group>
 
+
+
                             <group string="Forfaits">
-                                <field name="student_line_ids" nolabel="1">
-                                    <list editable="bottom">
-                                        <field name="prenom" readonly="1"/>
-                                        <field name="nom" readonly="1"/>
-                                        <field name="forfait_id" options="{'no_create': True}"/>
-                                        <field name="forfait_montant_mensuel" readonly="1"/>
-                                    </list>
-                                </field>
-                            </group>
+                                <div class="alert alert-info" role="alert">
+                                    <strong>CHOISISSEZ VOTRE FORFAIT</strong>
+                                    <br/>
+    FRAIS DE SCOLARITÉ + MATÉRIEL SCOLAIRE DE BASE + REPAS DE MIDI* BIO<br/>
+    *Selon l'emploi du temps<br/>
+                            <br/>
+    Tarifs mensuels sur 12 mois - 1er versement au mois d'août. Frais non compris : Activités en dehors des murs de l'école (ex. voyage, échange linguistique...) et goûters aux jardins d'enfants.
+                        </div>
+                        <field name="student_line_ids" nolabel="1">
+                            <list editable="bottom">
+                                <field name="prenom" readonly="1"/>
+                                <field name="nom" readonly="1"/>
+                                <field name="forfait_id" options="{'no_create': True}"/>
+                                <field name="forfait_montant_mensuel" readonly="1"/>
+                            </list>
+                        </field>
 
-                            <group string="Réductions">
-                                <field name="base_monthly_fee" readonly="1"/>
-                                <field name="reduction_requested" widget="boolean_button" options='{"terminology": "boolean"}'/>
+                        <field name="base_monthly_fee" readonly="1"/>
+                    </group>
 
-                                <group invisible="not reduction_requested">
-                                    <group string="DEMANDE DE RÉDUCTION EN RAISON DU NOMBRE D’ENFANTS">
-                                        <field name="children_count" widget="radio" options="{'horizontal': true}"/>
-                                        <div>
-                                            <strong>Réduction maximale possible :</strong>
-                                            <field name="max_children_discount" readonly="1"/>
+                    <group string="Réductions">
+
+                        <strong>Demander une  en raison du nombre d’enfants inscrit à l'école et/ou une réduction d'ancienneté</strong>
+                        <field name="reduction_requested" widget="boolean_button" options='{"terminology": "boolean"}'/>
+
+                        <group invisible="not reduction_requested">
+                            <group string="Demande de réduction en fonction du nombre d'enfants inscrits">
+                                <div>
+                                    <strong>Nombre d'enfants actuellement inscrits :</strong>
+                                    <field name="actual_children_count" class="oe_inline"/>
+                                </div>
+
+                                <div>
+                                    <div>
+                                        <strong>Réduction maximale possible :</strong>
+                                        <field name="max_children_discount" readonly="1"/>
  %
-                                        </div>
-                                        <field name="apply_children_discount"/>
-                                        <div invisible="not apply_children_discount">
-                                            <label for="monthly_fee_after_children"/>
-                                            <field name="monthly_fee_after_children" readonly="1" class="oe_inline"/>
- CHF
-                                        </div>
-                                    </group>
-
-                                    <group string="DEMANDE DE RÉDUCTION SELON L’ANCIENNETÉ">
-                                        <field name="seniority_years" widget="radio" options="{'horizontal': true}"/>
-                                        <div>
-                                            <strong>Réduction maximale possible :</strong>
-                                            <field name="max_seniority_discount" readonly="1"/>
- %
-                                        </div>
-                                        <field name="apply_seniority_discount"/>
-                                        <div invisible="not apply_seniority_discount">
-                                            <label for="monthly_fee_after_seniority"/>
-                                            <field name="monthly_fee_after_seniority" readonly="1" class="oe_inline"/>
- CHF
-                                        </div>
-                                    </group>
-
-                                    <group string="AJUSTEZ VOS RÉDUCTIONS">
-                                        <div>
-                                            <strong>Réduction maximale cumulable (ancienneté + enfants) :</strong>
-                                            <field name="max_total_discount" readonly="1"/>
- %
-                                        </div>
-                                        <div>
-                                            <label for="monthly_fee_at_max"/>
-                                            <field name="monthly_fee_at_max" readonly="1" class="oe_inline"/>
- CHF
-                                        </div>
-                                        <field name="requested_discount" string="Compte tenu de votre situation personnelle, vous sollicitez une réduction moindre, indiquez le pourcentage" required="1"/>
-                                        <div>
-                                            <label for="monthly_fee_after_requested"/>
-                                            <field name="monthly_fee_after_requested" readonly="1" class="oe_inline"/>
- CHF
-                                        </div>
-                                        <div class="alert alert-warning" role="alert" invisible="requested_discount &lt;= max_total_discount">
-                    Le pourcentage sollicité ne doit pas dépasser la réduction maximale !
-                                        </div>
-                                    </group>
-                                </group>
-                            </group>
-
-                            <!-- Demande de réduction complémentaire -->
-                            <group string="Réduction complémentaire">
-                                <field name="additional_reduction_request" widget="boolean_button" options='{"terminology": "boolean"}'/>
-
-                                <group invisible="not additional_reduction_request">
-                                    <div class="alert alert-info">
-                                        <i class="fa fa-info-circle"></i>
-    Merci de prendre impérativement connaissance de ce document :
-                                        <a href="/ersge_portal_ecolage/static/src/Procedure-demande-reduction-ecolage-2025-26.pdf" target="_blank">
-        Demande de réduction d'écolage
-                                        </a>
                                     </div>
-                                    <div class="alert alert-warning">
+                                    <label for="apply_children_discount" string="Appliquer la réduction enfants"/>
+                                    <field name="apply_children_discount"/>
+                                    <div invisible="not apply_children_discount">
+                                        <label for="monthly_fee_after_children"/>
+                                        <field name="monthly_fee_after_children" readonly="1" class="oe_inline"/>
+ CHF
+                                    </div>
+                                </div>
+                            </group>
+
+                            <group string="DEMANDE DE RÉDUCTION SELON L’ANCIENNETÉ">
+                                <field name="seniority_years" widget="radio" options="{'horizontal': true}"/>
+                                <div>
+                                    <strong>Réduction maximale possible :</strong>
+                                    <field name="max_seniority_discount" readonly="1"/>
+ %
+                                </div>
+                                <field name="apply_seniority_discount"/>
+                                <div invisible="not apply_seniority_discount">
+                                    <label for="monthly_fee_after_seniority"/>
+                                    <field name="monthly_fee_after_seniority" readonly="1" class="oe_inline"/>
+ CHF
+                                </div>
+                            </group>
+
+                            <group string="AJUSTEZ VOS RÉDUCTIONS">
+                                <div>
+                                    <strong>Réduction maximale cumulable (ancienneté + enfants) :</strong>
+                                    <field name="max_total_discount" readonly="1"/>
+ %
+                                </div>
+                                <div>
+                                    <label for="monthly_fee_at_max"/>
+                                    <field name="monthly_fee_at_max" readonly="1" class="oe_inline"/>
+ CHF
+                                </div>
+                                <field name="requested_discount" string="Compte tenu de votre situation personnelle, vous sollicitez une réduction moindre, indiquez le pourcentage" required="1"/>
+                                <div>
+                                    <label for="monthly_fee_after_requested"/>
+                                    <field name="monthly_fee_after_requested" readonly="1" class="oe_inline"/>
+ CHF
+                                </div>
+                                <div class="alert alert-warning" role="alert" invisible="requested_discount &lt;= max_total_discount">
+                    Le pourcentage sollicité ne doit pas dépasser la réduction maximale !
+                                </div>
+                            </group>
+                        </group>
+                    </group>
+
+                    <!-- Demande de réduction complémentaire -->
+                    <group string="Réduction complémentaire">
+                        <field name="additional_reduction_request" widget="boolean_button" options='{"terminology": "boolean"}'/>
+
+                        <group invisible="not additional_reduction_request">
+                            <div class="alert alert-info">
+                                <i class="fa fa-info-circle"></i>
+    Merci de prendre impérativement connaissance de ce document :
+                                <a href="/ersge_portal_ecolage/static/src/Procedure-demande-reduction-ecolage-2025-26.pdf" target="_blank">
+        Demande de réduction d'écolage
+                                </a>
+                            </div>
+                            <div class="alert alert-warning">
                 En cas d’impossibilité d'envoi de documents numériques, vous pouvez déposer une version papier
                 de ces documents au secrétariat.
+                            </div>
+
+                            <group string="Revenus">
+                                <field name="additional_reduction_income_percentage" string="Pourcentage que représente le tarif sur votre revenu annuel familial brut" widget="percentage"/>
+                            </group>
+
+                            <group string="Justificatifs">
+                                <field name="tax_notice_attachment" filename="tax_notice_filename" attachment="tax_notice_attachment" string="Dernier avis de taxation" help="Dernier avis de taxation (PDF, max 4MB)"/>
+                                <field name="payslip_ids" widget="many2many_binary" string="Trois dernières fiches de salaire" help="Vous pouvez télécharger plusieurs fichiers (max 8MB)"/>
+                                <field name="explanatory_letter_attachment" filename="explanatory_letter_filename" attachment="explanatory_letter_attachment" string="Lettre explicative de la situation familiale" help="Lettre explicative de la situation familiale (PDF, max 4MB)"/>
+
+                                <!-- Budget familial : option téléchargement ou saisie en ligne -->
+                                <field name="budget_method" widget="radio" options="{'horizontal': true}"/>
+                                <div invisible="budget_method != 'upload'">
+                                    <field name="budget_attachment" filename="budget_attachment_filename" help="Téléchargez votre budget au format PDF (max 4MB)"/>
+                                </div>
+
+                                <div invisible="budget_method != 'online'">
+                                    <div style="overflow-x: auto;">
+                                        <div invisible="budget_method != 'online'">
+                                            <button string="💾 Enregistrer le budget" type="object" name="action_save_budget" class="btn-primary"/>
+                                        </div>
+
+                                        <!-- Entrées -->
+                                        <h4>Entrées</h4>
+                                        <field name="budget_income_line_ids" nolabel="1">
+                                            <list editable="bottom" create="false" delete="false" style="min-width: 800px;">
+                                                <field name="category" string="Catégorie" readonly="1" width="350"/>
+                                                <field name="montant_madame" string="Madame" widget="monetary" options="{'currency_field': 'currency_id'}" width="150"/>
+                                                <field name="montant_monsieur" string="Monsieur" widget="monetary" options="{'currency_field': 'currency_id'}" width="150"/>
+                                                <field name="type" invisible="1"/>
+                                            </list>
+                                        </field>
+
+                                        <!-- Sorties -->
+                                        <h4>Sorties</h4>
+                                        <field name="budget_expense_line_ids" nolabel="1">
+                                            <list editable="bottom" create="false" delete="false" style="min-width: 800px;">
+                                                <field name="category" string="Catégorie" readonly="1" width="350"/>
+                                                <field name="montant_madame" string="Madame" widget="monetary" options="{'currency_field': 'currency_id'}" width="150"/>
+                                                <field name="montant_monsieur" string="Monsieur" widget="monetary" options="{'currency_field': 'currency_id'}" width="150"/>
+                                                <field name="type" invisible="1"/>
+                                            </list>
+                                        </field>
+
                                     </div>
 
-                                    <group string="Revenus">
-                                        <field name="additional_reduction_income_percentage" string="Pourcentage que représente le tarif sur votre revenu annuel familial brut" widget="percentage"/>
+                                    <!-- Totaux du budget -->
+                                    <group string="Totaux du budget">
+                                        <group string="Revenus">
+                                            <field name="total_revenus_madame" widget="monetary"/>
+                                            <field name="total_revenus_monsieur" widget="monetary"/>
+                                            <field name="total_revenus" widget="monetary"/>
+                                        </group>
+                                        <group string="Charges">
+                                            <field name="total_charges_madame" widget="monetary"/>
+                                            <field name="total_charges_monsieur" widget="monetary"/>
+                                            <field name="total_charges" widget="monetary"/>
+                                        </group>
+                                        <field name="solde" widget="monetary" decoration="text-danger:solde &lt; 0"/>
                                     </group>
+                                </div>
+                            </group>
 
-                                    <group string="Justificatifs">
-                                        <field name="tax_notice_attachment" filename="tax_notice_filename" attachment="tax_notice_attachment" string="Dernier avis de taxation" help="Dernier avis de taxation (PDF, max 4MB)"/>
-                                        <field name="payslip_ids" widget="many2many_binary" string="Trois dernières fiches de salaire" help="Vous pouvez télécharger plusieurs fichiers (max 8MB)"/>
-                                        <field name="explanatory_letter_attachment" filename="explanatory_letter_filename" attachment="explanatory_letter_attachment" string="Lettre explicative de la situation familiale" help="Lettre explicative de la situation familiale (PDF, max 4MB)"/>
-
-                                        <!-- Budget familial : option téléchargement ou saisie en ligne -->
-                                        <field name="budget_method" widget="radio" options="{'horizontal': true}"/>
-                                        <div invisible="budget_method != 'upload'">
-                                            <field name="budget_attachment" filename="budget_attachment_filename" help="Téléchargez votre budget au format PDF (max 4MB)"/>
-                                        </div>
-
-                                        <div invisible="budget_method != 'online'">
-                                            <div style="overflow-x: auto;">
-                                                <div invisible="budget_method != 'online'">
-                                                    <button string="💾 Enregistrer le budget" type="object" name="action_save_budget" class="btn-primary"/>
-                                                </div>
-
-                                                <!-- Entrées -->
-                                                <h4>Entrées</h4>
-                                                <field name="budget_income_line_ids" nolabel="1">
-                                                    <list editable="bottom" create="false" delete="false" style="min-width: 800px;">
-                                                        <field name="category" string="Catégorie" readonly="1" width="350"/>
-                                                        <field name="montant_madame" string="Madame" widget="monetary" options="{'currency_field': 'currency_id'}" width="150"/>
-                                                        <field name="montant_monsieur" string="Monsieur" widget="monetary" options="{'currency_field': 'currency_id'}" width="150"/>
-                                                        <field name="type" invisible="1"/>
-                                                    </list>
-                                                </field>
-
-                                                <!-- Sorties -->
-                                                <h4>Sorties</h4>
-                                                <field name="budget_expense_line_ids" nolabel="1">
-                                                    <list editable="bottom" create="false" delete="false" style="min-width: 800px;">
-                                                        <field name="category" string="Catégorie" readonly="1" width="350"/>
-                                                        <field name="montant_madame" string="Madame" widget="monetary" options="{'currency_field': 'currency_id'}" width="150"/>
-                                                        <field name="montant_monsieur" string="Monsieur" widget="monetary" options="{'currency_field': 'currency_id'}" width="150"/>
-                                                        <field name="type" invisible="1"/>
-                                                    </list>
-                                                </field>
-
-                                            </div>
-
-                                            <!-- Totaux du budget -->
-                                            <group string="Totaux du budget">
-                                                <group string="Revenus">
-                                                    <field name="total_revenus_madame" widget="monetary"/>
-                                                    <field name="total_revenus_monsieur" widget="monetary"/>
-                                                    <field name="total_revenus" widget="monetary"/>
-                                                </group>
-                                                <group string="Charges">
-                                                    <field name="total_charges_madame" widget="monetary"/>
-                                                    <field name="total_charges_monsieur" widget="monetary"/>
-                                                    <field name="total_charges" widget="monetary"/>
-                                                </group>
-                                                <field name="solde" widget="monetary" decoration="text-danger:solde &lt; 0"/>
-                                            </group>
-                                        </div>
-                                    </group>
-
-                                    <group string="Proposition">
-                                        <label for="proposed_monthly_amount" string="Je propose à la CEF un montant mensuel"/>
-                                        <field name="proposed_monthly_amount" string="Merci d'indiquer l'écolage mensuel que vous proposez"/>
-                                        <div>
-                                            <strong>Total proposé :</strong>
-                                            <field name="proposed_monthly_amount" readonly="1" class="oe_inline"/>
+                            <group string="Proposition">
+                                <label for="proposed_monthly_amount" string="Je propose à la CEF un montant mensuel"/>
+                                <field name="proposed_monthly_amount" string="Merci d'indiquer l'écolage mensuel que vous proposez"/>
+                                <div>
+                                    <strong>Total proposé :</strong>
+                                    <field name="proposed_monthly_amount" readonly="1" class="oe_inline"/>
  CHF
-                                        </div>
-                                    </group>
-                                </group>
+                                </div>
                             </group>
-                        </page>
-                        <page string="Parascolaire">
-                            <group string="Demande parascolaire">
-                                <field name="after_school_request" widget="radio"/>
-                                <field name="after_school_line_ids" invisible="after_school_request != 'yes'">
-                                    <list editable="bottom">
-                                        <field name="selected" widget="boolean_toggle"/>
-                                        <field name="student_id" domain="[('family_id', '=', parent.family_id)]" options="{'no_create': True}" required="1" readonly="1" />
-                                        <field name="accueil_type" required="1" widget="selection" invisible="not selected"/>
-                                        <field name="lundi_midi" invisible="accueil_type == False"/>
-                                        <field name="lundi_soir" invisible="accueil_type == False"/>
-                                        <field name="lundi_cirque" invisible="accueil_type != 'classe'"/>
-                                        <field name="mardi_midi"/>
-                                        <field name="mardi_soir"/>
-                                        <field name="mardi_cirque" invisible="accueil_type != 'classe'"/>
-                                        <field name="mercredi_midi"/>
-                                        <field name="mercredi_soir"/>
-                                        <field name="mercredi_cirque" invisible="accueil_type != 'classe'"/>
-                                        <field name="jeudi_midi"/>
-                                        <field name="jeudi_soir"/>
-                                        <field name="jeudi_cirque" invisible="accueil_type != 'classe'"/>
-                                        <field name="vendredi_midi"/>
-                                        <field name="vendredi_soir"/>
-                                        <field name="vendredi_cirque" invisible="accueil_type != 'classe'"/>
-                                        <field name="montant_mensuel" aggregate="sum" readonly="1"/>
-                                    </list>
-                                </field>
-                                <field name="total_monthly_after_school" readonly="1" invisible="after_school_request == 'no'" class="oe_inline"/>
-                            </group>
-                        </page>
+                        </group>
+                    </group>
+                </page>
+                <page string="Parascolaire">
+                    <group string="Demande parascolaire">
+                        <field name="after_school_request" widget="radio"/>
+                        <field name="after_school_line_ids" invisible="after_school_request != 'yes'">
+                            <list editable="bottom">
+                                <field name="selected" widget="boolean_toggle"/>
+                                <field name="student_id" domain="[('family_id', '=', parent.family_id)]" options="{'no_create': True}" required="1" readonly="1" />
+                                <field name="accueil_type" required="1" widget="selection" invisible="not selected"/>
+                                <field name="lundi_midi" invisible="accueil_type == False"/>
+                                <field name="lundi_soir" invisible="accueil_type == False"/>
+                                <field name="lundi_cirque" invisible="accueil_type != 'classe'"/>
+                                <field name="mardi_midi"/>
+                                <field name="mardi_soir"/>
+                                <field name="mardi_cirque" invisible="accueil_type != 'classe'"/>
+                                <field name="mercredi_midi"/>
+                                <field name="mercredi_soir"/>
+                                <field name="mercredi_cirque" invisible="accueil_type != 'classe'"/>
+                                <field name="jeudi_midi"/>
+                                <field name="jeudi_soir"/>
+                                <field name="jeudi_cirque" invisible="accueil_type != 'classe'"/>
+                                <field name="vendredi_midi"/>
+                                <field name="vendredi_soir"/>
+                                <field name="vendredi_cirque" invisible="accueil_type != 'classe'"/>
+                                <field name="montant_mensuel" aggregate="sum" readonly="1"/>
+                            </list>
+                        </field>
+                        <field name="total_monthly_after_school" readonly="1" invisible="after_school_request == 'no'" class="oe_inline"/>
+                    </group>
+                </page>
 
 
 
 
-                        <page string="Récapitulatif">
-                            <group string="Mensuel">
-                                <label for="total_monthly_tuition"/>
-                                <field name="total_monthly_tuition"/>
-                                <label for="total_monthly_after_school"/>
-                                <field name="total_monthly_after_school"/>
-                                <label for="total_monthly"/>
-                                <field name="total_monthly"/>
-                            </group>
-                            <group string="Annuel">
-                                <label for="total_annual_tuition"/>
-                                <field name="total_annual_tuition"/>
-                                <label for="total_annual_after_school"/>
-                                <field name="total_annual_after_school"/>
-                                <label for="membership_fee_amount"/>
-                                <field name="membership_fee_amount"/>
-                                <label for="deposit_amount"/>
-                                <field name="deposit_amount"/>
-                                <label for="total_annual"/>
-                                <field name="total_annual"/>
-                            </group>
-                        </page>
+                <page string="Récapitulatif">
+                    <group string="Mensuel">
+                        <label for="total_monthly_tuition"/>
+                        <field name="total_monthly_tuition"/>
+                        <label for="total_monthly_after_school"/>
+                        <field name="total_monthly_after_school"/>
+                        <label for="total_monthly"/>
+                        <field name="total_monthly"/>
+                    </group>
+                    <group string="Annuel">
+                        <label for="total_annual_tuition"/>
+                        <field name="total_annual_tuition"/>
+                        <label for="total_annual_after_school"/>
+                        <field name="total_annual_after_school"/>
+                        <label for="membership_fee_amount"/>
+                        <field name="membership_fee_amount"/>
+                        <label for="deposit_amount"/>
+                        <field name="deposit_amount"/>
+                        <label for="total_annual"/>
+                        <field name="total_annual"/>
+                    </group>
+                </page>
 
-                        <page string="Mentions">
-                            <field name="legal_notice" widget="html" readonly="1"/>
-                            <field name="technical_contact" widget="html" readonly="1"/>
-                        </page>
+                <page string="Mentions">
+                    <field name="legal_notice" widget="html" readonly="1"/>
+                    <field name="technical_contact" widget="html" readonly="1"/>
+                </page>
 
-                    </notebook>
-                </sheet>
-            </form>
-        </field>
-    </record>
+            </notebook>
+        </sheet>
+    </form>
+</field>
+</record>
 
-    <record id="view_dossier_famille_list" model="ir.ui.view">
-        <field name="name">ersge.dossier.famille.list</field>
-        <field name="model">ersge.dossier.famille</field>
-        <field name="arch" type="xml">
-            <list>
-                <field name="display_name"/>
-                <field name="annee_scolaire"/>
-                <field name="state" widget="badge"/>
-                <field name="date_soumission"/>
-            </list>
-        </field>
-    </record>
+<record id="view_dossier_famille_list" model="ir.ui.view">
+<field name="name">ersge.dossier.famille.list</field>
+<field name="model">ersge.dossier.famille</field>
+<field name="arch" type="xml">
+    <list>
+        <field name="display_name"/>
+        <field name="annee_scolaire"/>
+        <field name="state" widget="badge"/>
+        <field name="date_soumission"/>
+    </list>
+</field>
+</record>
 
-    <record id="action_dossier_famille" model="ir.actions.act_window">
-        <field name="name">Dossiers famille</field>
-        <field name="res_model">ersge.dossier.famille</field>
-        <field name="view_mode">list,form</field>
-        <field name="context">{}</field>
-    </record>
+<record id="action_dossier_famille" model="ir.actions.act_window">
+<field name="name">Dossiers famille</field>
+<field name="res_model">ersge.dossier.famille</field>
+<field name="view_mode">list,form</field>
+<field name="context">{}</field>
+</record>
 
-    <menuitem id="menu_ersge_root" name="Écolage" sequence="10"/>
+<menuitem id="menu_ersge_root" name="Écolage" sequence="10"/>
 
 </odoo>
