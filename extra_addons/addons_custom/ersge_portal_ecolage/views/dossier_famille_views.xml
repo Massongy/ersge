@@ -104,8 +104,8 @@
                             </div>
                         </page>
 
-                        <page string="Finances">
-                            <group string="Aide employeur">
+                        <page string="Ecolage">
+                            <group string="Ecolage">
                                 <field name="employer_assistance" widget="radio"/>
                                 <field name="send_invoice_to_employer" invisible="employer_assistance != 'yes'"/>
                                 <field name="employer_id" invisible="employer_assistance != 'yes' or not send_invoice_to_employer" context="{'default_is_employer': True}" options="{'no_create': False}"/>
@@ -136,13 +136,13 @@
 
                     <group string="Réductions">
 
-                        <strong>Demander une  en raison du nombre d’enfants inscrit à l'école et/ou une réduction d'ancienneté</strong>
+                        <strong>Demander une réduction en raison du nombre d’enfants inscrit à l'école et/ou une réduction d'ancienneté</strong>
                         <field name="reduction_requested" widget="boolean_button" options='{"terminology": "boolean"}'/>
 
                         <group invisible="not reduction_requested">
                             <group string="Demande de réduction en fonction du nombre d'enfants inscrits">
                                 <div>
-                                    <strong>Nombre d'enfants actuellement inscrits :</strong>
+                                    <strong>Nombre d'enfants inscrits :</strong>
                                     <field name="actual_children_count" class="oe_inline"/>
                                 </div>
 
@@ -152,8 +152,8 @@
                                         <field name="max_children_discount" readonly="1"/>
  %
                                     </div>
-                                    <label for="apply_children_discount" string="Appliquer la réduction enfants"/>
-                                    <field name="apply_children_discount"/>
+                                    <label for="apply_children_discount" string="Vous sollicitez une réduction en raison du nombre d’enfants de votre famille inscrits dans l’école."/>
+                                    <field name="apply_children_discount" nolabel="1"/>
                                     <div invisible="not apply_children_discount">
                                         <label for="monthly_fee_after_children"/>
                                         <field name="monthly_fee_after_children" readonly="1" class="oe_inline"/>
@@ -162,14 +162,15 @@
                                 </div>
                             </group>
 
-                            <group string="DEMANDE DE RÉDUCTION SELON L’ANCIENNETÉ">
+                            <group string="Demande de réduction en fonction de l'ancienneté">
                                 <field name="seniority_years" widget="radio" options="{'horizontal': true}"/>
                                 <div>
                                     <strong>Réduction maximale possible :</strong>
                                     <field name="max_seniority_discount" readonly="1"/>
  %
                                 </div>
-                                <field name="apply_seniority_discount"/>
+                                <label for="apply_seniority_discount" string="Vous sollicitez une réduction d’ancienneté relative au temps pendant lequel votre famille a contribué à l’école."/>
+                                <field name="apply_seniority_discount" nolabel="1"/>
                                 <div invisible="not apply_seniority_discount">
                                     <label for="monthly_fee_after_seniority"/>
                                     <field name="monthly_fee_after_seniority" readonly="1" class="oe_inline"/>
@@ -177,17 +178,23 @@
                                 </div>
                             </group>
 
-                            <group string="AJUSTEZ VOS RÉDUCTIONS">
+                            <group string="Ajustez vos réductions">
                                 <div>
-                                    <strong>Réduction maximale cumulable (ancienneté + enfants) :</strong>
+                                    <strong>Sollicitez, en conscience, la réduction juste en fonction de votre situation.</strong>
+                                </div>
+                                <div>
+                                    <strong>Vous pourriez solliciter la réduction maximale suivante : ancienneté et/ou nombres d'enfants dans l'école :</strong>
+                                    <!-- Affichage du pourcentage max, sans label -->
                                     <field name="max_total_discount" readonly="1"/>
  %
                                 </div>
                                 <div>
-                                    <label for="monthly_fee_at_max"/>
+                                    <!-- Label déplacé ici, devant le montant -->
+                                    <label for="monthly_fee_at_max" string="Total mensuel après rabais"/>
                                     <field name="monthly_fee_at_max" readonly="1" class="oe_inline"/>
  CHF
                                 </div>
+                                <!-- Le reste (requested_discount, etc.) est inchangé -->
                                 <field name="requested_discount" string="Compte tenu de votre situation personnelle, vous sollicitez une réduction moindre, indiquez le pourcentage" required="1"/>
                                 <div>
                                     <label for="monthly_fee_after_requested"/>
@@ -195,7 +202,7 @@
  CHF
                                 </div>
                                 <div class="alert alert-warning" role="alert" invisible="requested_discount &lt;= max_total_discount">
-                    Le pourcentage sollicité ne doit pas dépasser la réduction maximale !
+        Le pourcentage sollicité ne doit pas dépasser la réduction maximale !
                                 </div>
                             </group>
                         </group>
@@ -203,6 +210,7 @@
 
                     <!-- Demande de réduction complémentaire -->
                     <group string="Réduction complémentaire">
+                        <label for="additional_reduction_request" string="Je sollicite une demande de réduction complémentaire."/>
                         <field name="additional_reduction_request" widget="boolean_button" options='{"terminology": "boolean"}'/>
 
                         <group invisible="not additional_reduction_request">
@@ -213,13 +221,20 @@
         Demande de réduction d'écolage
                                 </a>
                             </div>
-                            <div class="alert alert-warning">
+                            <div>
                 En cas d’impossibilité d'envoi de documents numériques, vous pouvez déposer une version papier
                 de ces documents au secrétariat.
                             </div>
 
-                            <group string="Revenus">
-                                <field name="additional_reduction_income_percentage" string="Pourcentage que représente le tarif sur votre revenu annuel familial brut" widget="percentage"/>
+                            <group string="Situation financière">
+                                <!-- Champ invisible pour que le calcul fonctionne (montant après réduction maximale) -->
+                                <field name="monthly_fee_at_max" invisible="1"/>
+
+                                <!-- Champ saisie utilisateur -->
+                                <field name="gross_annual_income" string="Indiquer votre revenu brut annuel familial (CHF)"/>
+
+                                <!-- Champ calculé automatiquement (lecture seule) -->
+                                <field name="additional_reduction_income_percentage" string="Pourcentage que représente le tarif sur votre revenu annuel familial brut" widget="percentage" readonly="1"/>
                             </group>
 
                             <group string="Justificatifs">

@@ -317,7 +317,7 @@ class DossierFamille(models.Model):
         currency_field="currency_id",
     )
     monthly_fee_at_max = fields.Monetary(
-        string="Total mensuel après rabais max",
+        string="Total mensuel après rabais maximal",
         compute="_compute_discounted_fees",
         store=True,
         currency_field="currency_id",
@@ -341,12 +341,16 @@ class DossierFamille(models.Model):
     additional_reduction_request = fields.Boolean(
         string="Demande réduction complémentaire", default=False
     )
+
+    gross_annual_income = fields.Float(string="Revenu brut annuel familial (CHF)")
+
     additional_reduction_income_percentage = fields.Float(
-        string="Pourcentage du revenu"
+        string="Pourcentage que représente le tarif sur votre revenu annuel familial brut",
+        compute="_compute_income_percentage",
+        store=True,
+        widget="percentage",
     )
-    annual_gross_income = fields.Monetary(
-        string="Revenu annuel brut", currency_field="currency_id"
-    )
+
     proposed_monthly_amount = fields.Monetary(
         string="Montant mensuel proposé", currency_field="currency_id"
     )
@@ -679,6 +683,16 @@ class DossierFamille(models.Model):
     def _compute_actual_children_count(self):
         for record in self:
             record.actual_children_count = len(record.student_line_ids)
+
+    @api.depends("gross_annual_income", "monthly_fee_at_max")
+    def _compute_income_percentage(self):
+        for record in self:
+            if record.gross_annual_income and record.monthly_fee_at_max:
+                annual_fee = record.monthly_fee_at_max * 12
+                percentage = (annual_fee / record.gross_annual_income) * 100
+                record.additional_reduction_income_percentage = percentage
+            else:
+                record.additional_reduction_income_percentage = 0.0
 
     # CONSTRAINTS
     # -------------------------------------------------------------------------
