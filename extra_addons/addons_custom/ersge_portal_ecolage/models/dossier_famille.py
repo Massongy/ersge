@@ -435,7 +435,13 @@ class DossierFamille(models.Model):
     )
 
     budget_method = fields.Selection(
-        [("upload", "Télécharger un document"), ("online", "Remplir en ligne")],
+        [
+            (
+                "upload",
+                "Imprimer et renseigner le budget dans le document de demande de réduction d'écolage ci-dessus et le télécharger",
+            ),
+            ("online", "Remplir en ligne"),
+        ],
         string="Mode de saisie du budget",
         default="upload",
     )
@@ -688,7 +694,9 @@ class DossierFamille(models.Model):
     def _compute_income_percentage(self):
         for record in self:
             if record.gross_annual_income and record.monthly_fee_at_max:
-                annual_fee = record.monthly_fee_at_max * 12
+                # Convertir le montant mensuel de centimes en francs
+                monthly_fee_francs = record.monthly_fee_at_max / 100
+                annual_fee = monthly_fee_francs * 12
                 percentage = (annual_fee / record.gross_annual_income) * 100
                 record.additional_reduction_income_percentage = percentage
             else:
@@ -715,8 +723,7 @@ class DossierFamille(models.Model):
     def _get_current_school_year(self):
         today = datetime.date.today()
         year = today.year
-        # On est en avril 2026 → inscription pour 2026-2027
-        # On est en septembre 2026 → inscription pour 2026-2027 aussi
+
         return f"{year}-{year+1}"
 
     def _ensure_budget_lines(self):
