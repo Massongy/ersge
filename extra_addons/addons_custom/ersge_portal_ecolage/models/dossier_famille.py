@@ -421,12 +421,14 @@ class DossierFamille(models.Model):
         "dossier_id",
         domain=[("type", "=", "income")],
         string="Revenus",
+        context={"default_type": "income"},
     )
     budget_expense_line_ids = fields.One2many(
         "ersge.budget.line",
         "dossier_id",
         domain=[("type", "=", "expense")],
         string="Charges",
+        context={"default_type": "expense"},
     )
     budget_attachment = fields.Binary()
     budget_attachment_filename = fields.Char()
@@ -763,22 +765,6 @@ class DossierFamille(models.Model):
         year = today.year
         return f"{year}-{year+1}"
 
-    def action_save_budget(self):
-        for line in self.budget_income_line_ids:
-            line.write(
-                {
-                    "montant_monsieur": line.montant_monsieur,
-                    "montant_madame": line.montant_madame,
-                }
-            )
-        for line in self.budget_expense_line_ids:
-            line.write(
-                {
-                    "montant_monsieur": line.montant_monsieur,
-                    "montant_madame": line.montant_madame,
-                }
-            )
-
     # -------------------------------------------------------------------------
     # PRÉ-REMPLISSAGE DEPUIS LE DOSSIER PRÉCÉDENT
     # -------------------------------------------------------------------------
@@ -895,7 +881,6 @@ class DossierFamille(models.Model):
     @api.model_create_multi
     def create(self, vals_list):
         _logger.warning("=== METHODE CREATE EXECUTEE ===")
-        _logger.warning(f"vals_list: {vals_list}")
 
         for vals in vals_list:
             _logger.warning(f"family_id dans vals: {vals.get('family_id')}")
@@ -905,20 +890,29 @@ class DossierFamille(models.Model):
             _logger.warning(
                 f"parent1_firstname dans vals: {vals.get('parent1_firstname')}"
             )
+
             if vals.get("name", "New") == "New":
                 vals["name"] = (
                     self.env["ir.sequence"].next_by_code("ersge.dossier.famille")
                     or "New"
                 )
 
+            # Corriger les catégories manquantes dans les lignes budget avant création
+            if vals.get("budget_method") == "online" and vals.get("budget_line_ids"):
+                categories = self._get_budget_categories()
+                create_cmds = [l for l in vals["budget_line_ids"] if l[0] == 0]
+                for i, cmd in enumerate(create_cmds):
+                    if i < len(categories) and not cmd[2].get("category"):
+                        cmd[2]["category"] = categories[i][0]
+                        cmd[2]["type"] = categories[i][1]
+                        cmd[2]["include_in_totals"] = categories[i][2]
+
         records = super().create(vals_list)
 
         for record in records:
-            # Post-création : création étudiants si nécessaire
             if hasattr(record.student_line_ids, "_create_student_if_needed"):
                 record.student_line_ids._create_student_if_needed(record)
 
-            # Créer ou lier les parents (si le dossier a été pré-rempli)
             if (
                 record.family_id
                 and record.parent1_firstname
@@ -1064,7 +1058,7 @@ class DossierFamille(models.Model):
                         )
                     record.parent2_id = partner2.id
 
-            # === Correction : Création automatique des lignes budget si mode "online" ===
+            # Créer les lignes budget si l'onchange ne les a pas transmises
             if record.budget_method == "online" and not record.budget_line_ids:
                 record._create_budget_lines()
 
@@ -1102,8 +1096,14 @@ class DossierFamille(models.Model):
 
     def _create_budget_lines(self):
         categories = self._get_budget_categories()
-        vals = [
-            (
+        _logger.warning(
+            f"=== _create_budget_lines appelé, {len(categories)} catégories ==="
+        )
+        income_vals = [(5, 0, 0)]
+        expense_vals = [(5, 0, 0)]
+        for cat, typ, include in categories:
+            _logger.warning(f"  → catégorie: '{cat}'")
+            cmd = (
                 0,
                 0,
                 {
@@ -1114,14 +1114,15 @@ class DossierFamille(models.Model):
                     "montant_madame": 0.0,
                 },
             )
-            for cat, typ, include in categories
-        ]
-        self.budget_line_ids = vals
-        self.budget_income_line_ids = self.budget_line_ids.filtered(
-            lambda l: l.type == "income"
-        )
-        self.budget_expense_line_ids = self.budget_line_ids.filtered(
-            lambda l: l.type == "expense"
+            if typ == "income":
+                income_vals.append(cmd)
+            else:
+                expense_vals.append(cmd)
+        self.write(
+            {
+                "budget_income_line_ids": income_vals,
+                "budget_expense_line_ids": expense_vals,
+            }
         )
 
     def _ensure_budget_categories(self):
@@ -1150,19 +1151,32 @@ class DossierFamille(models.Model):
 
     @api.onchange("budget_method")
     def _onchange_budget_method(self):
+        _logger.warning(
+            f"=== _onchange_budget_method appelé: budget_method={self.budget_method}, nb_lignes={len(self.budget_line_ids)} ==="
+        )
         if self.budget_method == "online" and not self.budget_line_ids:
-            self._create_budget_lines()
-        elif self.budget_method == "upload" and self.budget_line_ids:
-            self.budget_line_ids = [(5, 0, 0)]  # Supprime toutes les lignes
-
-    @api.onchange("budget_line_ids")
-    def _onchange_budget_line_ids(self):
-        self.budget_income_line_ids = self.budget_line_ids.filtered(
-            lambda l: l.type == "income"
-        )
-        self.budget_expense_line_ids = self.budget_line_ids.filtered(
-            lambda l: l.type == "expense"
-        )
+            _logger.warning("=== Création des lignes budget ===")
+            categories = self._get_budget_categories()
+            income_lines = [(5, 0, 0)]
+            expense_lines = [(5, 0, 0)]
+            for cat, typ, include in categories:
+                cmd = (
+                    0,
+                    0,
+                    {
+                        "category": cat,
+                        "type": typ,
+                        "include_in_totals": include,
+                        "montant_monsieur": 0.0,
+                        "montant_madame": 0.0,
+                    },
+                )
+                if typ == "income":
+                    income_lines.append(cmd)
+                else:
+                    expense_lines.append(cmd)
+            self.budget_income_line_ids = income_lines
+            self.budget_expense_line_ids = expense_lines
 
     @api.onchange("budget_income_line_ids", "budget_expense_line_ids")
     def _onchange_budget_lines_totals(self):

@@ -280,10 +280,9 @@
                                         <h4>Entrées</h4>
                                         <field name="budget_income_line_ids" nolabel="1">
                                             <list editable="bottom" create="false" delete="false" style="min-width: 800px;">
-                                                <field name="category" string="Catégorie" readonly="1" width="350"/>
+                                                <field name="category" string="Catégorie" readonly="1" force_save="1" width="350"/>
                                                 <field name="montant_madame" string="Madame" widget="monetary" options="{'currency_field': 'currency_id'}" width="150"/>
                                                 <field name="montant_monsieur" string="Monsieur" widget="monetary" options="{'currency_field': 'currency_id'}" width="150"/>
-
                                             </list>
                                         </field>
 
@@ -294,39 +293,35 @@
                                                 <field name="category" string="Catégorie" readonly="1" force_save="1" width="350"/>
                                                 <field name="montant_madame" string="Madame" widget="monetary" options="{'currency_field': 'currency_id'}" width="150"/>
                                                 <field name="montant_monsieur" string="Monsieur" widget="monetary" options="{'currency_field': 'currency_id'}" width="150"/>
-
                                             </list>
                                         </field>
-                                        <div invisible="budget_method != 'online'">
-                                            <button string="💾 Enregistrer le budget" type="object" name="action_save_budget" class="btn-primary"/>
-                                        </div>
+
+                                        <!-- Totaux du budget -->
+                                        <group string="Totaux du budget">
+                                            <group string="Revenus">
+                                                <field name="total_revenus_madame" widget="monetary"/>
+                                                <field name="total_revenus_monsieur" widget="monetary"/>
+                                                <field name="total_revenus" widget="monetary"/>
+                                            </group>
+                                            <group string="Charges">
+                                                <field name="total_charges_madame" widget="monetary"/>
+                                                <field name="total_charges_monsieur" widget="monetary"/>
+                                                <field name="total_charges" widget="monetary"/>
+                                            </group>
+                                            <field name="solde" widget="monetary" decoration="text-danger:solde &lt; 0"/>
+                                        </group>
                                     </div>
-
-                                    <!-- Totaux du budget -->
-                                    <group string="Totaux du budget">
-                                        <group string="Revenus">
-                                            <field name="total_revenus_madame" widget="monetary"/>
-                                            <field name="total_revenus_monsieur" widget="monetary"/>
-                                            <field name="total_revenus" widget="monetary"/>
-                                        </group>
-                                        <group string="Charges">
-                                            <field name="total_charges_madame" widget="monetary"/>
-                                            <field name="total_charges_monsieur" widget="monetary"/>
-                                            <field name="total_charges" widget="monetary"/>
-                                        </group>
-                                        <field name="solde" widget="monetary" decoration="text-danger:solde &lt; 0"/>
-                                    </group>
                                 </div>
-                            </group>
 
-                            <group string="Proposition">
-                                <label for="proposed_monthly_amount" string="Je propose à la CEF un montant mensuel"/>
-                                <field name="proposed_monthly_amount" string="Merci d'indiquer l'écolage mensuel que vous proposez"/>
-                                <div>
-                                    <strong>Total proposé :</strong>
-                                    <field name="proposed_monthly_amount" readonly="1" class="oe_inline"/>
+                                <group string="Proposition">
+                                    <label for="proposed_monthly_amount" string="Je propose à la CEF un montant mensuel"/>
+                                    <field name="proposed_monthly_amount" string="Merci d'indiquer l'écolage mensuel que vous proposez"/>
+                                    <div>
+                                        <strong>Total proposé :</strong>
+                                        <field name="proposed_monthly_amount" readonly="1" class="oe_inline"/>
  CHF
-                                </div>
+                                    </div>
+                                </group>
                             </group>
                         </group>
                     </group>
