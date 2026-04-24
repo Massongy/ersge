@@ -397,11 +397,24 @@ class DossierFamille(models.Model):
     excluded_fees_info = fields.Html(string="Frais non compris", readonly=True)
 
     # === DOCUMENTS ET ATTACHEMENTS ===
-    explanatory_letter_text = fields.Text()
+    explanatory_letter_text = fields.Text(
+        string="Lettre explicative", help="Décrivez ici votre situation familiale"
+    )
     explanatory_letter_attachment = fields.Binary()
     explanatory_letter_filename = fields.Char()
     explanatory_letter_status = fields.Selection(
         [("draft", "Brouillon"), ("received", "Reçu"), ("validated", "Validé")]
+    )
+    # Ajoutez ceci dans votre modèle (à côté des autres explanatory_letter_xxx)
+
+    explanatory_letter_mode = fields.Selection(
+        [
+            ("upload", "Télécharger un fichier"),
+            ("write", "Écrire directement"),
+        ],
+        string="Mode de saisie",
+        default="upload",
+        help="Choisissez comment fournir votre lettre explicative",
     )
 
     # Budget
@@ -438,7 +451,7 @@ class DossierFamille(models.Model):
         [
             (
                 "upload",
-                "Imprimer et renseigner le budget dans le document de demande de réduction d'écolage ci-dessus et le télécharger",
+                "Imprimer, renseigner et télécharger la grille de budget dans le document de demande de réduction d'écolage ci-dessus",
             ),
             ("online", "Remplir en ligne"),
         ],
@@ -690,12 +703,12 @@ class DossierFamille(models.Model):
         for record in self:
             record.actual_children_count = len(record.student_line_ids)
 
-    @api.depends("gross_annual_income", "monthly_fee_at_max")
+    @api.depends("gross_annual_income", "monthly_fee_after_requested")
     def _compute_income_percentage(self):
         for record in self:
-            if record.gross_annual_income and record.monthly_fee_at_max:
+            if record.gross_annual_income and record.monthly_fee_after_requested:
                 # Convertir le montant mensuel de centimes en francs
-                monthly_fee_francs = record.monthly_fee_at_max / 100
+                monthly_fee_francs = record.monthly_fee_after_requested / 100
                 annual_fee = monthly_fee_francs * 12
                 percentage = (annual_fee / record.gross_annual_income) * 100
                 record.additional_reduction_income_percentage = percentage

@@ -104,7 +104,7 @@
                             </div>
                         </page>
 
-                        <page string="Ecolage">
+                        <page string="Finances">
                             <group string="Ecolage">
                                 <field name="employer_assistance" widget="radio"/>
                                 <field name="send_invoice_to_employer" invisible="employer_assistance != 'yes'"/>
@@ -183,7 +183,7 @@
                                     <strong>Sollicitez, en conscience, la réduction juste en fonction de votre situation.</strong>
                                 </div>
                                 <div>
-                                    <strong>Vous pourriez solliciter la réduction maximale suivante : ancienneté et/ou nombres d'enfants dans l'école :</strong>
+                                    <strong>Vous pourriez solliciter la réduction maximale suivante (ancienneté et/ou nombres d'enfants dans l'école) :</strong>
                                     <!-- Affichage du pourcentage max, sans label -->
                                     <field name="max_total_discount" readonly="1"/>
  %
@@ -227,8 +227,7 @@
                             </div>
 
                             <group string="Situation financière">
-                                <!-- Champ invisible pour que le calcul fonctionne (montant après réduction maximale) -->
-                                <field name="monthly_fee_at_max" invisible="1"/>
+
 
                                 <!-- Champ saisie utilisateur -->
                                 <field name="gross_annual_income" string="Indiquer votre revenu brut annuel familial (CHF)"/>
@@ -241,7 +240,27 @@
                                 <field name="tax_notice_attachment" filename="tax_notice_filename" attachment="tax_notice_attachment" string="Dernier avis de taxation" help="Dernier avis de taxation (PDF, max 4MB)"/>
                                 <field name="payslip_ids" widget="many2many_binary" string="Trois dernières fiches de salaire" help="Vous pouvez télécharger plusieurs fichiers (max 8MB)"/>
                                 <field name="explanatory_letter_attachment" filename="explanatory_letter_filename" attachment="explanatory_letter_attachment" string="Lettre explicative de la situation familiale" help="Lettre explicative de la situation familiale (PDF, max 4MB)"/>
+                                <group string="Lettre explicative" invisible="not additional_reduction_request">
+                                    <!-- Nouveau : choix du mode -->
+                                    <field name="explanatory_letter_mode" widget="radio" options="{'horizontal': true}"/>
 
+                                    <!-- Mode : téléchargement -->
+                                    <div invisible="explanatory_letter_mode != 'upload'">
+                                        <field name="explanatory_letter_attachment" filename="explanatory_letter_filename" help="PDF, max 4MB"/>
+                                        <field name="explanatory_letter_status" invisible="1" attrs="{'required': [('explanatory_letter_attachment', '!=', False)]}"/>
+                                    </div>
+
+                                    <!-- Mode : écriture directe -->
+                                    <div invisible="explanatory_letter_mode != 'write'">
+                                        <div class="alert alert-info">
+                                            <i class="fa fa-info-circle"/>
+ 
+            Veuillez décrire votre situation familiale ci-dessous :
+                                        </div>
+                                        <field name="explanatory_letter_text" placeholder="Décrivez votre situation familiale, les difficultés, vos motivations..." nolabel="1"/>
+                                        <field name="explanatory_letter_status" invisible="1"/>
+                                    </div>
+                                </group>
                                 <!-- Budget familial : option téléchargement ou saisie en ligne -->
                                 <field name="budget_method" widget="radio" options="{'horizontal': true}"/>
                                 <div invisible="budget_method != 'upload'">
