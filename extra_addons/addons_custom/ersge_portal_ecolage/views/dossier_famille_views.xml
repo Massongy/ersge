@@ -237,31 +237,36 @@
                             </group>
 
                             <group string="Justificatifs">
-                                <field name="tax_notice_attachment" filename="tax_notice_filename" attachment="tax_notice_attachment" string="Dernier avis de taxation" help="Dernier avis de taxation (PDF, max 4MB)"/>
-                                <field name="payslip_ids" widget="many2many_binary" string="Trois dernières fiches de salaire" help="Vous pouvez télécharger plusieurs fichiers (max 8MB)"/>
-                                <field name="explanatory_letter_attachment" filename="explanatory_letter_filename" attachment="explanatory_letter_attachment" string="Lettre explicative de la situation familiale" help="Lettre explicative de la situation familiale (PDF, max 4MB)"/>
-                                <group string="Lettre explicative" invisible="not additional_reduction_request">
-                                    <!-- Nouveau : choix du mode -->
-                                    <field name="explanatory_letter_mode" widget="radio" options="{'horizontal': true}"/>
+                                <label for="tax_notice_attachment" string="Dernier avis de taxation"/>
+                                <field name="tax_notice_attachment" filename="tax_notice_filename" attachment="tax_notice_attachment" help="Dernier avis de taxation (PDF, max 4MB)" nolabel="1"/>
 
-                                    <!-- Mode : téléchargement -->
-                                    <div invisible="explanatory_letter_mode != 'upload'">
-                                        <field name="explanatory_letter_attachment" filename="explanatory_letter_filename" help="PDF, max 4MB"/>
-                                        <field name="explanatory_letter_status" invisible="1" attrs="{'required': [('explanatory_letter_attachment', '!=', False)]}"/>
-                                    </div>
+                                <!-- Pour payslip_ids -->
+                                <label for="payslip_ids" string="Trois dernières fiches de salaire"/>
+                                <field name="payslip_ids" widget="many2many_binary" help="Vous pouvez télécharger plusieurs fichiers (max 8MB)" nolabel="1"/>
+                            </group>
+                            <group string="Lettre explicative" invisible="not additional_reduction_request">
+                                <!-- Nouveau : choix du mode -->
+                                <field name="explanatory_letter_mode" widget="radio" options="{'horizontal': true}"/>
 
-                                    <!-- Mode : écriture directe -->
-                                    <div invisible="explanatory_letter_mode != 'write'">
-                                        <div class="alert alert-info">
-                                            <i class="fa fa-info-circle"/>
+                                <!-- Mode : téléchargement -->
+                                <div invisible="explanatory_letter_mode != 'upload'">
+                                    <field name="explanatory_letter_attachment" filename="explanatory_letter_filename" help="PDF, max 4MB"/>
+                                    <field name="explanatory_letter_status" invisible="1" required="explanatory_letter_attachment != False"/>
+                                </div>
+
+                                <!-- Mode : écriture directe -->
+                                <div invisible="explanatory_letter_mode != 'write'">
+                                    <div class="alert alert-info">
+                                        <i class="fa fa-info-circle"/>
  
             Veuillez décrire votre situation familiale ci-dessous :
-                                        </div>
-                                        <field name="explanatory_letter_text" placeholder="Décrivez votre situation familiale, les difficultés, vos motivations..." nolabel="1"/>
-                                        <field name="explanatory_letter_status" invisible="1"/>
                                     </div>
-                                </group>
-                                <!-- Budget familial : option téléchargement ou saisie en ligne -->
+                                    <field name="explanatory_letter_text" placeholder="Décrivez votre situation familiale, les difficultés, vos motivations..." nolabel="1"/>
+                                    <field name="explanatory_letter_status" invisible="1"/>
+                                </div>
+                            </group>
+                            <!-- Budget familial : option téléchargement ou saisie en ligne -->
+                            <group string="Budget familial">
                                 <field name="budget_method" widget="radio" options="{'horizontal': true}"/>
                                 <div invisible="budget_method != 'upload'">
                                     <field name="budget_attachment" filename="budget_attachment_filename" help="Téléchargez votre budget au format PDF (max 4MB)"/>
@@ -269,9 +274,7 @@
 
                                 <div invisible="budget_method != 'online'">
                                     <div style="overflow-x: auto;">
-                                        <div invisible="budget_method != 'online'">
-                                            <button string="💾 Enregistrer le budget" type="object" name="action_save_budget" class="btn-primary"/>
-                                        </div>
+
 
                                         <!-- Entrées -->
                                         <h4>Entrées</h4>
@@ -280,7 +283,7 @@
                                                 <field name="category" string="Catégorie" readonly="1" width="350"/>
                                                 <field name="montant_madame" string="Madame" widget="monetary" options="{'currency_field': 'currency_id'}" width="150"/>
                                                 <field name="montant_monsieur" string="Monsieur" widget="monetary" options="{'currency_field': 'currency_id'}" width="150"/>
-                                                <field name="type" invisible="1"/>
+
                                             </list>
                                         </field>
 
@@ -288,13 +291,15 @@
                                         <h4>Sorties</h4>
                                         <field name="budget_expense_line_ids" nolabel="1">
                                             <list editable="bottom" create="false" delete="false" style="min-width: 800px;">
-                                                <field name="category" string="Catégorie" readonly="1" width="350"/>
+                                                <field name="category" string="Catégorie" readonly="1" force_save="1" width="350"/>
                                                 <field name="montant_madame" string="Madame" widget="monetary" options="{'currency_field': 'currency_id'}" width="150"/>
                                                 <field name="montant_monsieur" string="Monsieur" widget="monetary" options="{'currency_field': 'currency_id'}" width="150"/>
-                                                <field name="type" invisible="1"/>
+
                                             </list>
                                         </field>
-
+                                        <div invisible="budget_method != 'online'">
+                                            <button string="💾 Enregistrer le budget" type="object" name="action_save_budget" class="btn-primary"/>
+                                        </div>
                                     </div>
 
                                     <!-- Totaux du budget -->

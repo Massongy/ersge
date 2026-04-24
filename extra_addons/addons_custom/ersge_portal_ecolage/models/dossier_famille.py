@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
-import logging  # <---- AJOUTEZ CECI TOUT EN HAUT
+import logging
 from odoo import models, fields, api
 from odoo.exceptions import ValidationError
 import datetime
 
-_logger = logging.getLogger(__name__)  # <---- AJOUTEZ CECI JUSTE APRÈS LES IMPORTS
+_logger = logging.getLogger(__name__)
 
 
 class DossierFamille(models.Model):
@@ -183,7 +183,6 @@ class DossierFamille(models.Model):
     )
 
     # === ÉLÈVES ===
-
     student_line_ids = fields.One2many(
         "ersge.dossier.student.line", "dossier_id", string="Élèves"
     )
@@ -250,7 +249,6 @@ class DossierFamille(models.Model):
     )
 
     # nombres enfants inscrits (calculé)
-
     actual_children_count = fields.Integer(
         string="Nombre d'enfants inscrits",
         compute="_compute_actual_children_count",
@@ -405,7 +403,6 @@ class DossierFamille(models.Model):
     explanatory_letter_status = fields.Selection(
         [("draft", "Brouillon"), ("received", "Reçu"), ("validated", "Validé")]
     )
-    # Ajoutez ceci dans votre modèle (à côté des autres explanatory_letter_xxx)
 
     explanatory_letter_mode = fields.Selection(
         [
@@ -451,7 +448,7 @@ class DossierFamille(models.Model):
         [
             (
                 "upload",
-                "Imprimer, renseigner et télécharger la grille de budget dans le document de demande de réduction d'écolage ci-dessus",
+                "Télécharger la grille de budget du document de demande de réduction d'écolage ci-dessus.",
             ),
             ("online", "Remplir en ligne"),
         ],
@@ -514,6 +511,36 @@ class DossierFamille(models.Model):
     # Mentions légales
     legal_notice = fields.Html(readonly=True)
     technical_contact = fields.Html(readonly=True)
+
+    def _get_budget_categories(self):
+        return [
+            ("Salaire brut", "income", True),
+            ("Salaire net (à titre indicatif)", "income", False),
+            ("Allocations familiales", "income", True),
+            ("Pension alimentaire (reçue)", "income", True),
+            ("Autres revenus", "income", True),
+            ("Fortune (immobilière, etc)", "income", True),
+            ("Logement", "expense", True),
+            ("Impôts", "expense", True),
+            ("Assurance-maladie", "expense", True),
+            ("Frais médicaux non remboursés (lunette, dentiste, etc)", "expense", True),
+            ("Autres assurances (ménage, voiture)", "expense", True),
+            ("Energie (gaz, électricité, etc)", "expense", True),
+            ("Télécommunications (TV, internet, fixe, mobile, etc)", "expense", True),
+            ("Alimentation", "expense", True),
+            ("Pension alimentaire (versée)", "expense", True),
+            ("Transports (bus, voiture, scooter)", "expense", True),
+            ("Vêtements", "expense", True),
+            ("Ecolage (École Rudolf Steiner)", "expense", True),
+            ("Activités extrascolaires (musique, sport, etc)", "expense", True),
+            ("Cadeaux", "expense", True),
+            ("Argent de poche enfants", "expense", True),
+            ("Formations", "expense", True),
+            ("Loisirs – vacances", "expense", True),
+            ("Dettes (carte crédit, autres)", "expense", True),
+            ("Autre :", "expense", True),
+            ("Autre :", "expense", True),
+        ]
 
     # -------------------------------------------------------------------------
     # COMPUTE METHODS
@@ -696,7 +723,6 @@ class DossierFamille(models.Model):
             rec.max_total_discount = (
                 rec.max_children_discount + rec.max_seniority_discount
             )
-            # -------------------------------------------------------------------------
 
     @api.depends("student_line_ids")
     def _compute_actual_children_count(self):
@@ -716,7 +742,6 @@ class DossierFamille(models.Model):
                 record.additional_reduction_income_percentage = 0.0
 
     # CONSTRAINTS
-    # -------------------------------------------------------------------------
     @api.constrains("requested_discount", "max_total_discount", "reduction_requested")
     def _check_requested_discount(self):
         for rec in self:
@@ -736,65 +761,7 @@ class DossierFamille(models.Model):
     def _get_current_school_year(self):
         today = datetime.date.today()
         year = today.year
-
         return f"{year}-{year+1}"
-
-    def _ensure_budget_lines(self):
-        if self.budget_method != "online":
-            return
-        existing = self.env["ersge.budget.line"].search([("dossier_id", "=", self.id)])
-        if not existing:
-            categories = [
-                (
-                    "Salaire brut (indiquez svp aussi le net entre parenthèses)",
-                    "income",
-                    True,
-                ),
-                ("dont Salaire net (à titre indicatif)", "income", False),
-                ("Allocations familiales", "income", True),
-                ("Pension alimentaire (reçue)", "income", True),
-                ("Autres revenus", "income", True),
-                ("Fortune (immobilière, etc)", "income", True),
-                ("Logement", "expense", True),
-                ("Impôts", "expense", True),
-                ("Assurance-maladie", "expense", True),
-                (
-                    "Frais médicaux non remboursés (lunette, dentiste, etc)",
-                    "expense",
-                    True,
-                ),
-                ("Autres assurances (ménage, voiture)", "expense", True),
-                ("Energie (gaz, électricité, etc)", "expense", True),
-                (
-                    "Télécommunications (TV, internet, fixe, mobile, etc)",
-                    "expense",
-                    True,
-                ),
-                ("Alimentation", "expense", True),
-                ("Pension alimentaire (versée)", "expense", True),
-                ("Transports (bus, voiture, scooter)", "expense", True),
-                ("Vêtements", "expense", True),
-                ("Ecolage (École Rudolf Steiner)", "expense", True),
-                ("Activités extrascolaires (musique, sport, etc)", "expense", True),
-                ("Cadeaux", "expense", True),
-                ("Argent de poche enfants", "expense", True),
-                ("Formations", "expense", True),
-                ("Loisirs – vacances", "expense", True),
-                ("Dettes (carte crédit, autres)", "expense", True),
-                ("Autre :", "expense", True),
-                ("Autre :", "expense", True),
-            ]
-            for cat, typ, include in categories:
-                self.env["ersge.budget.line"].create(
-                    {
-                        "dossier_id": self.id,
-                        "category": cat,
-                        "type": typ,
-                        "include_in_totals": include,
-                        "montant_monsieur": 0.0,
-                        "montant_madame": 0.0,
-                    }
-                )
 
     def action_save_budget(self):
         for line in self.budget_income_line_ids:
@@ -830,7 +797,6 @@ class DossierFamille(models.Model):
         if not family_id:
             return defaults
 
-        # Chercher le dernier dossier de cette famille
         dernier_dossier = self.search(
             [("family_id", "=", family_id)], order="id desc", limit=1
         )
@@ -900,7 +866,7 @@ class DossierFamille(models.Model):
             defaults["budget_line_ids"] = budget_lines
             _logger.warning(f"Budget copié: {len(budget_lines)} lignes")
 
-        # === AJOUT : Copier les enfants ===
+        # Copier les enfants
         if dernier_dossier.student_line_ids:
             student_lines = []
             for line in dernier_dossier.student_line_ids:
@@ -916,9 +882,7 @@ class DossierFamille(models.Model):
                         },
                     )
                 )
-            defaults["student_line_ids"] = (
-                student_lines  # ← Correction : student_line_ids
-            )
+            defaults["student_line_ids"] = student_lines
             _logger.warning(f"Enfants copiés: {len(student_lines)} lignes")
 
         defaults["prefilled_from_previous"] = True
@@ -941,7 +905,6 @@ class DossierFamille(models.Model):
             _logger.warning(
                 f"parent1_firstname dans vals: {vals.get('parent1_firstname')}"
             )
-            # Génération de la séquence
             if vals.get("name", "New") == "New":
                 vals["name"] = (
                     self.env["ir.sequence"].next_by_code("ersge.dossier.famille")
@@ -951,8 +914,7 @@ class DossierFamille(models.Model):
         records = super().create(vals_list)
 
         for record in records:
-            # Post-création : lignes budget et création étudiants
-            record._ensure_budget_lines()
+            # Post-création : création étudiants si nécessaire
             if hasattr(record.student_line_ids, "_create_student_if_needed"):
                 record.student_line_ids._create_student_if_needed(record)
 
@@ -962,7 +924,6 @@ class DossierFamille(models.Model):
                 and record.parent1_firstname
                 and record.parent1_lastname
             ):
-                # Parent 1
                 if record.parent1_firstname and record.parent1_lastname:
                     partner1 = self.env["res.partner"].search(
                         [
@@ -972,11 +933,10 @@ class DossierFamille(models.Model):
                         ],
                         limit=1,
                     )
-
                     if not partner1:
                         partner1 = self.env["res.partner"].create(
                             {
-                                "name": f"{record.parent1_firstname} {record.parent1_lastname}",  # ← AJOUTEZ CECI
+                                "name": f"{record.parent1_firstname} {record.parent1_lastname}",
                                 "firstname": record.parent1_firstname,
                                 "lastname": record.parent1_lastname,
                                 "email": record.parent1_email,
@@ -1016,10 +976,8 @@ class DossierFamille(models.Model):
                                 "employer_name": record.parent1_employeur,
                             }
                         )
-
                     record.parent1_id = partner1.id
 
-                # Parent 2
                 if record.parent2_firstname and record.parent2_lastname:
                     partner2 = self.env["res.partner"].search(
                         [
@@ -1029,11 +987,10 @@ class DossierFamille(models.Model):
                         ],
                         limit=1,
                     )
-
                     if not partner2:
                         partner2 = self.env["res.partner"].create(
                             {
-                                "name": f"{record.parent2_firstname} {record.parent2_lastname}",  # ← AJOUTEZ CECI
+                                "name": f"{record.parent2_firstname} {record.parent2_lastname}",
                                 "firstname": record.parent2_firstname,
                                 "lastname": record.parent2_lastname,
                                 "email": record.parent2_email,
@@ -1105,8 +1062,11 @@ class DossierFamille(models.Model):
                                 "employer_name": record.parent2_employeur,
                             }
                         )
-
                     record.parent2_id = partner2.id
+
+            # === Correction : Création automatique des lignes budget si mode "online" ===
+            if record.budget_method == "online" and not record.budget_line_ids:
+                record._create_budget_lines()
 
         return records
 
@@ -1140,6 +1100,45 @@ class DossierFamille(models.Model):
             record.reopened_by = self.env.user
             record.reopened_date = fields.Datetime.now()
 
+    def _create_budget_lines(self):
+        categories = self._get_budget_categories()
+        vals = [
+            (
+                0,
+                0,
+                {
+                    "category": cat,
+                    "type": typ,
+                    "include_in_totals": include,
+                    "montant_monsieur": 0.0,
+                    "montant_madame": 0.0,
+                },
+            )
+            for cat, typ, include in categories
+        ]
+        self.budget_line_ids = vals
+        self.budget_income_line_ids = self.budget_line_ids.filtered(
+            lambda l: l.type == "income"
+        )
+        self.budget_expense_line_ids = self.budget_line_ids.filtered(
+            lambda l: l.type == "expense"
+        )
+
+    def _ensure_budget_categories(self):
+        categories = self._get_budget_categories()
+        income_cats = [c[0] for c in categories if c[1] == "income"]
+        expense_cats = [c[0] for c in categories if c[1] == "expense"]
+
+        income_lines = self.budget_line_ids.filtered(lambda l: l.type == "income")
+        for i, line in enumerate(income_lines):
+            if not line.category and i < len(income_cats):
+                line.category = income_cats[i]
+
+        expense_lines = self.budget_line_ids.filtered(lambda l: l.type == "expense")
+        for i, line in enumerate(expense_lines):
+            if not line.category and i < len(expense_cats):
+                line.category = expense_cats[i]
+
     # -------------------------------------------------------------------------
     # ONCHANGE
     # -------------------------------------------------------------------------
@@ -1152,68 +1151,9 @@ class DossierFamille(models.Model):
     @api.onchange("budget_method")
     def _onchange_budget_method(self):
         if self.budget_method == "online" and not self.budget_line_ids:
-            categories = [
-                (
-                    "Salaire brut (indiquez svp aussi le net entre parenthèses)",
-                    "income",
-                    True,
-                ),
-                ("dont Salaire net (à titre indicatif)", "income", False),
-                ("Allocations familiales", "income", True),
-                ("Pension alimentaire (reçue)", "income", True),
-                ("Autres revenus", "income", True),
-                ("Fortune (immobilière, etc)", "income", True),
-                ("Logement", "expense", True),
-                ("Impôts", "expense", True),
-                ("Assurance-maladie", "expense", True),
-                (
-                    "Frais médicaux non remboursés (lunette, dentiste, etc)",
-                    "expense",
-                    True,
-                ),
-                ("Autres assurances (ménage, voiture)", "expense", True),
-                ("Energie (gaz, électricité, etc)", "expense", True),
-                (
-                    "Télécommunications (TV, internet, fixe, mobile, etc)",
-                    "expense",
-                    True,
-                ),
-                ("Alimentation", "expense", True),
-                ("Pension alimentaire (versée)", "expense", True),
-                ("Transports (bus, voiture, scooter)", "expense", True),
-                ("Vêtements", "expense", True),
-                ("Ecolage (École Rudolf Steiner)", "expense", True),
-                ("Activités extrascolaires (musique, sport, etc)", "expense", True),
-                ("Cadeaux", "expense", True),
-                ("Argent de poche enfants", "expense", True),
-                ("Formations", "expense", True),
-                ("Loisirs – vacances", "expense", True),
-                ("Dettes (carte crédit, autres)", "expense", True),
-                ("Autre :", "expense", True),
-                ("Autre :", "expense", True),
-            ]
-            vals = [
-                (
-                    0,
-                    0,
-                    {
-                        "category": cat,
-                        "type": typ,
-                        "include_in_totals": include,
-                        "montant_monsieur": 0.0,
-                        "montant_madame": 0.0,
-                    },
-                )
-                for cat, typ, include in categories
-            ]
-            self.budget_line_ids = vals
-        # Forcer les champs filtrés depuis les lignes en mémoire
-        self.budget_income_line_ids = self.budget_line_ids.filtered(
-            lambda l: l.type == "income"
-        )
-        self.budget_expense_line_ids = self.budget_line_ids.filtered(
-            lambda l: l.type == "expense"
-        )
+            self._create_budget_lines()
+        elif self.budget_method == "upload" and self.budget_line_ids:
+            self.budget_line_ids = [(5, 0, 0)]  # Supprime toutes les lignes
 
     @api.onchange("budget_line_ids")
     def _onchange_budget_line_ids(self):
