@@ -1,34 +1,50 @@
 from odoo import models, fields, api
 
 
-class BudgetLine(models.Model):
+class ErsgebBudgetLine(models.Model):
     _name = "ersge.budget.line"
     _description = "Ligne budget mensuel"
+    _order = "category_id"
 
     dossier_id = fields.Many2one(
-        "ersge.dossier.famille", string="Dossier", required=True, ondelete="cascade"
-    )
-    category = fields.Char(string="Catégorie", required=False)
-    description = fields.Char(string="Description")
-    type = fields.Selection(
-        [
-            ("income", "Revenu"),
-            ("expense", "Charge"),
-        ],
-        string="Type",
+        "ersge.dossier.famille",
+        string="Dossier",
         required=True,
-        default="expense",
+        ondelete="cascade",
     )
-    include_in_totals = fields.Boolean(string="Inclure dans les totaux", default=True)
-
-    # Nouveaux champs pour les deux colonnes
-    montant_monsieur = fields.Monetary(string="Monsieur", currency_field="currency_id")
-    montant_madame = fields.Monetary(string="Madame", currency_field="currency_id")
+    category_id = fields.Many2one(
+        "ersge.budget.category",
+        string="Catégorie",
+        required=True,
+        ondelete="restrict",
+    )
+    # Dénormalisés depuis la catégorie — stockés pour les domains et computes
+    type = fields.Selection(
+        [("income", "Revenu"), ("expense", "Charge")],
+        related="category_id.type",
+        store=True,
+        readonly=True,
+    )
+    include_in_totals = fields.Boolean(
+        related="category_id.include_in_totals",
+        store=True,
+        readonly=True,
+    )
     currency_id = fields.Many2one(
-        "res.currency", related="dossier_id.currency_id", store=True
+        "res.currency",
+        related="dossier_id.currency_id",
+        store=True,
     )
-
-    # Champ calculé (optionnel) pour avoir un total par ligne
+    montant_monsieur = fields.Monetary(
+        string="Monsieur",
+        currency_field="currency_id",
+        default=0.0,
+    )
+    montant_madame = fields.Monetary(
+        string="Madame",
+        currency_field="currency_id",
+        default=0.0,
+    )
     total_ligne = fields.Monetary(
         string="Total ligne",
         compute="_compute_total_ligne",

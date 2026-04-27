@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+    <!-- REVENUS -->
+    <record id="budget_cat_salaire_brut" model="ersge.budget.category">
+        <field name="name">Salaire brut</field>
+        <field name="type">income</field>
+        <field name="include_in_totals">1</field>
+        <field name="sequence">10</field>
+    </record>
+    <record id="budget_cat_salaire_net" model="ersge.budget.category">
+        <field name="name">Salaire net (à titre indicatif)</field>
+        <field name="type">income</field>
+        <field name="include_in_totals">0</field>
+        <field name="sequence">20</field>
+    </record>
+    <record id="budget_cat_alloc_fam" model="ersge.budget.category">
+        <field name="name">Allocations familiales</field>
+        <field name="type">income</field>
+        <field name="include_in_totals">1</field>
+        <field name="sequence">30</field>
+    </record>
+    <record id="budget_cat_pension_recue" model="ersge.budget.category">
+        <field name="name">Pension alimentaire (reçue)</field>
+        <field name="type">income</field>
+        <field name="include_in_totals">1</field>
+        <field name="sequence">40</field>
+    </record>
+    <record id="budget_cat_autres_revenus" model="ersge.budget.category">
+        <field name="name">Autres revenus</field>
+        <field name="type">income</field>
+        <field name="include_in_totals">1</field>
+        <field name="sequence">50</field>
+    </record>
+    <record id="budget_cat_fortune" model="ersge.budget.category">
+        <field name="name">Fortune (immobilière, etc)</field>
+        <field name="type">income</field>
+        <field name="include_in_totals">1</field>
+        <field name="sequence">60</field>
+    </record>
+    <!-- CHARGES -->
+    <record id="budget_cat_logement" model="ersge.budget.category">
+        <field name="name">Logement</field>
+        <field name="type">expense</field>
+        <field name="include_in_totals">1</field>
+        <field name="sequence">100</field>
+    </record>
+    <record id="budget_cat_impots" model="ersge.budget.category">
+        <field name="name">Impôts</field>
+        <field name="type">expense</field>
+        <field name="include_in_totals">1</field>
+        <field name="sequence">110</field>
+    </record>
+    <record id="budget_cat_assurance_maladie" model="ersge.budget.category">
+        <field name="name">Assurance-maladie</field>
+        <field name="type">expense</field>
+        <field name="include_in_totals">1</field>
+        <field name="sequence">120</field>
+    </record>
+    <record id="budget_cat_frais_medicaux" model="ersge.budget.category">
+        <field name="name">Frais médicaux non remboursés (lunette, dentiste, etc)</field>
+        <field name="type">expense</field>
+        <field name="include_in_totals">1</field>
+        <field name="sequence">130</field>
+    </record>
+    <record id="budget_cat_autres_assurances" model="ersge.budget.category">
+        <field name="name">Autres assurances (ménage, voiture)</field>
+        <field name="type">expense</field>
+        <field name="include_in_totals">1</field>
+        <field name="sequence">140</field>
+    </record>
+    <record id="budget_cat_energie" model="ersge.budget.category">
+        <field name="name">Energie (gaz, électricité, etc)</field>
+        <field name="type">expense</field>
+        <field name="include_in_totals">1</field>
+        <field name="sequence">150</field>
+    </record>
+    <record id="budget_cat_telecom" model="ersge.budget.category">
+        <field name="name">Télécommunications (TV, internet, fixe, mobile, etc)</field>
+        <field name="type">expense</field>
+        <field name="include_in_totals">1</field>
+        <field name="sequence">160</field>
+    </record>
+    <record id="budget_cat_alimentation" model="ersge.budget.category">
+        <field name="name">Alimentation</field>
+        <field name="type">expense</field>
+        <field name="include_in_totals">1</field>
+        <field name="sequence">170</field>
+    </record>
+    <record id="budget_cat_pension_versee" model="ersge.budget.category">
+        <field name="name">Pension alimentaire (versée)</field>
+        <field name="type">expense</field>
+        <field name="include_in_totals">1</field>
+        <field name="sequence">180</field>
+    </record>
+    <record id="budget_cat_transports" model="ersge.budget.category">
+        <field name="name">Transports (bus, voiture, scooter)</field>
+        <field name="type">expense</field>
+        <field name="include_in_totals">1</field>
+        <field name="sequence">190</field>
+    </record>
+    <record id="budget_cat_vetements" model="ersge.budget.category">
+        <field name="name">Vêtements</field>
+        <field name="type">expense</field>
+        <field name="include_in_totals">1</field>
+        <field name="sequence">200</field>
+    </record>
+    <record id="budget_cat_ecolage" model="ersge.budget.category">
+        <field name="name">Ecolage (École Rudolf Steiner)</field>
+        <field name="type">expense</field>
+        <field name="include_in_totals">1</field>
+        <field name="sequence">210</field>
+    </record>
+    <record id="budget_cat_activites" model="ersge.budget.category">
+        <field name="name">Activités extrascolaires (musique, sport, etc)</field>
+        <field name="type">expense</field>
+        <field name="include_in_totals">1</field>
+        <field name="sequence">220</field>
+    </record>
+    <record id="budget_cat_cadeaux" model="ersge.budget.category">
+        <field name="name">Cadeaux</field>
+        <field name="type">expense</field>
+        <field name="include_in_totals">1</field>
+        <field name="sequence">230</field>
+    </record>
+    <record id="budget_cat_argent_poche" model="ersge.budget.category">
+        <field name="name">Argent de poche enfants</field>
+        <field name="type">expense</field>
+        <field name="include_in_totals">1</field>
+        <field name="sequence">240</field>
+    </record>
+    <record id="budget_cat_formations" model="ersge.budget.category">
+        <field name="name">Formations</field>
+        <field name="type">expense</field>
+        <field name="include_in_totals">1</field>
+        <field name="sequence">250</field>
+    </record>
+    <record id="budget_cat_loisirs" model="ersge.budget.category">
+        <field name="name">Loisirs – vacances</field>
+        <field name="type">expense</field>
+        <field name="include_in_totals">1</field>
+        <field name="sequence">260</field>
+    </record>
+    <record id="budget_cat_dettes" model="ersge.budget.category">
+        <field name="name">Dettes (carte crédit, autres)</field>
+        <field name="type">expense</field>
+        <field name="include_in_totals">1</field>
+        <field name="sequence">270</field>
+    </record>
+    <record id="budget_cat_autre1" model="ersge.budget.category">
+        <field name="name">Autre 1</field>
+        <field name="type">expense</field>
+        <field name="include_in_totals">1</field>
+        <field name="sequence">280</field>
+    </record>
+    <record id="budget_cat_autre2" model="ersge.budget.category">
+        <field name="name">Autre 2</field>
+        <field name="type">expense</field>
+        <field name="include_in_totals">1</field>
+        <field name="sequence">290</field>
+    </record>
+</odoo>

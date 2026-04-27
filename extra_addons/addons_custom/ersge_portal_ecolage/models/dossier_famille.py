@@ -415,21 +415,22 @@ class DossierFamille(models.Model):
     )
 
     # Budget
-    budget_line_ids = fields.One2many("ersge.budget.line", "dossier_id")
+    budget_line_ids = fields.One2many(
+        "ersge.budget.line", "dossier_id", string="Budget"
+    )
     budget_income_line_ids = fields.One2many(
         "ersge.budget.line",
         "dossier_id",
-        domain=[("type", "=", "income")],
         string="Revenus",
-        context={"default_type": "income"},
+        domain=[("type", "=", "income")],
     )
     budget_expense_line_ids = fields.One2many(
         "ersge.budget.line",
         "dossier_id",
-        domain=[("type", "=", "expense")],
         string="Charges",
-        context={"default_type": "expense"},
+        domain=[("type", "=", "expense")],
     )
+
     budget_attachment = fields.Binary()
     budget_attachment_filename = fields.Char()
 
@@ -513,36 +514,6 @@ class DossierFamille(models.Model):
     # Mentions légales
     legal_notice = fields.Html(readonly=True)
     technical_contact = fields.Html(readonly=True)
-
-    def _get_budget_categories(self):
-        return [
-            ("Salaire brut", "income", True),
-            ("Salaire net (à titre indicatif)", "income", False),
-            ("Allocations familiales", "income", True),
-            ("Pension alimentaire (reçue)", "income", True),
-            ("Autres revenus", "income", True),
-            ("Fortune (immobilière, etc)", "income", True),
-            ("Logement", "expense", True),
-            ("Impôts", "expense", True),
-            ("Assurance-maladie", "expense", True),
-            ("Frais médicaux non remboursés (lunette, dentiste, etc)", "expense", True),
-            ("Autres assurances (ménage, voiture)", "expense", True),
-            ("Energie (gaz, électricité, etc)", "expense", True),
-            ("Télécommunications (TV, internet, fixe, mobile, etc)", "expense", True),
-            ("Alimentation", "expense", True),
-            ("Pension alimentaire (versée)", "expense", True),
-            ("Transports (bus, voiture, scooter)", "expense", True),
-            ("Vêtements", "expense", True),
-            ("Ecolage (École Rudolf Steiner)", "expense", True),
-            ("Activités extrascolaires (musique, sport, etc)", "expense", True),
-            ("Cadeaux", "expense", True),
-            ("Argent de poche enfants", "expense", True),
-            ("Formations", "expense", True),
-            ("Loisirs – vacances", "expense", True),
-            ("Dettes (carte crédit, autres)", "expense", True),
-            ("Autre :", "expense", True),
-            ("Autre :", "expense", True),
-        ]
 
     # -------------------------------------------------------------------------
     # COMPUTE METHODS
@@ -676,32 +647,29 @@ class DossierFamille(models.Model):
         "budget_line_ids.montant_madame",
         "budget_line_ids.type",
         "budget_line_ids.include_in_totals",
-        "budget_income_line_ids.montant_monsieur",
-        "budget_income_line_ids.montant_madame",
-        "budget_expense_line_ids.montant_monsieur",
-        "budget_expense_line_ids.montant_madame",
     )
     def _compute_budget_totals(self):
         for rec in self:
+            lines = rec.budget_line_ids
             revenus_m = sum(
-                line.montant_monsieur
-                for line in rec.budget_line_ids
-                if line.type == "income" and line.include_in_totals
+                l.montant_monsieur
+                for l in lines
+                if l.type == "income" and l.include_in_totals
             )
             revenus_f = sum(
-                line.montant_madame
-                for line in rec.budget_line_ids
-                if line.type == "income" and line.include_in_totals
+                l.montant_madame
+                for l in lines
+                if l.type == "income" and l.include_in_totals
             )
             charges_m = sum(
-                line.montant_monsieur
-                for line in rec.budget_line_ids
-                if line.type == "expense" and line.include_in_totals
+                l.montant_monsieur
+                for l in lines
+                if l.type == "expense" and l.include_in_totals
             )
             charges_f = sum(
-                line.montant_madame
-                for line in rec.budget_line_ids
-                if line.type == "expense" and line.include_in_totals
+                l.montant_madame
+                for l in lines
+                if l.type == "expense" and l.include_in_totals
             )
             rec.total_revenus_monsieur = revenus_m
             rec.total_revenus_madame = revenus_f
@@ -1059,8 +1027,8 @@ class DossierFamille(models.Model):
                     record.parent2_id = partner2.id
 
             # Créer les lignes budget si l'onchange ne les a pas transmises
-            if record.budget_method == "online" and not record.budget_line_ids:
-                record._create_budget_lines()
+            if record.budget_method == "online":
+                record._init_budget_lines()
 
         return records
 
@@ -1094,51 +1062,40 @@ class DossierFamille(models.Model):
             record.reopened_by = self.env.user
             record.reopened_date = fields.Datetime.now()
 
-    def _create_budget_lines(self):
-        categories = self._get_budget_categories()
-        _logger.warning(
-            f"=== _create_budget_lines appelé, {len(categories)} catégories ==="
+    # -------------------------------------------------------------------------
+    # BUDGET
+    # -------------------------------------------------------------------------
+
+    def _init_budget_lines(self):
+
+        if self.budget_line_ids:
+            return
+        categories = self.env["ersge.budget.category"].search(
+            [("active", "=", True)], order="sequence, id"
         )
-        income_vals = [(5, 0, 0)]
-        expense_vals = [(5, 0, 0)]
-        for cat, typ, include in categories:
-            _logger.warning(f"  → catégorie: '{cat}'")
-            cmd = (
+        if not categories:
+            _logger.warning("Aucune catégorie de budget active trouvée.")
+            return
+        vals = [
+            (
                 0,
                 0,
                 {
-                    "category": cat,
-                    "type": typ,
-                    "include_in_totals": include,
+                    "category_id": cat.id,
                     "montant_monsieur": 0.0,
                     "montant_madame": 0.0,
                 },
             )
-            if typ == "income":
-                income_vals.append(cmd)
-            else:
-                expense_vals.append(cmd)
-        self.write(
-            {
-                "budget_income_line_ids": income_vals,
-                "budget_expense_line_ids": expense_vals,
-            }
-        )
+            for cat in categories
+        ]
+        self.write({"budget_line_ids": vals})
 
-    def _ensure_budget_categories(self):
-        categories = self._get_budget_categories()
-        income_cats = [c[0] for c in categories if c[1] == "income"]
-        expense_cats = [c[0] for c in categories if c[1] == "expense"]
-
-        income_lines = self.budget_line_ids.filtered(lambda l: l.type == "income")
-        for i, line in enumerate(income_lines):
-            if not line.category and i < len(income_cats):
-                line.category = income_cats[i]
-
-        expense_lines = self.budget_line_ids.filtered(lambda l: l.type == "expense")
-        for i, line in enumerate(expense_lines):
-            if not line.category and i < len(expense_cats):
-                line.category = expense_cats[i]
+    def write(self, vals):
+        result = super().write(vals)
+        if vals.get("budget_method") == "online":
+            for record in self:
+                record._init_budget_lines()
+        return result
 
     # -------------------------------------------------------------------------
     # ONCHANGE
@@ -1151,62 +1108,23 @@ class DossierFamille(models.Model):
 
     @api.onchange("budget_method")
     def _onchange_budget_method(self):
-        _logger.warning(
-            f"=== _onchange_budget_method appelé: budget_method={self.budget_method}, nb_lignes={len(self.budget_line_ids)} ==="
+        if self.budget_method != "online" or self.budget_line_ids:
+            return
+        categories = self.env["ersge.budget.category"].search(
+            [("active", "=", True)], order="sequence, id"
         )
-        if self.budget_method == "online" and not self.budget_line_ids:
-            _logger.warning("=== Création des lignes budget ===")
-            categories = self._get_budget_categories()
-            income_lines = [(5, 0, 0)]
-            expense_lines = [(5, 0, 0)]
-            for cat, typ, include in categories:
-                cmd = (
-                    0,
-                    0,
-                    {
-                        "category": cat,
-                        "type": typ,
-                        "include_in_totals": include,
-                        "montant_monsieur": 0.0,
-                        "montant_madame": 0.0,
-                    },
-                )
-                if typ == "income":
-                    income_lines.append(cmd)
-                else:
-                    expense_lines.append(cmd)
-            self.budget_income_line_ids = income_lines
-            self.budget_expense_line_ids = expense_lines
-
-    @api.onchange("budget_income_line_ids", "budget_expense_line_ids")
-    def _onchange_budget_lines_totals(self):
-        revenus_m = sum(
-            line.montant_monsieur
-            for line in self.budget_income_line_ids
-            if line.include_in_totals
-        )
-        revenus_f = sum(
-            line.montant_madame
-            for line in self.budget_income_line_ids
-            if line.include_in_totals
-        )
-        charges_m = sum(
-            line.montant_monsieur
-            for line in self.budget_expense_line_ids
-            if line.include_in_totals
-        )
-        charges_f = sum(
-            line.montant_madame
-            for line in self.budget_expense_line_ids
-            if line.include_in_totals
-        )
-        self.total_revenus_monsieur = revenus_m
-        self.total_revenus_madame = revenus_f
-        self.total_charges_monsieur = charges_m
-        self.total_charges_madame = charges_f
-        self.total_revenus = revenus_m + revenus_f
-        self.total_charges = charges_m + charges_f
-        self.solde = self.total_revenus - self.total_charges
+        self.budget_line_ids = [
+            (
+                0,
+                0,
+                {
+                    "category_id": cat.id,
+                    "montant_monsieur": 0.0,
+                    "montant_madame": 0.0,
+                },
+            )
+            for cat in categories
+        ]
 
     @api.onchange("after_school_request")
     def _onchange_after_school_request(self):

@@ -7,5 +7,6 @@ from . import billing_line
 from . import after_school_line
 from . import dossier_famille
 from . import forfait
+from . import budget_category
 from . import budget_line
 from . import dossier_student_line

@@ -15,6 +15,7 @@
     ],
     "data": [
         "security/ir.model.access.csv",
+        "data/budget_categories.xml",
         "data/sequence_data.xml",
         "views/forfait_views.xml",
         "views/family_views.xml",
