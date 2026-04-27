@@ -462,44 +462,30 @@ class DossierFamille(models.Model):
     # Totaux budget (par type et par colonne)
     total_revenus_monsieur = fields.Monetary(
         string="Revenus Monsieur",
-        compute="_compute_budget_totals",
-        store=True,
         currency_field="currency_id",
     )
     total_revenus_madame = fields.Monetary(
         string="Revenus Madame",
-        compute="_compute_budget_totals",
-        store=True,
         currency_field="currency_id",
     )
     total_charges_monsieur = fields.Monetary(
         string="Charges Monsieur",
-        compute="_compute_budget_totals",
-        store=True,
         currency_field="currency_id",
     )
     total_charges_madame = fields.Monetary(
         string="Charges Madame",
-        compute="_compute_budget_totals",
-        store=True,
         currency_field="currency_id",
     )
     total_revenus = fields.Monetary(
         string="Total revenus",
-        compute="_compute_budget_totals",
-        store=True,
         currency_field="currency_id",
     )
     total_charges = fields.Monetary(
         string="Total charges",
-        compute="_compute_budget_totals",
-        store=True,
         currency_field="currency_id",
     )
     solde = fields.Monetary(
         string="Solde",
-        compute="_compute_budget_totals",
-        store=True,
         currency_field="currency_id",
     )
 
@@ -651,43 +637,6 @@ class DossierFamille(models.Model):
                 1 - requested / 100.0
             )
 
-    @api.depends(
-        "budget_line_ids.montant_monsieur",
-        "budget_line_ids.montant_madame",
-        "budget_line_ids.type",
-        "budget_line_ids.include_in_totals",
-    )
-    def _compute_budget_totals(self):
-        for rec in self:
-            lines = rec.budget_line_ids
-            revenus_m = sum(
-                l.montant_monsieur
-                for l in lines
-                if l.type == "income" and l.include_in_totals
-            )
-            revenus_f = sum(
-                l.montant_madame
-                for l in lines
-                if l.type == "income" and l.include_in_totals
-            )
-            charges_m = sum(
-                l.montant_monsieur
-                for l in lines
-                if l.type == "expense" and l.include_in_totals
-            )
-            charges_f = sum(
-                l.montant_madame
-                for l in lines
-                if l.type == "expense" and l.include_in_totals
-            )
-            rec.total_revenus_monsieur = revenus_m
-            rec.total_revenus_madame = revenus_f
-            rec.total_charges_monsieur = charges_m
-            rec.total_charges_madame = charges_f
-            rec.total_revenus = revenus_m + revenus_f
-            rec.total_charges = charges_m + charges_f
-            rec.solde = rec.total_revenus - rec.total_charges
-
     @api.depends("student_line_ids", "seniority_years")
     def _compute_max_discounts(self):
         children_map = {1: 0.0, 2: 10.0, 3: 20.0, 4: 30.0}
@@ -818,9 +767,7 @@ class DossierFamille(models.Model):
                         0,
                         0,
                         {
-                            "category": line.category,
-                            "type": line.type,
-                            "include_in_totals": line.include_in_totals,
+                            "category_id": line.category_id.id,
                             "montant_monsieur": line.montant_monsieur,
                             "montant_madame": line.montant_madame,
                         },
@@ -1040,6 +987,33 @@ class DossierFamille(models.Model):
                 record._init_budget_lines()
 
         return records
+
+    @api.onchange("budget_income_line_ids", "budget_expense_line_ids")
+    def _onchange_budget_lines(self):
+        lines = self.budget_line_ids
+        self.total_revenus_monsieur = sum(
+            l.montant_monsieur
+            for l in lines
+            if l.type == "income" and l.include_in_totals
+        )
+        self.total_revenus_madame = sum(
+            l.montant_madame
+            for l in lines
+            if l.type == "income" and l.include_in_totals
+        )
+        self.total_charges_monsieur = sum(
+            l.montant_monsieur
+            for l in lines
+            if l.type == "expense" and l.include_in_totals
+        )
+        self.total_charges_madame = sum(
+            l.montant_madame
+            for l in lines
+            if l.type == "expense" and l.include_in_totals
+        )
+        self.total_revenus = self.total_revenus_monsieur + self.total_revenus_madame
+        self.total_charges = self.total_charges_monsieur + self.total_charges_madame
+        self.solde = self.total_revenus - self.total_charges
 
     # -------------------------------------------------------------------------
     # ACTIONS WORKFLOW
