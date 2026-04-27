@@ -463,35 +463,44 @@ class DossierFamille(models.Model):
     total_revenus_monsieur = fields.Monetary(
         string="Revenus Monsieur",
         compute="_compute_budget_totals",
+        store=True,
         currency_field="currency_id",
     )
     total_revenus_madame = fields.Monetary(
         string="Revenus Madame",
         compute="_compute_budget_totals",
+        store=True,
         currency_field="currency_id",
     )
     total_charges_monsieur = fields.Monetary(
         string="Charges Monsieur",
         compute="_compute_budget_totals",
+        store=True,
         currency_field="currency_id",
     )
     total_charges_madame = fields.Monetary(
         string="Charges Madame",
         compute="_compute_budget_totals",
+        store=True,
         currency_field="currency_id",
     )
     total_revenus = fields.Monetary(
         string="Total revenus",
         compute="_compute_budget_totals",
+        store=True,
         currency_field="currency_id",
     )
     total_charges = fields.Monetary(
         string="Total charges",
         compute="_compute_budget_totals",
+        store=True,
         currency_field="currency_id",
     )
     solde = fields.Monetary(
-        string="Solde", compute="_compute_budget_totals", currency_field="currency_id"
+        string="Solde",
+        compute="_compute_budget_totals",
+        store=True,
+        currency_field="currency_id",
     )
 
     # === SIGNATURE & ACCEPTATION ===
