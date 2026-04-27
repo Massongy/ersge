@@ -134,192 +134,170 @@
                         <field name="base_monthly_fee" readonly="1"/>
                     </group>
 
-                    <group string="Réductions">
-
-                        <strong>Demander une réduction en raison du nombre d’enfants inscrit à l'école et/ou une réduction d'ancienneté</strong>
+                    <div>
+                        <h4>Réductions</h4>
+                        <div>
+                            <strong>Demander une réduction en raison du nombre d'enfants inscrit à l'école et/ou une réduction d'ancienneté</strong>
+                        </div>
                         <field name="reduction_requested" widget="boolean_button" options='{"terminology": "boolean"}'/>
 
-                        <group invisible="not reduction_requested">
-                            <group string="Demande de réduction en fonction du nombre d'enfants inscrits">
-                                <div>
-                                    <strong>Nombre d'enfants inscrits :</strong>
-                                    <field name="actual_children_count" class="oe_inline"/>
-                                </div>
+                        <div invisible="not reduction_requested">
 
-                                <div>
-                                    <div>
-                                        <strong>Réduction maximale possible :</strong>
-                                        <field name="max_children_discount" readonly="1"/>
- %
-                                    </div>
-                                    <label for="apply_children_discount" string="Vous sollicitez une réduction en raison du nombre d’enfants de votre famille inscrits dans l’école."/>
-                                    <field name="apply_children_discount" nolabel="1"/>
-                                    <div invisible="not apply_children_discount">
-                                        <label for="monthly_fee_after_children"/>
-                                        <field name="monthly_fee_after_children" readonly="1" class="oe_inline"/>
- CHF
-                                    </div>
-                                </div>
-                            </group>
+                            <h4>Demande de réduction en fonction du nombre d'enfants inscrits</h4>
+                            <div>
+                                <strong>Nombre d'enfants inscrits :</strong>
+                                <field name="actual_children_count" class="oe_inline" readonly="1"/>
+                            </div>
+                            <div>
+                                <strong>Réduction maximale possible :</strong>
+                                <field name="max_children_discount" readonly="1" class="oe_inline"/>
+            %
+                            </div>
+                            <div>
+                                <field name="apply_children_discount"/>
+                                <label for="apply_children_discount" string="Vous sollicitez une réduction en raison du nombre d'enfants de votre famille inscrits dans l'école."/>
+                            </div>
+                            <div invisible="not apply_children_discount">
+                                <field name="monthly_fee_after_children" readonly="1" class="oe_inline"/>
+            CHF
+                            </div>
 
-                            <group string="Demande de réduction en fonction de l'ancienneté">
-                                <field name="seniority_years" widget="radio" options="{'horizontal': true}"/>
-                                <div>
-                                    <strong>Réduction maximale possible :</strong>
-                                    <field name="max_seniority_discount" readonly="1"/>
- %
-                                </div>
-                                <label for="apply_seniority_discount" string="Vous sollicitez une réduction d’ancienneté relative au temps pendant lequel votre famille a contribué à l’école."/>
-                                <field name="apply_seniority_discount" nolabel="1"/>
-                                <div invisible="not apply_seniority_discount">
-                                    <label for="monthly_fee_after_seniority"/>
-                                    <field name="monthly_fee_after_seniority" readonly="1" class="oe_inline"/>
- CHF
-                                </div>
-                            </group>
+                            <h4>Demande de réduction en fonction de l'ancienneté</h4>
+                            <field name="seniority_years" widget="radio"/>
+                            <div>
+                                <strong>Réduction maximale possible :</strong>
+                                <field name="max_seniority_discount" readonly="1" class="oe_inline"/>
+            %
+                            </div>
+                            <div>
+                                <field name="apply_seniority_discount"/>
+                                <label for="apply_seniority_discount" string="Vous sollicitez une réduction d'ancienneté relative au temps pendant lequel votre famille a contribué à l'école."/>
+                            </div>
+                            <div invisible="not apply_seniority_discount">
+                                <field name="monthly_fee_after_seniority" readonly="1" class="oe_inline"/>
+            CHF
+                            </div>
 
-                            <group string="Ajustez vos réductions">
-                                <div>
-                                    <strong>Sollicitez, en conscience, la réduction juste en fonction de votre situation.</strong>
-                                </div>
-                                <div>
-                                    <strong>Vous pourriez solliciter la réduction maximale suivante (ancienneté et/ou nombres d'enfants dans l'école) :</strong>
-                                    <!-- Affichage du pourcentage max, sans label -->
-                                    <field name="max_total_discount" readonly="1"/>
- %
-                                </div>
-                                <div>
-                                    <!-- Label déplacé ici, devant le montant -->
-                                    <label for="monthly_fee_at_max" string="Total mensuel après rabais"/>
-                                    <field name="monthly_fee_at_max" readonly="1" class="oe_inline"/>
- CHF
-                                </div>
-                                <!-- Le reste (requested_discount, etc.) est inchangé -->
+                            <h4>Ajustez vos réductions</h4>
+                            <div>
+                                <strong>Sollicitez, en conscience, la réduction juste en fonction de votre situation.</strong>
+                            </div>
+                            <div>
+                                <strong>Vous pourriez solliciter la réduction maximale suivante (ancienneté et/ou nombres d'enfants dans l'école) :</strong>
+                                <field name="max_total_discount" readonly="1" class="oe_inline"/>
+            %
+                            </div>
+                            <div>
+                                <strong>Total mensuel après rabais :</strong>
+                                <field name="monthly_fee_at_max" readonly="1" class="oe_inline"/>
+            CHF
+                            </div>
+                            <div>
                                 <field name="requested_discount" string="Compte tenu de votre situation personnelle, vous sollicitez une réduction moindre, indiquez le pourcentage" required="1"/>
-                                <div>
-                                    <label for="monthly_fee_after_requested"/>
-                                    <field name="monthly_fee_after_requested" readonly="1" class="oe_inline"/>
- CHF
-                                </div>
-                                <div class="alert alert-warning" role="alert" invisible="requested_discount &lt;= max_total_discount">
-        Le pourcentage sollicité ne doit pas dépasser la réduction maximale !
-                                </div>
-                            </group>
-                        </group>
-                    </group>
+                            </div>
+                            <div>
+                                <field name="monthly_fee_after_requested" readonly="1" class="oe_inline"/>
+            CHF
+                            </div>
+                            <div class="alert alert-warning" invisible="requested_discount &lt;= max_total_discount">
+            Le pourcentage sollicité ne doit pas dépasser la réduction maximale !
+                            </div>
+                        </div>
+                    </div>
 
                     <!-- Demande de réduction complémentaire -->
                     <group string="Réduction complémentaire">
                         <label for="additional_reduction_request" string="Je sollicite une demande de réduction complémentaire."/>
                         <field name="additional_reduction_request" widget="boolean_button" options='{"terminology": "boolean"}'/>
-
-                        <group invisible="not additional_reduction_request">
+                        <div invisible="not additional_reduction_request">
                             <div class="alert alert-info">
                                 <i class="fa fa-info-circle"></i>
-    Merci de prendre impérativement connaissance de ce document :
+        Merci de prendre impérativement connaissance de ce document :
                                 <a href="/ersge_portal_ecolage/static/src/Procedure-demande-reduction-ecolage-2025-26.pdf" target="_blank">
-        Demande de réduction d'écolage
+            Demande de réduction d'écolage
                                 </a>
                             </div>
                             <div>
-                En cas d’impossibilité d'envoi de documents numériques, vous pouvez déposer une version papier
-                de ces documents au secrétariat.
+        En cas d'impossibilité d'envoi de documents numériques, vous pouvez déposer une version papier
+        de ces documents au secrétariat.
                             </div>
 
-                            <group string="Situation financière">
-
-
-                                <!-- Champ saisie utilisateur -->
+                            <h4>Situation financière</h4>
+                            <group>
                                 <field name="gross_annual_income" string="Indiquer votre revenu brut annuel familial (CHF)"/>
-
-                                <!-- Champ calculé automatiquement (lecture seule) -->
                                 <field name="additional_reduction_income_percentage" string="Pourcentage que représente le tarif sur votre revenu annuel familial brut" widget="percentage" readonly="1"/>
                             </group>
 
-                            <group string="Justificatifs">
+                            <h4>Justificatifs</h4>
+                            <div>
                                 <label for="tax_notice_attachment" string="Dernier avis de taxation"/>
-                                <field name="tax_notice_attachment" filename="tax_notice_filename" attachment="tax_notice_attachment" help="Dernier avis de taxation (PDF, max 4MB)" nolabel="1"/>
-
-                                <!-- Pour payslip_ids -->
+                                <field name="tax_notice_attachment" filename="tax_notice_filename" help="Dernier avis de taxation (PDF, max 4MB)" nolabel="1"/>
+                            </div>
+                            <div>
                                 <label for="payslip_ids" string="Trois dernières fiches de salaire"/>
                                 <field name="payslip_ids" widget="many2many_binary" help="Vous pouvez télécharger plusieurs fichiers (max 8MB)" nolabel="1"/>
-                            </group>
-                            <group string="Lettre explicative" invisible="not additional_reduction_request">
-                                <!-- Nouveau : choix du mode -->
-                                <field name="explanatory_letter_mode" widget="radio" options="{'horizontal': true}"/>
+                            </div>
 
-                                <!-- Mode : téléchargement -->
+                            <h4>Lettre explicative</h4>
+                            <div>
+                                <field name="explanatory_letter_mode" widget="radio"/>
                                 <div invisible="explanatory_letter_mode != 'upload'">
                                     <field name="explanatory_letter_attachment" filename="explanatory_letter_filename" help="PDF, max 4MB"/>
-                                    <field name="explanatory_letter_status" invisible="1" required="explanatory_letter_attachment != False"/>
                                 </div>
-
-                                <!-- Mode : écriture directe -->
                                 <div invisible="explanatory_letter_mode != 'write'">
                                     <div class="alert alert-info">
                                         <i class="fa fa-info-circle"/>
- 
-            Veuillez décrire votre situation familiale ci-dessous :
+                Veuillez décrire votre situation familiale ci-dessous :
                                     </div>
                                     <field name="explanatory_letter_text" placeholder="Décrivez votre situation familiale, les difficultés, vos motivations..." nolabel="1"/>
-                                    <field name="explanatory_letter_status" invisible="1"/>
                                 </div>
-                            </group>
-                            <!-- Budget familial : option téléchargement ou saisie en ligne -->
-                            <group string="Budget familial">
-                                <field name="budget_method" widget="radio" options="{'horizontal': true}"/>
+                            </div>
+
+                            <h4>Budget familial</h4>
+                            <div>
+                                <field name="budget_method" widget="radio"/>
+
                                 <div invisible="budget_method != 'upload'">
                                     <field name="budget_attachment" filename="budget_attachment_filename" help="Téléchargez votre budget au format PDF (max 4MB)"/>
                                 </div>
 
                                 <div invisible="budget_method != 'online'">
-                                    <div style="overflow-x: auto;">
+                                    <h4>Entrées</h4>
+                                    <field name="budget_income_line_ids" nolabel="1">
+                                        <list editable="bottom" create="false" delete="false">
+                                            <field name="category_id" string="Catégorie" readonly="1" optional="show"/>
+                                            <field name="montant_madame" string="Madame" widget="monetary" aggregate="sum"/>
+                                            <field name="montant_monsieur" string="Monsieur" widget="monetary" aggregate="sum"/>
+                                        </list>
+                                    </field>
 
-                                        <h4>Entrées</h4>
-                                        <field name="budget_income_line_ids" nolabel="1">
-                                            <list editable="bottom" create="false" delete="false">
-                                                <field name="category_id" string="Catégorie" readonly="1"/>
-                                                <field name="montant_madame" string="Madame" widget="monetary" aggregate="sum"/>
-                                                <field name="montant_monsieur" string="Monsieur" widget="monetary" aggregate="sum"/>
-                                            </list>
-                                        </field>
+                                    <h4>Sorties</h4>
+                                    <field name="budget_expense_line_ids" nolabel="1">
+                                        <list editable="bottom" create="false" delete="false">
+                                            <field name="category_id" string="Catégorie" readonly="1" optional="show"/>
+                                            <field name="montant_madame" string="Madame" widget="monetary" aggregate="sum"/>
+                                            <field name="montant_monsieur" string="Monsieur" widget="monetary" aggregate="sum"/>
+                                        </list>
+                                    </field>
 
-                                        <h4>Sorties</h4>
-                                        <field name="budget_expense_line_ids" nolabel="1">
-                                            <list editable="bottom" create="false" delete="false">
-                                                <field name="category_id" string="Catégorie" readonly="1"/>
-                                                <field name="montant_madame" string="Madame" widget="monetary" aggregate="sum"/>
-                                                <field name="montant_monsieur" string="Monsieur" widget="monetary" aggregate="sum"/>
-                                            </list>
-                                        </field>
-
-                                        <group string="Totaux du budget">
-                                            <group string="Revenus">
-                                                <field name="total_revenus_madame" widget="monetary"/>
-                                                <field name="total_revenus_monsieur" widget="monetary"/>
-                                                <field name="total_revenus" widget="monetary"/>
-                                            </group>
-                                            <group string="Charges">
-                                                <field name="total_charges_madame" widget="monetary"/>
-                                                <field name="total_charges_monsieur" widget="monetary"/>
-                                                <field name="total_charges" widget="monetary"/>
-                                            </group>
-                                            <field name="solde" widget="monetary" decoration-danger="solde &lt; 0"/>
-                                        </group>
-                                    </div>
+                                    <group string="Totaux">
+                                        <field name="total_revenus_madame" widget="monetary"/>
+                                        <field name="total_revenus_monsieur" widget="monetary"/>
+                                        <field name="total_revenus" widget="monetary"/>
+                                        <field name="total_charges_madame" widget="monetary"/>
+                                        <field name="total_charges_monsieur" widget="monetary"/>
+                                        <field name="total_charges" widget="monetary"/>
+                                        <field name="solde" widget="monetary" decoration-danger="solde &lt; 0"/>
+                                    </group>
                                 </div>
+                            </div>
 
-                                <group string="Proposition">
-                                    <label for="proposed_monthly_amount" string="Je propose à la CEF un montant mensuel"/>
-                                    <field name="proposed_monthly_amount" string="Merci d'indiquer l'écolage mensuel que vous proposez"/>
-                                    <div>
-                                        <strong>Total proposé :</strong>
-                                        <field name="proposed_monthly_amount" readonly="1" class="oe_inline"/>
- CHF
-                                    </div>
-                                </group>
+                            <h4>Proposition</h4>
+                            <group>
+                                <field name="proposed_monthly_amount" string="Je propose à la CEF un montant mensuel"/>
                             </group>
-                        </group>
+                        </div>
+
                     </group>
                 </page>
                 <page string="Parascolaire">
