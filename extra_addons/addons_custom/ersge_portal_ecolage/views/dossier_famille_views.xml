@@ -365,32 +365,15 @@
 
                 </page>
                 <page string="Parascolaire">
-                    <group string="Demande parascolaire">
-                        <field name="after_school_request" widget="radio"/>
-                        <field name="after_school_line_ids" invisible="after_school_request != 'yes'">
+                    <group string="Inscriptions par élève">
+                        <field name="after_school_line_ids" nolabel="1">
                             <list editable="bottom">
-                                <field name="selected" widget="boolean_toggle"/>
-                                <field name="student_id" domain="[('family_id', '=', parent.family_id)]" options="{'no_create': True}" required="1" readonly="1" />
-                                <field name="accueil_type" required="1" widget="selection" invisible="not selected"/>
-                                <field name="lundi_midi" invisible="accueil_type == False"/>
-                                <field name="lundi_soir" invisible="accueil_type == False"/>
-                                <field name="lundi_cirque" invisible="accueil_type != 'classe'"/>
-                                <field name="mardi_midi"/>
-                                <field name="mardi_soir"/>
-                                <field name="mardi_cirque" invisible="accueil_type != 'classe'"/>
-                                <field name="mercredi_midi"/>
-                                <field name="mercredi_soir"/>
-                                <field name="mercredi_cirque" invisible="accueil_type != 'classe'"/>
-                                <field name="jeudi_midi"/>
-                                <field name="jeudi_soir"/>
-                                <field name="jeudi_cirque" invisible="accueil_type != 'classe'"/>
-                                <field name="vendredi_midi"/>
-                                <field name="vendredi_soir"/>
-                                <field name="vendredi_cirque" invisible="accueil_type != 'classe'"/>
-                                <field name="montant_mensuel" aggregate="sum" readonly="1"/>
+                                <field name="student_id" readonly="1"/>
+                                <field name="accueil_type"/>
+                                <field name="prestation_ids" widget="many2many_checkboxes"/>
+                                <field name="montant_mensuel" sum="Total"/>
                             </list>
                         </field>
-                        <field name="total_monthly_after_school" readonly="1" invisible="after_school_request == 'no'" class="oe_inline"/>
                     </group>
                 </page>
 

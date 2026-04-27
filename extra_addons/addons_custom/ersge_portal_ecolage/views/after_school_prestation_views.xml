@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Vue liste (arborescence) -->
+    <record id="view_after_school_prestation_list" model="ir.ui.view">
+        <field name="name">after.school.prestation.list</field>
+        <field name="model">ersge.after.school.prestation</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="name"/>
+                <field name="jour"/>
+                <field name="creneau"/>
+                <field name="prix_jardin" widget="monetary"/>
+                <field name="prix_classe" widget="monetary"/>
+                <field name="active" widget="boolean_toggle"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Vue formulaire -->
+    <record id="view_after_school_prestation_form" model="ir.ui.view">
+        <field name="name">after.school.prestation.form</field>
+        <field name="model">ersge.after.school.prestation</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <field name="name"/>
+                        <field name="jour"/>
+                        <field name="creneau"/>
+                        <field name="prix_jardin" widget="monetary"/>
+                        <field name="prix_classe" widget="monetary"/>
+                        <field name="active"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Action fenêtre -->
+    <record id="action_after_school_prestation" model="ir.actions.act_window">
+        <field name="name">Prestations parascolaires</field>
+        <field name="res_model">ersge.after.school.prestation</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p>Définissez les prestations (jour, créneau) et leurs prix selon le type d'accueil.</p>
+        </field>
+    </record>
+
+    <!-- Menu (à ajuster selon votre racine) -->
+    <menuitem id="menu_after_school_prestation" name="Prestations parascolaires" parent="menu_ersge_root" action="action_after_school_prestation" sequence="10"/>
+</odoo>

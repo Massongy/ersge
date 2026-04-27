@@ -27,3 +27,6 @@ access_ersge_dossier_student_line_user,access.ersge.dossier.student.line.user,mo
 access_ersge_dossier_student_line_manager,access.ersge.dossier.student.line.manager,model_ersge_dossier_student_line,base.group_system,1,1,1,1
 access_ersge_student_user,ersge.student.user,model_ersge_student,base.group_user,1,1,1,1
 access_ersge_budget_category,ersge.budget.category,model_ersge_budget_category,base.group_user,1,0,0,0
+access_ersge_after_school_prestation_user,access.ersge.after.school.prestation.user,model_ersge_after_school_prestation,base.group_user,1,1,1,1
+access_ersge_after_school_prestation_manager,access.ersge.after.school.prestation.manager,model_ersge_after_school_prestation,base.group_system,1,1,1,1
+access_ersge_after_school_prestation_portal,access.ersge.after.school.prestation.portal,model_ersge_after_school_prestation,base.group_portal,1,0,0,0
