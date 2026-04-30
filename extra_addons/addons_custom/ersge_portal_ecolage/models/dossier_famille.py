@@ -431,25 +431,47 @@ class DossierFamille(models.Model):
 
     # Totaux budget (par type)
     total_revenus_monsieur = fields.Monetary(
-        string="Revenus Monsieur", currency_field="currency_id"
+        string="Revenus Monsieur",
+        currency_field="currency_id",
+        compute="_compute_budget_totals",
+        store=True,  # stocké pour la recherche et l'affichage rapide
     )
     total_revenus_madame = fields.Monetary(
-        string="Revenus Madame", currency_field="currency_id"
+        string="Revenus Madame",
+        currency_field="currency_id",
+        compute="_compute_budget_totals",
+        store=True,
     )
     total_charges_monsieur = fields.Monetary(
-        string="Charges Monsieur", currency_field="currency_id"
+        string="Charges Monsieur",
+        currency_field="currency_id",
+        compute="_compute_budget_totals",
+        store=True,
     )
     total_charges_madame = fields.Monetary(
-        string="Charges Madame", currency_field="currency_id"
+        string="Charges Madame",
+        currency_field="currency_id",
+        compute="_compute_budget_totals",
+        store=True,
     )
     total_revenus = fields.Monetary(
-        string="Total revenus", currency_field="currency_id"
+        string="Total revenus",
+        currency_field="currency_id",
+        compute="_compute_budget_totals",
+        store=True,
     )
     total_charges = fields.Monetary(
-        string="Total charges", currency_field="currency_id"
+        string="Total charges",
+        currency_field="currency_id",
+        compute="_compute_budget_totals",
+        store=True,
     )
-    solde = fields.Monetary(string="Solde", currency_field="currency_id")
-
+    solde = fields.Monetary(
+        string="Solde",
+        currency_field="currency_id",
+        compute="_compute_budget_totals",
+        store=True,
+    )
     # Signature & acceptation
     contract_accepted = fields.Boolean()
     convention_accepted = fields.Boolean()
@@ -473,6 +495,35 @@ class DossierFamille(models.Model):
     # -------------------------------------------------------------------------
     # Compute methods
     # -------------------------------------------------------------------------
+    @api.depends(
+        "budget_line_ids.montant_madame",
+        "budget_line_ids.montant_monsieur",
+        "budget_line_ids.type",
+        "budget_line_ids.include_in_totals",
+    )
+    def _compute_budget_totals(self):
+        for record in self:
+            revenus_madame = revenus_monsieur = 0.0
+            charges_madame = charges_monsieur = 0.0
+            for line in record.budget_line_ids:
+                if not line.include_in_totals:
+                    continue
+                if line.type == "income":
+                    revenus_madame += line.montant_madame
+                    revenus_monsieur += line.montant_monsieur
+                elif line.type == "expense":
+                    charges_madame += line.montant_madame
+                    charges_monsieur += line.montant_monsieur
+            record.total_revenus_madame = revenus_madame
+            record.total_revenus_monsieur = revenus_monsieur
+            record.total_revenus = revenus_madame + revenus_monsieur
+            record.total_charges_madame = charges_madame
+            record.total_charges_monsieur = charges_monsieur
+            record.total_charges = charges_madame + charges_monsieur
+            record.solde = (revenus_madame + revenus_monsieur) - (
+                charges_madame + charges_monsieur
+            )
+
     @api.depends("family_id", "annee_scolaire")
     def _compute_display_name(self):
         for record in self:
@@ -662,7 +713,6 @@ class DossierFamille(models.Model):
         if not defaults.get("budget_method"):
             defaults["budget_method"] = "online"
             _logger.warning("default_get: budget_method forcé à online")
-
         family_id = (
             self._context.get("default_family_id")
             or self._context.get("parent_id")
@@ -800,6 +850,9 @@ class DossierFamille(models.Model):
 
         if budget_lines:
             defaults["budget_line_ids"] = budget_lines
+            _logger.warning(
+                f"default_get retourne {len(budget_lines)} lignes budget, type={type(budget_lines[0])}"
+            )
 
         defaults["prefilled_from_previous"] = bool(dernier_dossier)
         return defaults
@@ -829,57 +882,6 @@ class DossierFamille(models.Model):
     # -------------------------------------------------------------------------
     # Onchange methods
     # -------------------------------------------------------------------------
-    @api.onchange("budget_method")
-    def _onchange_budget_method(self):
-        _logger.warning(f"=== onchange: budget_method = {self.budget_method} ===")
-        if self.budget_method != "online":
-            return
-        categories = self.env["ersge.budget.category"].search(
-            [("active", "=", True)], order="sequence, id"
-        )
-        if not categories:
-            return
-        existing_cat_ids = set(self.budget_line_ids.mapped("category_id").ids)
-        for cat in categories:
-            if cat.id not in existing_cat_ids:
-                self.budget_line_ids = [
-                    (
-                        0,
-                        0,
-                        {
-                            "category_id": cat.id,
-                            "montant_monsieur": 0.0,
-                            "montant_madame": 0.0,
-                        },
-                    )
-                ]
-
-    @api.onchange("budget_income_line_ids", "budget_expense_line_ids")
-    def _onchange_budget_lines(self):
-        lines = self.budget_line_ids
-        self.total_revenus_monsieur = sum(
-            l.montant_monsieur
-            for l in lines
-            if l.type == "income" and l.include_in_totals
-        )
-        self.total_revenus_madame = sum(
-            l.montant_madame
-            for l in lines
-            if l.type == "income" and l.include_in_totals
-        )
-        self.total_charges_monsieur = sum(
-            l.montant_monsieur
-            for l in lines
-            if l.type == "expense" and l.include_in_totals
-        )
-        self.total_charges_madame = sum(
-            l.montant_madame
-            for l in lines
-            if l.type == "expense" and l.include_in_totals
-        )
-        self.total_revenus = self.total_revenus_monsieur + self.total_revenus_madame
-        self.total_charges = self.total_charges_monsieur + self.total_charges_madame
-        self.solde = self.total_revenus - self.total_charges
 
     @api.onchange("employer_assistance")
     def _onchange_employer_assistance(self):

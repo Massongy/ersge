@@ -1,4 +1,7 @@
+import logging
 from odoo import models, fields, api
+
+_logger = logging.getLogger(__name__)
 
 
 class ErsgebBudgetLine(models.Model):
@@ -9,7 +12,7 @@ class ErsgebBudgetLine(models.Model):
     dossier_id = fields.Many2one(
         "ersge.dossier.famille",
         string="Dossier",
-        required=True,
+        required=False,
         ondelete="cascade",
     )
     category_id = fields.Many2one(
@@ -18,22 +21,23 @@ class ErsgebBudgetLine(models.Model):
         required=True,
         ondelete="restrict",
     )
-    # Dénormalisés depuis la catégorie — stockés pour les domains et computes
+
+    currency_id = fields.Many2one(
+        "res.currency",
+        compute="_compute_currency_id",
+        store=True,
+    )
+
     type = fields.Selection(
         [("income", "Revenu"), ("expense", "Charge")],
-        related="category_id.type",
+        compute="_compute_from_category",
         store=True,
         readonly=True,
     )
     include_in_totals = fields.Boolean(
-        related="category_id.include_in_totals",
+        compute="_compute_from_category",
         store=True,
         readonly=True,
-    )
-    currency_id = fields.Many2one(
-        "res.currency",
-        related="dossier_id.currency_id",
-        store=True,
     )
     montant_monsieur = fields.Monetary(
         string="Monsieur",
@@ -58,3 +62,23 @@ class ErsgebBudgetLine(models.Model):
             line.total_ligne = (line.montant_monsieur or 0.0) + (
                 line.montant_madame or 0.0
             )
+
+    @api.depends("dossier_id", "dossier_id.currency_id")
+    def _compute_currency_id(self):
+        default_currency = self.env.company.currency_id
+        for line in self:
+            line.currency_id = line.dossier_id.currency_id or default_currency
+
+    @api.depends("category_id", "category_id.type", "category_id.include_in_totals")
+    def _compute_from_category(self):
+        for line in self:
+            if line.category_id:
+                line.type = line.category_id.type
+                line.include_in_totals = line.category_id.include_in_totals
+                _logger.warning(
+                    f"_compute_from_category: category={line.category_id.name}, type={line.type}"
+                )
+            else:
+                line.type = False
+                line.include_in_totals = False
+                _logger.warning("_compute_from_category: pas de category_id")
