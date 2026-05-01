@@ -807,28 +807,35 @@ class DossierFamille(models.Model):
                     _logger.warning(f"Enfants copiés: {len(student_lines)} lignes")
 
             # --- Création des lignes parascolaires (avec ou sans ancien dossier) ---
-            if not defaults.get("after_school_line_ids"):
+        # Remplacer le bloc after_school_line_ids dans default_get
+
+        if family_id and not defaults.get("after_school_line_ids"):
+            # Priorité : élèves déjà copiés depuis l'ancien dossier
+            student_ids_from_lines = []
+            if dernier_dossier and dernier_dossier.student_line_ids:
+                student_ids_from_lines = [
+                    l.student_id.id for l in dernier_dossier.student_line_ids
+                ]
+            else:
                 students = self.env["ersge.student"].search(
                     [("family_id", "=", family_id)]
                 )
-                if students:
-                    lines = []
-                    for student in students:
-                        lines.append(
-                            (
-                                0,
-                                0,
-                                {
-                                    "student_id": student.id,
-                                    "selected": False,
-                                    "accueil_type": "jardin",  # valeur par défaut, ajustez selon votre besoin
-                                },
-                            )
-                        )
-                    defaults["after_school_line_ids"] = lines
-                    _logger.warning(
-                        f"Lignes parascolaires créées pour {len(lines)} élèves"
+                student_ids_from_lines = students.ids
+
+            if student_ids_from_lines:
+                lines = [
+                    (
+                        0,
+                        0,
+                        {
+                            "student_id": sid,
+                            "selected": False,
+                            "accueil_type": "jardin",
+                        },
                     )
+                    for sid in student_ids_from_lines
+                ]
+                defaults["after_school_line_ids"] = lines
 
         # --- Si aucune ligne budget n'a été copiée, création à partir des catégories ---
         if not budget_lines and categories:
@@ -895,14 +902,24 @@ class DossierFamille(models.Model):
             students = self.env["ersge.student"].search(
                 [("family_id", "=", self.family_id.id)]
             )
-            for student in students:
-                self.update(
+            # Construire TOUTE la liste en une seule fois
+            lines = [
+                (
+                    0,
+                    0,
                     {
-                        "after_school_line_ids": [
-                            (0, 0, {"student_id": student.id, "selected": True})
-                        ]
-                    }
+                        "student_id": student.id,
+                        "selected": False,
+                        "accueil_type": "jardin",
+                    },
                 )
+                for student in students
+            ]
+            if lines:
+                self.after_school_line_ids = lines  # assignation directe en onchange
+        elif self.after_school_request == "no":
+            # Optionnel : vider les lignes si on repasse à "non"
+            self.after_school_line_ids = [(5, 0, 0)]
 
     # -------------------------------------------------------------------------
     # Workflow actions
@@ -966,46 +983,28 @@ class DossierFamille(models.Model):
                 record._init_budget_lines()
         return result
 
-
-class ErsgebBudgetLine(models.Model):
-    _name = "ersge.budget.line"
-    _description = "Ligne budget mensuel"
-    _order = "category_id"
-
-    dossier_id = fields.Many2one(
-        "ersge.dossier.famille", string="Dossier", required=True, ondelete="cascade"
-    )
-    category_id = fields.Many2one(
-        "ersge.budget.category", string="Catégorie", required=True, ondelete="restrict"
-    )
-    type = fields.Selection(
-        [("income", "Revenu"), ("expense", "Charge")],
-        related="category_id.type",
-        store=True,
-        readonly=True,
-    )
-    include_in_totals = fields.Boolean(
-        related="category_id.include_in_totals", store=True, readonly=True
-    )
-    currency_id = fields.Many2one(
-        "res.currency", related="dossier_id.currency_id", store=True
-    )
-    montant_monsieur = fields.Monetary(
-        string="Monsieur", currency_field="currency_id", default=0.0
-    )
-    montant_madame = fields.Monetary(
-        string="Madame", currency_field="currency_id", default=0.0
-    )
-    total_ligne = fields.Monetary(
-        string="Total ligne",
-        compute="_compute_total_ligne",
-        store=True,
-        currency_field="currency_id",
-    )
-
-    @api.depends("montant_monsieur", "montant_madame")
-    def _compute_total_ligne(self):
-        for line in self:
-            line.total_ligne = (line.montant_monsieur or 0.0) + (
-                line.montant_madame or 0.0
-            )
+    def web_read(self, specification):
+        # D'abord créer les lignes manquantes
+        for record in self:
+            if record.student_line_ids and not record.after_school_line_ids:
+                lines = [
+                    (
+                        0,
+                        0,
+                        {
+                            "student_id": line.student_id.id,
+                            "selected": False,
+                            "accueil_type": "jardin",
+                        },
+                    )
+                    for line in record.student_line_ids
+                    if line.student_id
+                ]
+                if lines:
+                    record.write({"after_school_line_ids": lines})
+                    _logger.warning(
+                        f"web_read(): {len(lines)} lignes créées pour dossier {record.id}"
+                    )
+        # Ensuite lire — les lignes sont maintenant en base
+        result = super().web_read(specification)
+        return result

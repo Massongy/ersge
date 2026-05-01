@@ -5,7 +5,12 @@ from odoo import models, fields, api
 class ErsgeStudent(models.Model):
     _name = "ersge.student"
     _description = "Élève"
-    _rec_name = "firstname"
+    _rec_name = "display_name"
+
+    display_name = fields.Char(
+        compute="_compute_display_name",
+        store=True,
+    )
 
     firstname = fields.Char(string="Prénom", required=False)
     lastname = fields.Char(string="Nom", required=False)
@@ -54,3 +59,9 @@ class ErsgeStudent(models.Model):
                 vals["firstname"] = "Nouvel élève"
 
         return super().create(vals_list)
+
+    @api.depends("firstname", "lastname")
+    def _compute_display_name(self):
+        for student in self:
+            name = f"{student.firstname or ''} {student.lastname or ''}".strip()
+            student.display_name = name or "Nouvel élève"

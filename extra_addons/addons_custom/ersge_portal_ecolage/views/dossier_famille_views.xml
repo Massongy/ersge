@@ -135,8 +135,7 @@
                     </div>
                     <field name="student_line_ids" nolabel="1">
                         <list editable="bottom">
-                            <field name="prenom" readonly="1"/>
-                            <field name="nom" readonly="1"/>
+                            <field name="student_id" readonly="1"/>
                             <field name="forfait_id" options="{'no_create': True}"/>
                             <field name="forfait_montant_mensuel" readonly="1"/>
                         </list>
