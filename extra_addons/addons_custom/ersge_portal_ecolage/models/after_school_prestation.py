@@ -37,10 +37,13 @@ class AfterSchoolPrestation(models.Model):
         "res.currency", default=lambda self: self.env.company.currency_id
     )
 
-    _sql_constraints = [
-        (
-            "unique_jour_creneau",
-            "unique(jour, creneau)",
-            "Une prestation pour ce jour et ce créneau existe déjà.",
-        ),
-    ]
+    applicable_to = fields.Selection(
+        [
+            ("jardin", "Jardin uniquement"),
+            ("classe", "Classe uniquement"),
+            ("both", "Les deux"),
+        ],
+        string="Applicable à",
+        required=True,
+        default="both",
+    )

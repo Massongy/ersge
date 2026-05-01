@@ -9,6 +9,8 @@
                 <field name="name"/>
                 <field name="jour"/>
                 <field name="creneau"/>
+                <field name="applicable_to"/>
+
                 <field name="prix_jardin" widget="monetary"/>
                 <field name="prix_classe" widget="monetary"/>
                 <field name="active" widget="boolean_toggle"/>
@@ -27,6 +29,8 @@
                         <field name="name"/>
                         <field name="jour"/>
                         <field name="creneau"/>
+                        <field name="applicable_to" widget="radio"/>
+
                         <field name="prix_jardin" widget="monetary"/>
                         <field name="prix_classe" widget="monetary"/>
                         <field name="active"/>

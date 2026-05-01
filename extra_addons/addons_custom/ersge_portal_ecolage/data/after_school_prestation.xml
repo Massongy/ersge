@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- LUNDI -->
+    <record id="prestation_lundi_midi" model="ersge.after.school.prestation">
+        <field name="name">Lundi 12h-15h30</field>
+        <field name="jour">lundi</field>
+        <field name="creneau">midi</field>
+        <field name="applicable_to">both</field>
+        <field name="prix_jardin">100</field>
+        <field name="prix_classe">100</field>
+    </record>
+    <record id="prestation_lundi_cirque" model="ersge.after.school.prestation">
+        <field name="name">Lundi 12h-15h30 Accompagnement Cirque</field>
+        <field name="jour">lundi</field>
+        <field name="creneau">cirque</field>
+        <field name="applicable_to">both</field>
+        <field name="prix_jardin">100</field>
+        <field name="prix_classe">100</field>
+    </record>
+    <record id="prestation_lundi_soir" model="ersge.after.school.prestation">
+        <field name="name">Lundi 15h30-17h45</field>
+        <field name="jour">lundi</field>
+        <field name="creneau">soir</field>
+        <field name="applicable_to">both</field>
+        <field name="prix_jardin">100</field>
+        <field name="prix_classe">100</field>
+    </record>
+
+    <!-- MARDI -->
+    <record id="prestation_mardi_midi" model="ersge.after.school.prestation">
+        <field name="name">Mardi 12h-15h30</field>
+        <field name="jour">mardi</field>
+        <field name="creneau">midi</field>
+        <field name="applicable_to">both</field>
+        <field name="prix_jardin">100</field>
+        <field name="prix_classe">100</field>
+    </record>
+    <record id="prestation_mardi_cirque" model="ersge.after.school.prestation">
+        <field name="name">Mardi 12h-15h30 Accompagnement Cirque</field>
+        <field name="jour">mardi</field>
+        <field name="creneau">cirque</field>
+        <field name="applicable_to">both</field>
+        <field name="prix_jardin">100</field>
+        <field name="prix_classe">100</field>
+    </record>
+    <record id="prestation_mardi_soir" model="ersge.after.school.prestation">
+        <field name="name">Mardi 15h30-17h45</field>
+        <field name="jour">mardi</field>
+        <field name="creneau">soir</field>
+        <field name="applicable_to">both</field>
+        <field name="prix_jardin">100</field>
+        <field name="prix_classe">100</field>
+    </record>
+
+    <!-- MERCREDI -->
+    <record id="prestation_mercredi_midi" model="ersge.after.school.prestation">
+        <field name="name">Mercredi 12h-15h30</field>
+        <field name="jour">mercredi</field>
+        <field name="creneau">midi</field>
+        <field name="applicable_to">both</field>
+        <field name="prix_jardin">100</field>
+        <field name="prix_classe">100</field>
+    </record>
+    <record id="prestation_mercredi_soir" model="ersge.after.school.prestation">
+        <field name="name">Mercredi 15h30-17h45</field>
+        <field name="jour">mercredi</field>
+        <field name="creneau">soir</field>
+        <field name="applicable_to">both</field>
+        <field name="prix_jardin">100</field>
+        <field name="prix_classe">100</field>
+    </record>
+
+    <!-- JEUDI -->
+    <record id="prestation_jeudi_midi" model="ersge.after.school.prestation">
+        <field name="name">Jeudi 12h-15h30</field>
+        <field name="jour">jeudi</field>
+        <field name="creneau">midi</field>
+        <field name="applicable_to">both</field>
+        <field name="prix_jardin">100</field>
+        <field name="prix_classe">100</field>
+    </record>
+    <record id="prestation_jeudi_cirque" model="ersge.after.school.prestation">
+        <field name="name">Jeudi 12h-15h30 Accompagnement Cirque</field>
+        <field name="jour">jeudi</field>
+        <field name="creneau">cirque</field>
+        <field name="applicable_to">both</field>
+        <field name="prix_jardin">100</field>
+        <field name="prix_classe">100</field>
+    </record>
+    <record id="prestation_jeudi_soir" model="ersge.after.school.prestation">
+        <field name="name">Jeudi 15h30-17h45</field>
+        <field name="jour">jeudi</field>
+        <field name="creneau">soir</field>
+        <field name="applicable_to">both</field>
+        <field name="prix_jardin">100</field>
+        <field name="prix_classe">100</field>
+    </record>
+
+    <!-- VENDREDI -->
+    <record id="prestation_vendredi_midi" model="ersge.after.school.prestation">
+        <field name="name">Vendredi 12h-15h30</field>
+        <field name="jour">vendredi</field>
+        <field name="creneau">midi</field>
+        <field name="applicable_to">both</field>
+        <field name="prix_jardin">100</field>
+        <field name="prix_classe">100</field>
+    </record>
+    <record id="prestation_vendredi_cirque" model="ersge.after.school.prestation">
+        <field name="name">Vendredi 12h-15h30 Accompagnement Cirque</field>
+        <field name="jour">vendredi</field>
+        <field name="creneau">cirque</field>
+        <field name="applicable_to">both</field>
+        <field name="prix_jardin">100</field>
+        <field name="prix_classe">100</field>
+    </record>
+</odoo>

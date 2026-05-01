@@ -17,6 +17,7 @@
         "security/ir.model.access.csv",
         "data/budget_categories.xml",
         "data/sequence_data.xml",
+        "data/after_school_prestation.xml",
         "views/forfait_views.xml",
         "views/after_school_prestation_views.xml",
         "views/family_views.xml",

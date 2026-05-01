@@ -379,9 +379,9 @@
                 <field name="after_school_line_ids" nolabel="1">
                     <list editable="bottom">
                         <field name="student_id" readonly="1"/>
-                        <field name="accueil_type" widget="selection" options="{'jardin': 'Jardin d’accueil (3-6 ans)', 'classe': 'Classe d’accueil (6-12 ans)'}"/>
-                        <field name="prestation_ids" widget="many2many_checkboxes" context="{'default_accueil_type': accueil_type}"/>
-                        <field name="montant_mensuel" sum="Total" widget="monetary"/>
+                        <field name="accueil_type" required="1"/>
+                        <field name="prestation_ids" widget="many2many_tags" domain="[('active', '=', True), '|', ('applicable_to', '=', accueil_type), ('applicable_to', '=', 'both')]" options="{'no_create': True, 'no_open': True}"/>
+                        <field name="montant_mensuel" readonly="1" sum="Total"/>
                     </list>
                 </field>
             </group>

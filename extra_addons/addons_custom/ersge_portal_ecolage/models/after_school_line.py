@@ -56,3 +56,15 @@ class AfterSchoolLine(models.Model):
             else:
                 total = sum(rec.prestation_ids.mapped("prix_classe"))
             rec.montant_mensuel = total
+
+    @api.onchange("accueil_type")
+    def _onchange_accueil_type(self):
+        # Vider les prestations quand on change de type
+        self.prestation_ids = [(5, 0, 0)]
+
+    @api.onchange("accueil_type", "prestation_ids")
+    def _onchange_prestations(self):
+        if self.accueil_type == "jardin":
+            self.montant_mensuel = sum(self.prestation_ids.mapped("prix_jardin"))
+        else:
+            self.montant_mensuel = sum(self.prestation_ids.mapped("prix_classe"))
