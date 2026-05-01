@@ -24,7 +24,7 @@
                         <page string="Informations parents">
                             <group string="Représentant légal">
                                 <field name="legal_representation" widget="radio"/>
-                                <field name="legal_representation_other" invisible="legal_representation != 'other'" required="legal_representation == 'other'"/>
+                                <field name="legal_representation_other" invisible="legal_representation != 'other'" />
                             </group>
                             <h3>Cotisation annuelle</h3>
                             <div class="alert alert-info">
@@ -37,45 +37,45 @@
  CHF
                             </div>
                             <group string="Père (ou parent 1)" invisible="legal_representation != 'both'">
-                                <field name="parent1_firstname" required="legal_representation == 'both'"/>
-                                <field name="parent1_lastname" required="legal_representation == 'both'"/>
-                                <field name="parent1_email" widget="email" required="legal_representation == 'both'"/>
-                                <field name="parent1_phone" widget="phone" required="legal_representation == 'both'"/>
+                                <field name="parent1_firstname" />
+                                <field name="parent1_lastname" />
+                                <field name="parent1_email" widget="email" />
+                                <field name="parent1_phone" widget="phone" />
                                 <field name="parent1_phone_fixed" widget="phone"/>
                                 <field name="parent1_phone_pro" widget="phone"/>
-                                <field name="parent1_street" required="legal_representation == 'both'"/>
-                                <field name="parent1_zip" required="legal_representation == 'both'"/>
-                                <field name="parent1_city" required="legal_representation == 'both'"/>
-                                <field name="parent1_country_id" required="legal_representation == 'both'"/>
-                                <field name="parent1_profession" required="legal_representation == 'both'"/>
+                                <field name="parent1_street" />
+                                <field name="parent1_zip" />
+                                <field name="parent1_city" />
+                                <field name="parent1_country_id" />
+                                <field name="parent1_profession" />
                                 <field name="parent1_employeur"/>
                             </group>
                             <group string="Mère (ou parent 2)" invisible="legal_representation != 'both'">
-                                <field name="parent2_firstname" required="legal_representation == 'both'"/>
-                                <field name="parent2_lastname" required="legal_representation == 'both'"/>
-                                <field name="parent2_email" widget="email" required="legal_representation == 'both'"/>
-                                <field name="parent2_phone" widget="phone" required="legal_representation == 'both'"/>
+                                <field name="parent2_firstname" />
+                                <field name="parent2_lastname" />
+                                <field name="parent2_email" widget="email" />
+                                <field name="parent2_phone" widget="phone" />
                                 <field name="parent2_phone_fixed" widget="phone"/>
                                 <field name="parent2_phone_pro" widget="phone"/>
                                 <field name="same_address_as_parent1"/>
-                                <field name="parent2_street" invisible="same_address_as_parent1" required="legal_representation == 'both' and not same_address_as_parent1"/>
-                                <field name="parent2_zip" invisible="same_address_as_parent1" required="legal_representation == 'both' and not same_address_as_parent1"/>
-                                <field name="parent2_city" invisible="same_address_as_parent1" required="legal_representation == 'both' and not same_address_as_parent1"/>
-                                <field name="parent2_country_id" invisible="same_address_as_parent1" required="legal_representation == 'both' and not same_address_as_parent1"/>
-                                <field name="parent2_profession" required="legal_representation == 'both'"/>
+                                <field name="parent2_street" invisible="same_address_as_parent1" />
+                                <field name="parent2_zip" invisible="same_address_as_parent1" />
+                                <field name="parent2_city" invisible="same_address_as_parent1" />
+                                <field name="parent2_country_id" invisible="same_address_as_parent1" />
+                                <field name="parent2_profession" />
                                 <field name="parent2_employeur"/>
                             </group>
                             <group invisible="legal_representation == 'both' or legal_representation == False">
-                                <field name="parent1_firstname" required="legal_representation in ('father_only', 'mother_only', 'other')"/>
-                                <field name="parent1_lastname" required="legal_representation in ('father_only', 'mother_only', 'other')"/>
-                                <field name="parent1_email" widget="email" required="legal_representation in ('father_only', 'mother_only', 'other')"/>
-                                <field name="parent1_phone" widget="phone" required="legal_representation in ('father_only', 'mother_only', 'other')"/>
+                                <field name="parent1_firstname" />
+                                <field name="parent1_lastname" />
+                                <field name="parent1_email" widget="email" />
+                                <field name="parent1_phone" widget="phone" />
                                 <field name="parent1_phone_fixed" widget="phone"/>
                                 <field name="parent1_phone_pro" widget="phone"/>
-                                <field name="parent1_street" required="legal_representation in ('father_only', 'mother_only', 'other')"/>
-                                <field name="parent1_zip" required="legal_representation in ('father_only', 'mother_only', 'other')"/>
-                                <field name="parent1_city" required="legal_representation in ('father_only', 'mother_only', 'other')"/>
-                                <field name="parent1_country_id" required="legal_representation in ('father_only', 'mother_only', 'other')"/>
+                                <field name="parent1_street" />
+                                <field name="parent1_zip" />
+                                <field name="parent1_city" />
+                                <field name="parent1_country_id" />
                                 <field name="parent1_profession"/>
                                 <field name="parent1_employeur"/>
                             </group>
@@ -93,7 +93,7 @@
                             <field name="student_line_ids" nolabel="1">
                                 <list editable="bottom" create="1" delete="1">
                                     <field name="student_id" string="Élève" domain="[('family_id', '=', parent.family_id)]" options="{'no_create': False, 'no_create_edit': False, 'always_reload': True}" context="{'form_view_ref': 'ersge_portal_ecolage.view_ersge_student_form', 'default_family_id': parent.family_id}"/>
-                                    <field name="sexe" required="1"/>
+                                    <field name="sexe" />
                                     <field name="image_rights" widget="boolean_toggle"/>
                                 </list>
                             </field>
@@ -219,7 +219,7 @@
                         </div>
                         <div>
                             <label for="requested_discount" string="Compte tenu de votre situation personnelle, vous sollicitez une réduction moindre, indiquez le pourcentage"/>
-                            <field name="requested_discount" required="1"/>
+                            <field name="requested_discount" />
                         </div>
                         <div>
                             <strong>Total mensuel après votre réduction : </strong>

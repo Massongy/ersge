@@ -1,0 +1,54 @@
+<odoo>
+    <template id="portal_my_dossiers" name="Mes dossiers d'écolage">
+        <t t-call="portal.portal_layout">
+            <t t-set="page_title">Mes dossiers d'écolage</t>
+            <div class="o_portal_wrapper">
+
+                <!-- Message d'erreur -->
+                <t t-if="error">
+                    <div class="alert alert-warning" role="alert">
+                        <t t-esc="error"/>
+                    </div>
+                </t>
+
+                <!-- Bouton nouveau dossier -->
+                <a href="/my/ecolage/new" class="btn btn-primary mb-3">+ Nouveau dossier</a>
+
+                <t t-if="not dossiers">
+                    <div class="alert alert-info">Vous n'avez aucun dossier pour le moment.</div>
+                </t>
+                <t t-foreach="dossiers" t-as="dossier">
+                    <div class="card mb-2">
+                        <div class="card-body">
+                            <h5 class="card-title">
+                                <span t-field="dossier.name"/>
+                                <t t-if="dossier.state == 'soumis'">
+                                    <span class="badge ml-2 badge-warning">
+                                        <t t-out="dossier.state"/>
+                                    </span>
+                                </t>
+                                <t t-elif="dossier.state == 'valide'">
+                                    <span class="badge ml-2 badge-success">
+                                        <t t-out="dossier.state"/>
+                                    </span>
+                                </t>
+                                <t t-else="">
+                                    <span class="badge ml-2 badge-secondary">
+                                        <t t-out="dossier.state"/>
+                                    </span>
+                                </t>
+                            </h5>
+                            <p class="card-text">Année scolaire : <span t-field="dossier.annee_scolaire"/>
+                            </p>
+                            <div class="btn-group">
+                                <a t-att-href="'/my/ecolage/edit/%s' % dossier.id" class="btn btn-secondary">Modifier</a>
+                                <a t-att-href="'/my/ecolage/dossier/%s' % dossier.id" class="btn btn-primary">Voir le détail</a>
+                            </div>
+                        </div>
+                    </div>
+                </t>
+
+            </div>
+        </t>
+    </template>
+</odoo>

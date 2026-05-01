@@ -1,0 +1,15 @@
+<odoo>
+    <template id="portal_my_home_ecolage" inherit_id="portal.portal_my_home" name="Ecolage Portal Tile">
+        <xpath expr="//div[hasclass('o_portal_docs')]" position="inside">
+            <a href="/my/ecolage" class="o_portal_docs_entry">
+                <div class="o_portal_docs_entry_icon">
+                    <i class="fa fa-graduation-cap"/>
+                </div>
+                <div class="o_portal_docs_entry_details">
+                    <div class="o_portal_docs_entry_title">Écolage</div>
+                    <div class="o_portal_docs_entry_desc">Vos dossiers d'écolage</div>
+                </div>
+            </a>
+        </xpath>
+    </template>
+</odoo>
