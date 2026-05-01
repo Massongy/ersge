@@ -806,36 +806,54 @@ class DossierFamille(models.Model):
                     defaults["student_line_ids"] = student_lines
                     _logger.warning(f"Enfants copiés: {len(student_lines)} lignes")
 
-            # --- Création des lignes parascolaires (avec ou sans ancien dossier) ---
-        # Remplacer le bloc after_school_line_ids dans default_get
+                defaults["after_school_request"] = dernier_dossier.after_school_request
+            # --- Copie des lignes parascolaires depuis l'ancien dossier ---
 
-        if family_id and not defaults.get("after_school_line_ids"):
-            # Priorité : élèves déjà copiés depuis l'ancien dossier
-            student_ids_from_lines = []
-            if dernier_dossier and dernier_dossier.student_line_ids:
-                student_ids_from_lines = [
-                    l.student_id.id for l in dernier_dossier.student_line_ids
-                ]
-            else:
-                students = self.env["ersge.student"].search(
-                    [("family_id", "=", family_id)]
-                )
-                student_ids_from_lines = students.ids
-
-            if student_ids_from_lines:
-                lines = [
-                    (
-                        0,
-                        0,
-                        {
-                            "student_id": sid,
-                            "selected": False,
-                            "accueil_type": "jardin",
-                        },
+            if dernier_dossier and dernier_dossier.after_school_line_ids:
+                after_school_lines = []
+                for line in dernier_dossier.after_school_line_ids:
+                    after_school_lines.append(
+                        (
+                            0,
+                            0,
+                            {
+                                "student_id": line.student_id.id,
+                                "accueil_type": line.accueil_type,
+                                "prestation_ids": [(6, 0, line.prestation_ids.ids)],
+                                "selected": line.selected,
+                            },
+                        )
                     )
-                    for sid in student_ids_from_lines
-                ]
-                defaults["after_school_line_ids"] = lines
+                defaults["after_school_line_ids"] = after_school_lines
+                _logger.warning(f"Parascolaire copié: {len(after_school_lines)} lignes")
+
+            # Sinon créer les lignes vides depuis les élèves
+            elif family_id and not defaults.get("after_school_line_ids"):
+                student_ids_from_lines = []
+                if dernier_dossier and dernier_dossier.student_line_ids:
+                    student_ids_from_lines = [
+                        l.student_id.id for l in dernier_dossier.student_line_ids
+                    ]
+                else:
+                    students = self.env["ersge.student"].search(
+                        [("family_id", "=", family_id)]
+                    )
+                    student_ids_from_lines = students.ids
+
+                if student_ids_from_lines:
+                    lines = [
+                        (
+                            0,
+                            0,
+                            {
+                                "student_id": sid,
+                                "selected": False,
+                                "accueil_type": "jardin",
+                            },
+                        )
+                        for sid in student_ids_from_lines
+                    ]
+                    defaults["after_school_line_ids"] = lines
 
         # --- Si aucune ligne budget n'a été copiée, création à partir des catégories ---
         if not budget_lines and categories:
