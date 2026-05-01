@@ -377,12 +377,20 @@
             <!-- Section : liste des élèves -->
             <group string="Inscriptions par élève">
                 <field name="after_school_line_ids" nolabel="1">
-                    <list editable="bottom">
+                    <list>
                         <field name="student_id" readonly="1"/>
-                        <field name="accueil_type" required="1"/>
-                        <field name="prestation_ids" widget="many2many_tags" domain="[('active', '=', True), '|', ('applicable_to', '=', accueil_type), ('applicable_to', '=', 'both')]" options="{'no_create': True, 'no_open': True}"/>
+                        <field name="accueil_type"/>
+                        <field name="prestation_ids" widget="many2many_tags"/>
                         <field name="montant_mensuel" readonly="1" sum="Total"/>
                     </list>
+                    <form>
+                        <group>
+                            <field name="student_id" readonly="1"/>
+                            <field name="accueil_type" widget="radio"/>
+                            <field name="prestation_ids" widget="many2many_checkboxes" domain="[('active', '=', True), '|', ('applicable_to', '=', accueil_type), ('applicable_to', '=', 'both')]"/>
+                            <field name="montant_mensuel" readonly="1"/>
+                        </group>
+                    </form>
                 </field>
             </group>
 
