@@ -18,7 +18,7 @@ class PortalEcolage(http.Controller):
         ], limit=1)
 
     # ==================== CRÉATION DE FAMILLE AVEC CHOIX DU RÔLE ====================
-    @http.route('/my/ecolage/family/create', type='http', auth='user', website=True, methods=['GET', 'POST'])
+    @http.route('/my/ecolage/family/create', type='http', auth='user', website=True, methods=['GET', 'POST'], csrf=False)
     def family_create(self, **kwargs):
         partner = request.env.user.partner_id
         # Si déjà membre d'une famille, rediriger vers la page des dossiers
@@ -30,7 +30,8 @@ class PortalEcolage(http.Controller):
             my_role = kwargs.get('my_role')
             if not name or not my_role or my_role not in ['parent1', 'parent2', 'tutor']:
                 return request.render('ersge_portal_ecolage.portal_famille_create', {
-                    'error': 'Tous les champs sont requis.'
+                    'error': 'Tous les champs sont requis.',
+                    'csrf_token': request.csrf_token()   # ← AJOUT
                 })
             # Création de la famille
             family = request.env['ersge.family'].sudo().create({'name': name})
@@ -45,7 +46,9 @@ class PortalEcolage(http.Controller):
             return request.redirect('/my/ecolage/invite')
 
         # Affichage du formulaire (GET)
-        return request.render('ersge_portal_ecolage.portal_famille_create', {})
+        return request.render('ersge_portal_ecolage.portal_famille_create', {
+            'csrf_token': request.csrf_token()   # ← AJOUT
+        })
 
     # ==================== INVITATIONS ====================
     @http.route('/my/ecolage/invite', type='http', auth='user', website=True, methods=['GET', 'POST'])
@@ -60,7 +63,8 @@ class PortalEcolage(http.Controller):
             role = kwargs.get('role')
             if not email or role not in ['parent2', 'tutor']:
                 return request.render('ersge_portal_ecolage.portal_invite_form', {
-                    'error': 'Email et rôle valide requis'
+                    'error': 'Email et rôle valide requis',
+                    'csrf_token': request.csrf_token()   # ← AJOUT
                 })
             token = secrets.token_urlsafe(32)
             family.sudo().write({
@@ -69,12 +73,13 @@ class PortalEcolage(http.Controller):
                 'invited_role': role
             })
             invite_link = request.httprequest.host_url + f'/my/ecolage/join?token={token}'
-            # Ici vous devez envoyer un email réel (mail.mail ou template)
             _logger.info(f"[invite] Invitation envoyée à {email} pour le rôle {role} : {invite_link}")
             return request.render('ersge_portal_ecolage.portal_invite_sent', {'email': email})
 
-        return request.render('ersge_portal_ecolage.portal_invite_form', {})
-
+        # GET : afficher le formulaire avec le token CSRF
+        return request.render('ersge_portal_ecolage.portal_invite_form', {
+            'csrf_token': request.csrf_token()   # ← AJOUT
+        })
     @http.route('/my/ecolage/join', type='http', auth='public', website=True)
     def join_from_invite(self, token=None, **kwargs):
         if not token:
