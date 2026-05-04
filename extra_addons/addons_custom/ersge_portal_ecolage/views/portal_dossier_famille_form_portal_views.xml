@@ -488,7 +488,7 @@ Aide employeur
                                                         <div class="form-check form-switch">
                                                             <input class="form-check-input" type="checkbox" role="switch" name="send_invoice_to_employer" id="send_invoice_to_employer" value="1" t-att-checked="dossier.send_invoice_to_employer"/>
                                                             <label class="form-check-label fw-semibold" for="send_invoice_to_employer">
-                                        Envoyer la facture à l'employeur
+                    Envoyer la facture à l'employeur
                                                             </label>
                                                         </div>
                                                     </div>
@@ -499,47 +499,47 @@ Aide employeur
                                                     <div class="card mb-3">
                                                         <div class="card-header fw-semibold bg-light">
                                                             <i class="fa fa-building me-2"/>
-Coordonnées de l'employeur
+                Coordonnées de l'employeur
                                                         </div>
                                                         <div class="card-body">
                                                             <div class="row g-3">
                                                                 <div class="col-12">
                                                                     <label class="form-label fw-semibold">
-                                                Nom de l'employeur <span class="text-danger">*</span>
+                            Nom de l'employeur <span class="text-danger">*</span>
                                                                     </label>
-                                                                    <!-- Liste déroulante des employeurs existants -->
-                                                                    <select class="form-select" name="employer_id" id="employer_id_select">
-                                                                        <option value="">-- Sélectionner un employeur --</option>
-                                                                        <t t-foreach="employers" t-as="emp">
-                                                                            <option t-att-value="emp.id" t-att-selected="dossier.employer_id.id == emp.id">
-                                                                                <t t-out="emp.name"/>
+                                                                    <input type="text" class="form-control" name="employer_name" id="employer_name" t-att-value="dossier.employer_name or ''" required="required"/>
+                                                                </div>
+                                                                <div class="col-12">
+                                                                    <label class="form-label fw-semibold">
+                            Adresse de l'employeur <span class="text-danger">*</span>
+                                                                    </label>
+                                                                    <input type="text" class="form-control" name="employer_street" id="employer_street" t-att-value="dossier.employer_street or ''" required="required"/>
+                                                                </div>
+                                                                <div class="col-md-4">
+                                                                    <label class="form-label fw-semibold">
+                            Code Postal <span class="text-danger">*</span>
+                                                                    </label>
+                                                                    <input type="text" class="form-control" name="employer_zip" id="employer_zip" t-att-value="dossier.employer_zip or ''" required="required"/>
+                                                                </div>
+                                                                <div class="col-md-8">
+                                                                    <label class="form-label fw-semibold">
+                            Ville <span class="text-danger">*</span>
+                                                                    </label>
+                                                                    <input type="text" class="form-control" name="employer_city" id="employer_city" t-att-value="dossier.employer_city or ''" required="required"/>
+                                                                </div>
+                                                                <div class="col-12">
+                                                                    <label class="form-label fw-semibold">
+                            Pays
+                                                                    </label>
+                                                                    <select class="form-select" name="employer_country_id" id="employer_country_id">
+                                                                        <option value="">-- Sélectionner un pays --</option>
+                                                                        <t t-foreach="countries" t-as="country">
+                                                                            <option t-att-value="country.id" t-att-selected="dossier.employer_country_id == country.id">
+                                                                                <t t-out="country.name"/>
                                                                             </option>
                                                                         </t>
                                                                     </select>
                                                                 </div>
-
-                                                                <!-- Affichage infos employeur sélectionné (lecture seule) -->
-                                                                <div id="block_employer_details" t-att-style="'display:' + ('block' if dossier.employer_id else 'none')">
-                                                                    <div class="col-12">
-                                                                        <label class="form-label fw-semibold">Adresse</label>
-                                                                        <div class="form-control bg-light">
-                                                                            <t t-out="dossier.employer_id.street or '-'"/>
-                                                                        </div>
-                                                                    </div>
-                                                                    <div class="col-md-4">
-                                                                        <label class="form-label fw-semibold">NPA</label>
-                                                                        <div class="form-control bg-light">
-                                                                            <t t-out="dossier.employer_id.zip or '-'"/>
-                                                                        </div>
-                                                                    </div>
-                                                                    <div class="col-md-8">
-                                                                        <label class="form-label fw-semibold">Ville</label>
-                                                                        <div class="form-control bg-light">
-                                                                            <t t-out="dossier.employer_id.city or '-'"/>
-                                                                        </div>
-                                                                    </div>
-                                                                </div>
-
                                                             </div>
                                                         </div>
                                                     </div>
@@ -573,7 +573,7 @@ Annuler
             </div>
 
             <script type="text/javascript">
-//                <![CDATA[
+//                                                <![CDATA[
 document.addEventListener('DOMContentLoaded', function () {
     function initForm() {
         // ---- Représentant légal ----
