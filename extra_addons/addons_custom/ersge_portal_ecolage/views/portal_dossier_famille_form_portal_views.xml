@@ -4,7 +4,7 @@
         <t t-call="portal.portal_layout">
             <t t-set="page_title">Dossier d'écolage</t>
             <div class="container mt-4">
-                <form method="post" action="" enctype="multipart/form-data">
+                <form method="post" action="" enctype="multipart/form-data" novalidate="novalidate">
                     <input type="hidden" name="csrf_token" t-att-value="csrf_token"/>
 
                     <!-- En-tête dossier -->
@@ -507,25 +507,25 @@ Aide employeur
                                                                     <label class="form-label fw-semibold">
                             Nom de l'employeur <span class="text-danger">*</span>
                                                                     </label>
-                                                                    <input type="text" class="form-control" name="employer_name" id="employer_name" t-att-value="dossier.employer_name or ''" required="required"/>
+                                                                    <input type="text" class="form-control" name="employer_name" id="employer_name" t-att-value="dossier.employer_name or ''" />
                                                                 </div>
                                                                 <div class="col-12">
                                                                     <label class="form-label fw-semibold">
                             Adresse de l'employeur <span class="text-danger">*</span>
                                                                     </label>
-                                                                    <input type="text" class="form-control" name="employer_street" id="employer_street" t-att-value="dossier.employer_street or ''" required="required"/>
+                                                                    <input type="text" class="form-control" name="employer_street" id="employer_street" t-att-value="dossier.employer_street or ''" />
                                                                 </div>
                                                                 <div class="col-md-4">
                                                                     <label class="form-label fw-semibold">
                             Code Postal <span class="text-danger">*</span>
                                                                     </label>
-                                                                    <input type="text" class="form-control" name="employer_zip" id="employer_zip" t-att-value="dossier.employer_zip or ''" required="required"/>
+                                                                    <input type="text" class="form-control" name="employer_zip" id="employer_zip" t-att-value="dossier.employer_zip or ''" />
                                                                 </div>
                                                                 <div class="col-md-8">
                                                                     <label class="form-label fw-semibold">
                             Ville <span class="text-danger">*</span>
                                                                     </label>
-                                                                    <input type="text" class="form-control" name="employer_city" id="employer_city" t-att-value="dossier.employer_city or ''" required="required"/>
+                                                                    <input type="text" class="form-control" name="employer_city" id="employer_city" t-att-value="dossier.employer_city or ''" />
                                                                 </div>
                                                                 <div class="col-12">
                                                                     <label class="form-label fw-semibold">
@@ -553,27 +553,107 @@ Aide employeur
                             </div>
                         </div>
                         <!-- ── Fin Section 3 ── -->
+                        <!-- Section 4 : Forfaits et cotisation -->
+                        <div class="accordion-item border mb-3 rounded shadow-sm">
+                            <h2 class="accordion-header" id="headingForfaits">
+                                <button class="accordion-button collapsed rounded" type="button" data-bs-toggle="collapse" data-bs-target="#collapseForfaits" aria-expanded="false" aria-controls="collapseForfaits">
+                                    <i class="fa fa-tags me-2 text-primary"/>
+                                    <strong>Forfaits et cotisation</strong>
+                                </button>
+                            </h2>
+                            <div id="collapseForfaits" class="accordion-collapse collapse" aria-labelledby="headingForfaits">
+                                <div class="accordion-body">
 
+                                    <div class="alert alert-info">
+                                        <strong>CHOISISSEZ VOTRE FORFAIT</strong>
+                                        <br/>
+                FRAIS DE SCOLARITÉ + MATÉRIEL SCOLAIRE DE BASE + REPAS DE MIDI* BIO<br/>
+                *Selon l'emploi du temps<br/>
+                                <br/>
+                Tarifs mensuels sur 12 mois - 1er versement au mois d'août.<br/>
+                Frais non compris : Activités en dehors des murs de l'école (ex. voyage, échange linguistique...) et goûters aux jardins d'enfants.
+                            </div>
+
+                            <!-- Liste des lignes élèves avec choix du forfait -->
+                            <div id="forfaits_list">
+                                <t t-foreach="dossier.student_line_ids" t-as="line">
+                                    <div class="card mb-3 forfait-line" t-att-data-line-id="line.id">
+                                        <div class="card-header fw-semibold bg-light d-flex justify-content-between align-items-center">
+                                            <span>
+                                                <i class="fa fa-user me-2"/>
+                                                <t t-out="line.student_id.display_name or 'Élève'"/>
+                                            </span>
+                                            <!-- Pas de bouton supprimer ici car l'élève lui-même est géré dans la section élèves -->
+                                        </div>
+                                        <div class="card-body">
+                                            <input type="hidden" t-att-name="'forfait_line_id_' + str(line.id)" t-att-value="line.id"/>
+                                            <div class="row g-3">
+                                                <div class="col-md-6">
+                                                    <label class="form-label fw-semibold">Forfait</label>
+                                                    <select class="form-select forfait-select" t-att-name="'forfait_id_' + str(line.id)" t-att-data-line-id="line.id">
+                                                        <option value="">-- Aucun forfait --</option>
+                                                        <t t-foreach="forfaits" t-as="f">
+                                                            <option t-att-value="f.id" t-att-selected="line.forfait_id.id == f.id">
+                                                                <t t-out="f.name"/>
+ -                                                                <t t-esc="f.montant_mensuel"/>
+ CHF/mois
+                                                            </option>
+                                                        </t>
+                                                    </select>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label class="form-label fw-semibold">Montant mensuel (CHF)</label>
+                                                    <input type="text" class="form-control bg-light montant-mensuel" readonly="readonly" t-att-value="line.forfait_montant_mensuel or ''" t-att-data-line-id="line.id"/>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </t>
+                            </div>
+
+                            <!-- Total mensuel -->
+                            <div class="alert alert-secondary mt-3">
+                                <strong>Total mensuel (hors réduction) : </strong>
+                                <span id="total_monthly_fee">0.00</span> CHF
+                            </div>
+
+                            <!-- Cotisation annuelle -->
+                            <h2 class="mt-4">Cotisation annuelle</h2>
+                            <div class="alert alert-info">
+                À l'Association en faveur de l'école Rudolf Steiner de Genève :<br/>
+                Individuelle 40 CHF, Couple 60 CHF, Curateur/trice et Tuteur/trice Gratuit.
+                            </div>
+                            <div class="alert alert-secondary">
+                                <strong>Total de la cotisation : </strong>
+                                <span id="membership_fee_amount">0.00</span> CHF
+                            </div>
+
+                        </div>
                     </div>
-                    <!-- Fin accordéon -->
 
-                    <!-- Boutons -->
-                    <div class="d-flex gap-2 mt-3">
-                        <button type="submit" class="btn btn-primary btn-lg">
-                            <i class="fa fa-save me-2"/>
+                    <!-- Fin Section 4 -->
+                </div>
+
+            </div>
+            <!-- Fin accordéon -->
+
+            <!-- Boutons -->
+            <div class="d-flex gap-2 mt-3">
+                <button type="submit" class="btn btn-primary btn-lg">
+                    <i class="fa fa-save me-2"/>
 Enregistrer
-                        </button>
-                        <a href="/my/ecolage" class="btn btn-outline-secondary btn-lg">
-                            <i class="fa fa-arrow-left me-2"/>
+                </button>
+                <a href="/my/ecolage" class="btn btn-outline-secondary btn-lg">
+                    <i class="fa fa-arrow-left me-2"/>
 Annuler
-                        </a>
-                    </div>
-
-                </form>
+                </a>
             </div>
 
-            <script type="text/javascript">
-//                                                <![CDATA[
+        </form>
+    </div>
+
+    <script type="text/javascript">
+//                                                                                                                        <![CDATA[
 document.addEventListener('DOMContentLoaded', function () {
     function initForm() {
         // ---- Représentant légal ----
@@ -668,83 +748,138 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
+    // ---- Gestion des forfaits et cotisation ----
+function updateForfaitMontant(selectEl, montantInput) {
+    var selectedOption = selectEl.options[selectEl.selectedIndex];
+    var montant = 0;
+    if (selectedOption && selectedOption.value) {
+        var text = selectedOption.text;
+        var match = text.match(/(\d+(?:\.\d+)?)\s*CHF/);
+        if (match) montant = parseFloat(match[1]);
+    }
+    montantInput.value = montant.toFixed(2);
+    updateTotalMensuel();
+    updateCotisation();
+}
+
+function updateTotalMensuel() {
+    var total = 0;
+    document.querySelectorAll('.montant-mensuel').forEach(function(input) {
+        var val = parseFloat(input.value);
+        if (!isNaN(val)) total += val;
+    });
+    document.getElementById('total_monthly_fee').innerText = total.toFixed(2);
+}
+
+function updateCotisation() {
+    var legalChecked = document.querySelector('input[name="legal_representation"]:checked');
+    var legalValue = legalChecked ? legalChecked.value : null;
+    var hasParent2 = (legalValue === 'both' || legalValue === 'parent2');
+    var hasOther = (legalValue === 'other');
+    var montantCotisation = 0;
+    if (hasOther) {
+        montantCotisation = 0;
+    } else if (hasParent2) {
+        montantCotisation = 60;
+    } else {
+        montantCotisation = 40;
+    }
+    document.getElementById('membership_fee_amount').innerText = montantCotisation.toFixed(2);
+}
+
+document.querySelectorAll('.forfait-select').forEach(function(select) {
+    var lineId = select.getAttribute('data-line-id');
+    var montantInput = document.querySelector('.montant-mensuel[data-line-id="' + lineId + '"]');
+    if (montantInput) {
+        function onChange() { updateForfaitMontant(select, montantInput); }
+        select.addEventListener('change', onChange);
+        onChange();
+    }
+});
+
+var legalRadios = document.querySelectorAll('input[name="legal_representation"]');
+legalRadios.forEach(function(radio) {
+    radio.addEventListener('change', updateCotisation);
+});
+updateCotisation();
+
     initForm();
 });
 //]]>
-            </script>
-        </t>
-    </template>
+    </script>
+</t>
+</template>
 
-    <template id="portal_famille_new" name="Créer ma famille">
-        <t t-call="portal.portal_layout">
-            <div class="container mt-4">
-                <div class="card">
-                    <div class="card-header">
-                        <h5 class="mb-0">
-                            <i class="fa fa-home me-2 text-primary"/>
+<template id="portal_famille_new" name="Créer ma famille">
+<t t-call="portal.portal_layout">
+    <div class="container mt-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fa fa-home me-2 text-primary"/>
                             Créer votre famille
-                        </h5>
-                    </div>
-                    <div class="card-body">
-
-                        <div class="alert alert-info mb-4" role="alert">
-                            <i class="fa fa-info-circle me-2"/>
-                            Pour déposer un dossier d'écolage, vous devez d'abord
-                            <strong>créer votre famille</strong>.
-                            Cette étape est rapide et ne prend qu'une minute.
-                        </div>
-
-                        <t t-if="error">
-                            <div class="alert alert-danger mb-4" role="alert">
-                                <i class="fa fa-exclamation-triangle me-2"/>
-                                <t t-out="error"/>
-                            </div>
-                        </t>
-
-                        <form action="/my/famille/new" method="POST" class="o_portal_details">
-                            <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
-                            <input type="hidden" name="next" t-att-value="next"/>
-
-                            <div class="row g-3">
-                                <div class="col-12">
-                                    <label for="nom" class="form-label fw-semibold">
-                                        Nom de famille <span class="text-danger">*</span>
-                                    </label>
-                                    <input type="text" name="nom" id="nom" class="form-control form-control-lg" placeholder="Ex : Dupont" required="required" autofocus="autofocus"/>
-                                    <div class="form-text text-muted">
-                                        Le nom qui identifiera votre famille dans le système.
-                                    </div>
-                                </div>
-                                <div class="col-12">
-                                    <label class="form-label fw-semibold">Compte rattaché</label>
-                                    <div class="form-control bg-light text-muted">
-                                        <i class="fa fa-user me-2"/>
-                                        <t t-out="partner.name"/>
-                                        <span class="ms-2 small">(                                            <t t-out="partner.email"/>
-)</span>
-                                    </div>
-                                    <div class="form-text text-muted">
-                                        Vous serez automatiquement ajouté comme parent de cette famille.
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="d-flex gap-2 mt-4 pt-3 border-top">
-                                <button type="submit" class="btn btn-primary btn-lg">
-                                    <i class="fa fa-check me-2"/>
-Créer ma famille et continuer
-                                </button>
-                                <a href="/my/ecolage" class="btn btn-outline-secondary btn-lg">
-                                    <i class="fa fa-arrow-left me-2"/>
-Annuler
-                                </a>
-                            </div>
-
-                        </form>
-                    </div>
-                </div>
+                </h5>
             </div>
-        </t>
-    </template>
+            <div class="card-body">
+
+                <div class="alert alert-info mb-4" role="alert">
+                    <i class="fa fa-info-circle me-2"/>
+                            Pour déposer un dossier d'écolage, vous devez d'abord
+                    <strong>créer votre famille</strong>.
+                            Cette étape est rapide et ne prend qu'une minute.
+                </div>
+
+                <t t-if="error">
+                    <div class="alert alert-danger mb-4" role="alert">
+                        <i class="fa fa-exclamation-triangle me-2"/>
+                        <t t-out="error"/>
+                    </div>
+                </t>
+
+                <form action="/my/famille/new" method="POST" class="o_portal_details">
+                    <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                    <input type="hidden" name="next" t-att-value="next"/>
+
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <label for="nom" class="form-label fw-semibold">
+                                        Nom de famille <span class="text-danger">*</span>
+                            </label>
+                            <input type="text" name="nom" id="nom" class="form-control form-control-lg" placeholder="Ex : Dupont" autofocus="autofocus"/>
+                            <div class="form-text text-muted">
+                                        Le nom qui identifiera votre famille dans le système.
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label fw-semibold">Compte rattaché</label>
+                            <div class="form-control bg-light text-muted">
+                                <i class="fa fa-user me-2"/>
+                                <t t-out="partner.name"/>
+                                <span class="ms-2 small">(                                    <t t-out="partner.email"/>
+)</span>
+                            </div>
+                            <div class="form-text text-muted">
+                                        Vous serez automatiquement ajouté comme parent de cette famille.
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex gap-2 mt-4 pt-3 border-top">
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="fa fa-check me-2"/>
+Créer ma famille et continuer
+                        </button>
+                        <a href="/my/ecolage" class="btn btn-outline-secondary btn-lg">
+                            <i class="fa fa-arrow-left me-2"/>
+Annuler
+                        </a>
+                    </div>
+
+                </form>
+            </div>
+        </div>
+    </div>
+</t>
+</template>
 
 </odoo>
