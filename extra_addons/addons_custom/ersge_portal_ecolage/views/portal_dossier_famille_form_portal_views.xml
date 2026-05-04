@@ -59,13 +59,7 @@
                             <div id="collapseParents" class="accordion-collapse collapse show" aria-labelledby="headingParents">
                                 <div class="accordion-body">
 
-                                    <div class="alert alert-info">
-                                        <i class="fa fa-info-circle me-2"/>
-                                        À l'Association en faveur de l'école Rudolf Steiner de Genève :
-                                        <strong>Individuelle 40 CHF</strong>,
-                                        <strong>Couple 60 CHF</strong>,
-                                        Curateur/trice et Tuteur/trice <strong>Gratuit</strong>.
-                                    </div>
+
 
                                     <!-- Représentant légal -->
                                     <div class="card mb-4">
@@ -288,7 +282,13 @@ Mère / Parent 2
                                             </div>
                                         </div>
                                     </div>
-
+                                    <div class="alert alert-info">
+                                        <i class="fa fa-info-circle me-2"/>
+                                        Cotisation annuelle à l'Association en faveur de l'école Rudolf Steiner de Genève :
+                                        <strong>Individuelle 40 CHF</strong>,
+                                        <strong>Couple 60 CHF</strong>,
+                                        Curateur/trice et Tuteur/trice <strong>Gratuit</strong>.
+                                    </div>
                                     <!-- Dépôt -->
                                     <div class="card mb-2">
                                         <div class="card-header fw-semibold bg-light">
@@ -307,12 +307,9 @@ Dépôt
                                                 </div>
                                                 <div class="form-check">
                                                     <input class="form-check-input" type="radio" name="deposit_status" value="pending" t-att-checked="dossier.deposit_status == 'pending'"/>
-                                                    <label class="form-check-label">En cours</label>
+                                                    <label class="form-check-label">Versement du dépôt</label>
                                                 </div>
-                                                <div class="form-check">
-                                                    <input class="form-check-input" type="radio" name="deposit_status" value="exempt" t-att-checked="dossier.deposit_status == 'exempt'"/>
-                                                    <label class="form-check-label">Exempté</label>
-                                                </div>
+
                                             </div>
                                         </div>
                                     </div>
@@ -336,7 +333,7 @@ Dépôt
                                     <div class="alert alert-info">
                                         <i class="fa fa-info-circle me-2"/>
                                         Lors de diverses activités organisées par l'école, les élèves
-                                        peuvent être amenés à être photographiés ou filmés.
+                                        peuvent être amenés à être photographiés ou filmés. Dans le cas de votre accord au droit à l'image, ces images pourront  utilisées à des fins pédagogiques ou pour notre communication (site internet, feuille d’info, rapport d’activité, espace parent, réseaux sociaux de l’école…) en toute vigilance et respect pour les élèves.
                                     </div>
 
                                     <!-- Élèves existants -->
@@ -448,6 +445,114 @@ Ajouter un élève
                             </div>
                         </div>
                         <!-- Fin Section 2 -->
+                        <!-- ── Section 3 : Finances / Aide employeur ── -->
+                        <div class="accordion-item border mb-3 rounded shadow-sm">
+                            <h2 class="accordion-header" id="headingFinances">
+                                <button class="accordion-button collapsed rounded" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFinances" aria-expanded="false" aria-controls="collapseFinances">
+                                    <i class="fa fa-euro me-2 text-primary"/>
+                                    <strong>Finances</strong>
+                                </button>
+                            </h2>
+                            <div id="collapseFinances" class="accordion-collapse collapse" aria-labelledby="headingFinances">
+                                <div class="accordion-body">
+
+                                    <!-- Aide employeur -->
+                                    <div class="card mb-4">
+                                        <div class="card-header fw-semibold bg-light">
+                                            <i class="fa fa-briefcase me-2"/>
+Aide employeur
+                                        </div>
+                                        <div class="card-body">
+
+                                            <label class="form-label fw-semibold">
+                        Bénéficiez-vous d'une aide de votre employeur pour l'écolage ?
+                                                <span class="text-danger">*</span>
+                                            </label>
+                                            <div class="d-flex flex-column gap-2 mb-3">
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="radio" name="employer_assistance" id="employer_yes" value="yes" t-att-checked="dossier.employer_assistance == 'yes'"/>
+                                                    <label class="form-check-label" for="employer_yes">Oui</label>
+                                                </div>
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="radio" name="employer_assistance" id="employer_no" value="no" t-att-checked="dossier.employer_assistance == 'no' or not dossier.employer_assistance"/>
+                                                    <label class="form-check-label" for="employer_no">Non</label>
+                                                </div>
+                                            </div>
+
+                                            <!-- Bloc conditionnel : affiché si oui -->
+                                            <div id="block_employer_yes" t-att-style="'display:' + ('block' if dossier.employer_assistance == 'yes' else 'none')">
+
+                                                <!-- Envoyer facture à l'employeur -->
+                                                <div class="card mb-3 bg-light border-0">
+                                                    <div class="card-body">
+                                                        <div class="form-check form-switch">
+                                                            <input class="form-check-input" type="checkbox" role="switch" name="send_invoice_to_employer" id="send_invoice_to_employer" value="1" t-att-checked="dossier.send_invoice_to_employer"/>
+                                                            <label class="form-check-label fw-semibold" for="send_invoice_to_employer">
+                                        Envoyer la facture à l'employeur
+                                                            </label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <!-- Bloc employeur : affiché si facture à l'employeur -->
+                                                <div id="block_employer_id" t-att-style="'display:' + ('block' if dossier.send_invoice_to_employer else 'none')">
+                                                    <div class="card mb-3">
+                                                        <div class="card-header fw-semibold bg-light">
+                                                            <i class="fa fa-building me-2"/>
+Coordonnées de l'employeur
+                                                        </div>
+                                                        <div class="card-body">
+                                                            <div class="row g-3">
+                                                                <div class="col-12">
+                                                                    <label class="form-label fw-semibold">
+                                                Nom de l'employeur <span class="text-danger">*</span>
+                                                                    </label>
+                                                                    <!-- Liste déroulante des employeurs existants -->
+                                                                    <select class="form-select" name="employer_id" id="employer_id_select">
+                                                                        <option value="">-- Sélectionner un employeur --</option>
+                                                                        <t t-foreach="employers" t-as="emp">
+                                                                            <option t-att-value="emp.id" t-att-selected="dossier.employer_id.id == emp.id">
+                                                                                <t t-out="emp.name"/>
+                                                                            </option>
+                                                                        </t>
+                                                                    </select>
+                                                                </div>
+
+                                                                <!-- Affichage infos employeur sélectionné (lecture seule) -->
+                                                                <div id="block_employer_details" t-att-style="'display:' + ('block' if dossier.employer_id else 'none')">
+                                                                    <div class="col-12">
+                                                                        <label class="form-label fw-semibold">Adresse</label>
+                                                                        <div class="form-control bg-light">
+                                                                            <t t-out="dossier.employer_id.street or '-'"/>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="col-md-4">
+                                                                        <label class="form-label fw-semibold">NPA</label>
+                                                                        <div class="form-control bg-light">
+                                                                            <t t-out="dossier.employer_id.zip or '-'"/>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="col-md-8">
+                                                                        <label class="form-label fw-semibold">Ville</label>
+                                                                        <div class="form-control bg-light">
+                                                                            <t t-out="dossier.employer_id.city or '-'"/>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+                        <!-- ── Fin Section 3 ── -->
 
                     </div>
                     <!-- Fin accordéon -->
@@ -469,7 +574,7 @@ Annuler
 
             <!-- ✅ CDATA obligatoire pour le JS dans un fichier XML -->
             <script type="text/javascript">
-//                                                <![CDATA[
+//                                                                                                                                                                <![CDATA[
 document.addEventListener('DOMContentLoaded', function () {
 
     function initForm() {
