@@ -210,4 +210,90 @@
         </div>
     </t>
 </template>
+<template id="portal_famille_new" name="Créer ma famille">
+    <t t-call="portal.portal_layout">
+
+        <!-- Fil d'Ariane -->
+        <t t-set="o_portal_fullwidth_alert" t-value="False"/>
+
+        <div class="container mt-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fa fa-home me-2 text-primary"/>
+                        Créer votre famille
+                    </h5>
+                </div>
+                <div class="card-body">
+
+                    <!-- Message d'explication -->
+                    <div class="alert alert-info mb-4" role="alert">
+                        <i class="fa fa-info-circle me-2"/>
+                        Pour déposer un dossier d'écolage, vous devez d'abord
+                        <strong>créer votre famille</strong>.
+                        Cette étape est rapide et ne prend qu'une minute.
+                    </div>
+
+                    <!-- Message d'erreur éventuel -->
+                    <t t-if="error">
+                        <div class="alert alert-danger mb-4" role="alert">
+                            <i class="fa fa-exclamation-triangle me-2"/>
+                            <t t-out="error"/>
+                        </div>
+                    </t>
+
+                    <!-- Formulaire -->
+                    <form action="/my/famille/new" method="POST" class="o_portal_details">
+                        <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                        <input type="hidden" name="next" t-att-value="next"/>
+
+                        <div class="row g-3">
+
+                            <!-- Nom de famille -->
+                            <div class="col-12">
+                                <label for="nom" class="form-label fw-semibold">
+                                    Nom de famille <span class="text-danger">*</span>
+                                </label>
+                                <input type="text" name="nom" id="nom" class="form-control form-control-lg" placeholder="Ex : Dupont" required="required" autofocus="autofocus" />
+                                <div class="form-text text-muted">
+                                    Le nom qui identifiera votre famille dans le système.
+                                </div>
+                            </div>
+
+                            <!-- Info partenaire connecté -->
+                            <div class="col-12">
+                                <label class="form-label fw-semibold">Compte rattaché</label>
+                                <div class="form-control bg-light text-muted">
+                                    <i class="fa fa-user me-2"/>
+                                    <t t-out="partner.name"/>
+                                    <span class="ms-2 small">(                                        <t t-out="partner.email"/>
+)</span>
+                                </div>
+                                <div class="form-text text-muted">
+                                    Vous serez automatiquement ajouté comme parent de cette famille.
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <!-- Boutons -->
+                        <div class="d-flex gap-2 mt-4 pt-3 border-top">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fa fa-check me-2"/>
+                                Créer ma famille et continuer
+                            </button>
+                            <a href="/my/ecolage" class="btn btn-outline-secondary btn-lg">
+                                <i class="fa fa-arrow-left me-2"/>
+                                Annuler
+                            </a>
+                        </div>
+
+                    </form>
+
+                </div>
+            </div>
+        </div>
+
+    </t>
+</template>
 </odoo>
