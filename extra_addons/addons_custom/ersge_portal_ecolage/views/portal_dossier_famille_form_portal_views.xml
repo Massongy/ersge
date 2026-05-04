@@ -572,46 +572,43 @@ Annuler
                 </form>
             </div>
 
-            <!-- ✅ CDATA obligatoire pour le JS dans un fichier XML -->
             <script type="text/javascript">
-//                                                                                                                                                                <![CDATA[
+//                <![CDATA[
 document.addEventListener('DOMContentLoaded', function () {
-
     function initForm() {
-        var radios = document.querySelectorAll('input[name="legal_representation"]');
-        if (radios.length === 0) {
-            // Pas encore prêt, on réessaie
+        // ---- Représentant légal ----
+        var radiosLegal = document.querySelectorAll('input[name="legal_representation"]');
+        if (radiosLegal.length === 0) {
             setTimeout(initForm, 100);
             return;
         }
-
-        function updateVisibility() {
-    var checked = document.querySelector('input[name="legal_representation"]:checked');
-    var val = checked ? checked.value : null;
-
-    var p1    = document.getElementById('block_parent1');
-    var p2    = document.getElementById('block_parent2');
-    var other = document.getElementById('block_other');
-
-    if (p1)    p1.style.setProperty('display', (val === 'both' || val === 'parent1') ? 'block' : 'none', 'important');
-    if (p2)    p2.style.setProperty('display', (val === 'both' || val === 'parent2') ? 'block' : 'none', 'important');
-    if (other) other.style.setProperty('display', (val === 'other') ? 'block' : 'none', 'important');
-}
-
-        radios.forEach(function(r) {
-            r.addEventListener('change', updateVisibility);
+        function updateLegalVisibility() {
+            var checked = document.querySelector('input[name="legal_representation"]:checked');
+            var val = checked ? checked.value : null;
+            var p1 = document.getElementById('block_parent1');
+            var p2 = document.getElementById('block_parent2');
+            var other = document.getElementById('block_other');
+            if (p1) p1.style.display = (val === 'both' || val === 'parent1') ? 'block' : 'none';
+            if (p2) p2.style.display = (val === 'both' || val === 'parent2') ? 'block' : 'none';
+            if (other) other.style.display = (val === 'other') ? 'block' : 'none';
+        }
+        radiosLegal.forEach(function(r) {
+            r.addEventListener('change', updateLegalVisibility);
         });
+        updateLegalVisibility();
 
-        // Adresse parent 2
+        // ---- Même adresse parent 2 ----
         var cbSameAddr = document.getElementById('same_address_as_parent1');
         var blockAddr2 = document.getElementById('block_parent2_address');
         if (cbSameAddr && blockAddr2) {
-            cbSameAddr.addEventListener('change', function() {
-                blockAddr2.style.display = this.checked ? 'none' : 'block';
-            });
+            function toggleAddr2() {
+                blockAddr2.style.display = cbSameAddr.checked ? 'none' : 'block';
+            }
+            cbSameAddr.addEventListener('change', toggleAddr2);
+            toggleAddr2();
         }
 
-        // Ajouter un élève
+        // ---- Gestion des élèves (ajout/suppression) ----
         var btnAdd = document.getElementById('btn_add_student');
         if (btnAdd) {
             btnAdd.addEventListener('click', function() {
@@ -624,8 +621,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 document.getElementById('students_list').appendChild(clone);
             });
         }
-
-        // Supprimer élève existant
         document.addEventListener('click', function(e) {
             var btn = e.target.closest('.btn-remove-student');
             if (!btn) return;
@@ -638,14 +633,45 @@ document.addEventListener('DOMContentLoaded', function () {
             btn.closest('.student-line').remove();
         });
 
-        updateVisibility();
+        // ---- Aide employeur (gestion dynamique Oui/Non) ----
+        var employerRadios = document.querySelectorAll('input[name="employer_assistance"]');
+        var blockEmployerYes = document.getElementById('block_employer_yes');
+        function toggleEmployerYes() {
+            if (!blockEmployerYes) return;
+            var selected = document.querySelector('input[name="employer_assistance"]:checked');
+            var isYes = (selected && selected.value === 'yes');
+            blockEmployerYes.style.display = isYes ? 'block' : 'none';
+        }
+        if (employerRadios.length && blockEmployerYes) {
+            employerRadios.forEach(function(radio) {
+                radio.addEventListener('change', toggleEmployerYes);
+            });
+            toggleEmployerYes();
+        }
+
+        // ---- Envoyer facture à l'employeur (affichage bloc coordonnées) ----
+        var chkInvoice = document.getElementById('send_invoice_to_employer');
+        var blockEmployerId = document.getElementById('block_employer_id');
+        if (chkInvoice && blockEmployerId) {
+            function toggleEmployerBlock() {
+                // Forcer l'affichage en supprimant tout style inline conflictuel
+                if (chkInvoice.checked) {
+                    blockEmployerId.style.display = 'block';
+                    blockEmployerId.style.removeProperty('display');
+                } else {
+                    blockEmployerId.style.display = 'none';
+                }
+            }
+            // Initialisation et écoute
+            toggleEmployerBlock();
+            chkInvoice.addEventListener('change', toggleEmployerBlock);
+        }
     }
 
     initForm();
 });
 //]]>
             </script>
-
         </t>
     </template>
 
