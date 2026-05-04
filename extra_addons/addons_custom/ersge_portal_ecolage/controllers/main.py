@@ -177,6 +177,9 @@ class PortalEcolage(http.Controller):
                 raise AccessError("Vous n'avez pas accès à ce dossier.")
 
             if request.httprequest.method == 'POST':
+                _logger.warning("=== POST RECU ===")
+                _logger.warning(f"parent1_firstname = {request.params.get('parent1_firstname')}")
+                _logger.warning(f"dossier.parent1_id avant = {dossier.parent1_id.id if dossier.parent1_id else None}")
                 params = request.params.copy()
                 params.pop('csrf_token', None)
 
@@ -191,7 +194,7 @@ class PortalEcolage(http.Controller):
                 if dossier_vals:
                     dossier.sudo().write(dossier_vals)
 
-                # Parent 1 (utilisateur connecté)
+                # Parent 1
                 parent1_vals = {
                     'firstname': params.get('parent1_firstname', ''),
                     'lastname': params.get('parent1_lastname', ''),
@@ -209,9 +212,12 @@ class PortalEcolage(http.Controller):
                 }
                 fullname = f"{parent1_vals['firstname']} {parent1_vals['lastname']}".strip()
                 parent1_vals['name'] = fullname if fullname else parent1_vals.get('email', 'Parent 1')
-                partner.sudo().write(parent1_vals)
-                if not dossier.parent1_id:
-                    dossier.sudo().write({'parent1_id': partner.id})
+
+                if dossier.parent1_id:
+                    dossier.parent1_id.sudo().write(parent1_vals)
+                else:
+                    new_parent1 = request.env['res.partner'].sudo().create(parent1_vals)
+                    dossier.sudo().write({'parent1_id': new_parent1.id})
 
                 # Parent 2
                 if params.get('parent2_firstname') or params.get('parent2_lastname'):

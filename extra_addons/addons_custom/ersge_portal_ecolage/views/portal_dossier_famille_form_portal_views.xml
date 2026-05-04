@@ -78,11 +78,11 @@ Représentant légal
                                                     <label class="form-check-label" for="rep_both">Les deux parents</label>
                                                 </div>
                                                 <div class="form-check">
-                                                    <input class="form-check-input" type="radio" name="legal_representation" id="rep_parent1" value="parent1" t-att-checked="dossier.legal_representation == 'parent1'"/>
+                                                    <input class="form-check-input" type="radio" name="legal_representation" id="rep_parent1" value="father_only" t-att-checked="dossier.legal_representation == 'father_only'"/>
                                                     <label class="form-check-label" for="rep_parent1">Parent 1 uniquement</label>
                                                 </div>
                                                 <div class="form-check">
-                                                    <input class="form-check-input" type="radio" name="legal_representation" id="rep_parent2" value="parent2" t-att-checked="dossier.legal_representation == 'parent2'"/>
+                                                    <input class="form-check-input" type="radio" name="legal_representation" id="rep_parent2" value="mother_only" t-att-checked="dossier.legal_representation == 'mother_only'"/>
                                                     <label class="form-check-label" for="rep_parent2">Parent 2 uniquement</label>
                                                 </div>
                                                 <div class="form-check">
@@ -653,7 +653,7 @@ Annuler
     </div>
 
     <script type="text/javascript">
-//                                                                                                                        <![CDATA[
+//                                                                                                                                        <![CDATA[
 document.addEventListener('DOMContentLoaded', function () {
     function initForm() {
         // ---- Représentant légal ----
@@ -663,15 +663,15 @@ document.addEventListener('DOMContentLoaded', function () {
             return;
         }
         function updateLegalVisibility() {
-            var checked = document.querySelector('input[name="legal_representation"]:checked');
-            var val = checked ? checked.value : null;
-            var p1 = document.getElementById('block_parent1');
-            var p2 = document.getElementById('block_parent2');
-            var other = document.getElementById('block_other');
-            if (p1) p1.style.display = (val === 'both' || val === 'parent1') ? 'block' : 'none';
-            if (p2) p2.style.display = (val === 'both' || val === 'parent2') ? 'block' : 'none';
-            if (other) other.style.display = (val === 'other') ? 'block' : 'none';
-        }
+    var checked = document.querySelector('input[name="legal_representation"]:checked');
+    var val = checked ? checked.value : null;
+    var p1 = document.getElementById('block_parent1');
+    var p2 = document.getElementById('block_parent2');
+    var other = document.getElementById('block_other');
+    if (p1) p1.style.display = (val === 'both' || val === 'father_only') ? 'block' : 'none';
+    if (p2) p2.style.display = (val === 'both' || val === 'mother_only') ? 'block' : 'none';
+    if (other) other.style.display = (val === 'other') ? 'block' : 'none';
+}
         radiosLegal.forEach(function(r) {
             r.addEventListener('change', updateLegalVisibility);
         });
