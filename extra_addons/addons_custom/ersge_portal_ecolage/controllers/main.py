@@ -172,29 +172,31 @@ class PortalEcolage(http.Controller):
             if not dossier.exists():
                 return request.redirect('/my/ecolage')
 
-            # Vérification de l'accès via la famille
             if not partner.family_id or dossier.family_id.id != partner.family_id.id:
                 raise AccessError("Vous n'avez pas accès à ce dossier.")
 
             if request.httprequest.method == 'POST':
-                _logger.warning("=== POST RECU ===")
-                _logger.warning(f"parent1_firstname = {request.params.get('parent1_firstname')}")
-                _logger.warning(f"dossier.parent1_id avant = {dossier.parent1_id.id if dossier.parent1_id else None}")
-                params = request.params.copy()
-                params.pop('csrf_token', None)
+                # Pour les champs simples, on peut utiliser request.params (dict)
+                params = request.params
+                # Pour les listes (new_student_*[]), on utilise request.httprequest.form (MultiDict)
+                form = request.httprequest.form
 
-                # Champs simples
-                simple_fields = ['legal_representation', 'legal_representation_other', 'deposit_status',
-                                'employer_assistance', 'send_invoice_to_employer', 'same_address_as_parent1',
-                                'after_school_request', 'reduction_requested', 'requested_discount',
-                                'gross_annual_income', 'additional_reduction_request', 'proposed_monthly_amount',
-                                'contract_accepted', 'convention_accepted', 'procedures_accepted', 'terms_accepted',
-                                'lpd_consent', 'explanatory_letter_text', 'explanatory_letter_mode']
-                dossier_vals = {k: v for k, v in params.items() if k in simple_fields}
+                _logger.warning("=== POST RECU ===")
+
+                # 1. Champs simples du dossier
+                simple_fields = [
+                    'legal_representation', 'legal_representation_other', 'deposit_status',
+                    'employer_assistance', 'send_invoice_to_employer', 'same_address_as_parent1',
+                    'after_school_request', 'reduction_requested', 'requested_discount',
+                    'gross_annual_income', 'additional_reduction_request', 'proposed_monthly_amount',
+                    'contract_accepted', 'convention_accepted', 'procedures_accepted', 'terms_accepted',
+                    'lpd_consent', 'explanatory_letter_text', 'explanatory_letter_mode'
+                ]
+                dossier_vals = {k: params.get(k) for k in simple_fields if params.get(k) is not None}
                 if dossier_vals:
                     dossier.sudo().write(dossier_vals)
 
-                # Parent 1
+                # 2. Parent 1
                 parent1_vals = {
                     'firstname': params.get('parent1_firstname', ''),
                     'lastname': params.get('parent1_lastname', ''),
@@ -212,14 +214,13 @@ class PortalEcolage(http.Controller):
                 }
                 fullname = f"{parent1_vals['firstname']} {parent1_vals['lastname']}".strip()
                 parent1_vals['name'] = fullname if fullname else parent1_vals.get('email', 'Parent 1')
-
                 if dossier.parent1_id:
                     dossier.parent1_id.sudo().write(parent1_vals)
                 else:
                     new_parent1 = request.env['res.partner'].sudo().create(parent1_vals)
                     dossier.sudo().write({'parent1_id': new_parent1.id})
 
-                # Parent 2
+                # 3. Parent 2
                 if params.get('parent2_firstname') or params.get('parent2_lastname'):
                     parent2_vals = {
                         'firstname': params.get('parent2_firstname', ''),
@@ -255,10 +256,10 @@ class PortalEcolage(http.Controller):
                         new_parent2 = request.env['res.partner'].sudo().create(parent2_vals)
                         dossier.sudo().write({'parent2_id': new_parent2.id})
 
-                # Élèves (existants, suppressions, nouveaux)
-                for key, value in params.items():
+                # 4. Élèves existants (modifier)
+                for key in list(params.keys()):
                     if key.startswith('student_line_id_'):
-                        line_id = int(value)
+                        line_id = int(params.get(key))
                         line = request.env['ersge.dossier.student.line'].sudo().browse(line_id)
                         if line.exists() and line.dossier_id.id == dossier.id:
                             student_vals = {
@@ -270,11 +271,12 @@ class PortalEcolage(http.Controller):
                             }
                             line.student_id.sudo().write(student_vals)
                             forfait_key = f'forfait_id_{line_id}'
-                            if forfait_key in params and params[forfait_key]:
-                                line.sudo().write({'forfait_id': int(params[forfait_key])})
+                            if forfait_key in params and params.get(forfait_key):
+                                line.sudo().write({'forfait_id': int(params.get(forfait_key))})
                             elif forfait_key in params:
                                 line.sudo().write({'forfait_id': False})
 
+                # 5. Suppression d'élèves
                 for key in list(params.keys()):
                     if key.startswith('delete_student_line_'):
                         line_id = int(key.replace('delete_student_line_', ''))
@@ -282,11 +284,12 @@ class PortalEcolage(http.Controller):
                         if line.exists() and line.dossier_id.id == dossier.id:
                             line.unlink()
 
-                new_firstnames = params.getlist('new_student_firstname[]')
-                new_lastnames = params.getlist('new_student_lastname[]')
-                new_birthdates = params.getlist('new_student_birthdate[]')
-                new_genders = params.getlist('new_student_gender[]')
-                new_image_rights = params.getlist('new_student_image_rights[]')
+                # 6. Ajout de nouveaux élèves (utilisation de form.getlist)
+                new_firstnames = form.getlist('new_student_firstname[]')
+                new_lastnames = form.getlist('new_student_lastname[]')
+                new_birthdates = form.getlist('new_student_birthdate[]')
+                new_genders = form.getlist('new_student_gender[]')
+                new_image_rights = form.getlist('new_student_image_rights[]')
                 for i in range(len(new_firstnames)):
                     if new_firstnames[i] or new_lastnames[i]:
                         student = request.env['ersge.student'].sudo().create({
@@ -302,14 +305,14 @@ class PortalEcolage(http.Controller):
                             'student_id': student.id,
                         })
 
-                # Employeur
+                # 7. Employeur
                 if params.get('employer_assistance') == 'yes' and params.get('send_invoice_to_employer') == '1':
                     employer_vals = {
                         'name': params.get('employer_name', ''),
                         'street': params.get('employer_street', ''),
                         'zip': params.get('employer_zip', ''),
                         'city': params.get('employer_city', ''),
-                        'country_id': int(params['employer_country_id']) if params.get('employer_country_id') else False,
+                        'country_id': int(params.get('employer_country_id')) if params.get('employer_country_id') else False,
                         'is_employer': True,
                     }
                     if not employer_vals['name']:
@@ -325,7 +328,7 @@ class PortalEcolage(http.Controller):
 
                 return request.redirect('/my/ecolage?success=1')
 
-            # GET: afficher le formulaire
+            # GET
             countries = request.env['res.country'].sudo().search([])
             forfaits = request.env['ersge.forfait'].sudo().search([('active', '=', True)])
             return request.render('ersge_portal_ecolage.portal_dossier_form_complete', {
