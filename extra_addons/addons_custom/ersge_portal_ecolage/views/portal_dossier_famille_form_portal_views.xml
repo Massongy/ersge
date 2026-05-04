@@ -3,297 +3,617 @@
     <template id="portal_dossier_form_complete" name="Formulaire complet dossier écolage">
         <t t-call="portal.portal_layout">
             <t t-set="page_title">Dossier d'écolage</t>
-            <div class="o_portal_wrapper">
-                <form method="post" enctype="multipart/form-data">
+            <div class="container mt-4">
+                <form method="post" action="" enctype="multipart/form-data">
                     <input type="hidden" name="csrf_token" t-att-value="csrf_token"/>
 
-                    <div class="alert alert-info">
-                        <i class="fa fa-info-circle"/>
-                        Cliquez sur les sections ci-dessous pour les dérouler
+                    <!-- En-tête dossier -->
+                    <div class="card mb-4">
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="mb-0">
+                                <i class="fa fa-folder me-2"/>
+                                Dossier d'écolage
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold">Référence</label>
+                                    <div class="form-control bg-light">
+                                        <t t-out="dossier.name"/>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold">Année scolaire</label>
+                                    <div class="form-control bg-light">
+                                        <t t-out="dossier.annee_scolaire"/>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold">Famille</label>
+                                    <div class="form-control bg-light">
+                                        <t t-out="dossier.family_id.name"/>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold">Date de soumission</label>
+                                    <div class="form-control bg-light">
+                                        <t t-out="dossier.date_soumission"/>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
-                    <group>
-                        <field name="name"/>
-                        <field name="annee_scolaire"/>
-                        <field name="family_id" options="{'no_create': True, 'no_create_edit': True}" readonly="1"/>
-                        <field name="date_soumission"/>
-                    </group>
+                    <!-- ACCORDÉON -->
+                    <div class="accordion mb-4" id="dossierAccordion">
 
-                    <notebook>
+                        <!-- Section 1 : Informations parents -->
+                        <div class="accordion-item border mb-3 rounded shadow-sm">
+                            <h2 class="accordion-header" id="headingParents">
+                                <button class="accordion-button rounded" type="button" data-bs-toggle="collapse" data-bs-target="#collapseParents" aria-expanded="true" aria-controls="collapseParents">
+                                    <i class="fa fa-users me-2 text-primary"/>
+                                    <strong>Informations parents</strong>
+                                </button>
+                            </h2>
+                            <div id="collapseParents" class="accordion-collapse collapse show" aria-labelledby="headingParents">
+                                <div class="accordion-body">
 
-                        <!-- Page Informations parents -->
-                        <page string="Informations parents">
-                            <group string="Représentant légal">
-                                <field name="legal_representation" widget="radio"/>
-                                <field name="legal_representation_other" invisible="legal_representation != 'other'"/>
-                            </group>
-                            <h3>Cotisation annuelle</h3>
-                            <div class="alert alert-info">
-                                À l'Association en faveur de l'école Rudolf Steiner de Genève :
-                                Individuelle 40 CHF, Couple 60 CHF, Curateur/trice et Tuteur/trice Gratuit.
-                            </div>
-                            <div>
-                                <strong>Total de la cotisation : </strong>
-                                <field name="membership_fee_amount" readonly="1" class="oe_inline"/>
- CHF
-                            </div>
-                            <group string="Père (ou parent 1)" invisible="legal_representation != 'both'">
-                                <field name="parent1_firstname"/>
-                                <field name="parent1_lastname"/>
-                                <field name="parent1_email" widget="email"/>
-                                <field name="parent1_phone" widget="phone"/>
-                                <field name="parent1_phone_fixed" widget="phone"/>
-                                <field name="parent1_phone_pro" widget="phone"/>
-                                <field name="parent1_street"/>
-                                <field name="parent1_zip"/>
-                                <field name="parent1_city"/>
-                                <field name="parent1_country_id"/>
-                                <field name="parent1_profession"/>
-                                <field name="parent1_employeur"/>
-                            </group>
-                            <group string="Mère (ou parent 2)" invisible="legal_representation != 'both'">
-                                <field name="parent2_firstname"/>
-                                <field name="parent2_lastname"/>
-                                <field name="parent2_email" widget="email"/>
-                                <field name="parent2_phone" widget="phone"/>
-                                <field name="parent2_phone_fixed" widget="phone"/>
-                                <field name="parent2_phone_pro" widget="phone"/>
-                                <field name="same_address_as_parent1"/>
-                                <field name="parent2_street" invisible="same_address_as_parent1"/>
-                                <field name="parent2_zip" invisible="same_address_as_parent1"/>
-                                <field name="parent2_city" invisible="same_address_as_parent1"/>
-                                <field name="parent2_country_id" invisible="same_address_as_parent1"/>
-                                <field name="parent2_profession"/>
-                                <field name="parent2_employeur"/>
-                            </group>
-                            <group invisible="legal_representation == 'both' or legal_representation == False">
-                                <field name="parent1_firstname"/>
-                                <field name="parent1_lastname"/>
-                                <field name="parent1_email" widget="email"/>
-                                <field name="parent1_phone" widget="phone"/>
-                                <field name="parent1_phone_fixed" widget="phone"/>
-                                <field name="parent1_phone_pro" widget="phone"/>
-                                <field name="parent1_street"/>
-                                <field name="parent1_zip"/>
-                                <field name="parent1_city"/>
-                                <field name="parent1_country_id"/>
-                                <field name="parent1_profession"/>
-                                <field name="parent1_employeur"/>
-                            </group>
-                            <group string="Dépôt">
-                                <div class="alert alert-info">Toute nouvelle famille doit verser un dépôt de 1000 CHF</div>
-                                <field name="deposit_status" widget="radio"/>
-                                <field name="deposit_amount" readonly="1"/>
-                            </group>
-                        </page>
+                                    <div class="alert alert-info">
+                                        <i class="fa fa-info-circle me-2"/>
+                                        À l'Association en faveur de l'école Rudolf Steiner de Genève :
+                                        <strong>Individuelle 40 CHF</strong>,
+                                        <strong>Couple 60 CHF</strong>,
+                                        Curateur/trice et Tuteur/trice <strong>Gratuit</strong>.
+                                    </div>
 
-                        <!-- Page Élèves -->
-                        <page string="Informations élève(s)">
-                            <field name="student_line_ids" nolabel="1">
-                                <list editable="bottom" create="1" delete="1">
-                                    <field name="student_id" string="Élève" domain="[('family_id', '=', parent.family_id)]" options="{'no_create': False, 'no_create_edit': False, 'always_reload': True}" context="{'form_view_ref': 'ersge_portal_ecolage.view_ersge_student_form', 'default_family_id': parent.family_id}"/>
-                                    <field name="sexe"/>
-                                    <field name="image_rights" widget="boolean_toggle"/>
-                                </list>
-                            </field>
-                            <div class="alert alert-info mt-3">
-                                <i class="fa fa-info-circle"/>
-                                Lors de diverses activités organisées par l'école, les élèves peuvent être amenés à être photographiés ou filmés.
-                            </div>
-                        </page>
+                                    <!-- Représentant légal -->
+                                    <div class="card mb-4">
+                                        <div class="card-header fw-semibold bg-light">
+                                            <i class="fa fa-gavel me-2"/>
+Représentant légal
+                                        </div>
+                                        <div class="card-body">
+                                            <label class="form-label fw-semibold">
+                                                Qui exerce la représentation légale ?
+                                                <span class="text-danger">*</span>
+                                            </label>
+                                            <div class="d-flex flex-column gap-2">
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="radio" name="legal_representation" id="rep_both" value="both" t-att-checked="dossier.legal_representation == 'both'"/>
+                                                    <label class="form-check-label" for="rep_both">Les deux parents</label>
+                                                </div>
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="radio" name="legal_representation" id="rep_parent1" value="parent1" t-att-checked="dossier.legal_representation == 'parent1'"/>
+                                                    <label class="form-check-label" for="rep_parent1">Parent 1 uniquement</label>
+                                                </div>
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="radio" name="legal_representation" id="rep_parent2" value="parent2" t-att-checked="dossier.legal_representation == 'parent2'"/>
+                                                    <label class="form-check-label" for="rep_parent2">Parent 2 uniquement</label>
+                                                </div>
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="radio" name="legal_representation" id="rep_other" value="other" t-att-checked="dossier.legal_representation == 'other'"/>
+                                                    <label class="form-check-label" for="rep_other">Autre</label>
+                                                </div>
+                                            </div>
+                                            <div class="mt-3" id="block_other" t-att-style="'display:' + ('block' if dossier.legal_representation == 'other' else 'none')">
+                                                <div class="card mb-4">
+                                                    <div class="card-header fw-semibold bg-light">
+                                                        <i class="fa fa-user me-2 text-warning"/>
+Autre représentant légal
+                                                    </div>
+                                                    <div class="card-body">
+                                                        <div class="row g-3">
+                                                            <div class="col-12">
+                                                                <label class="form-label fw-semibold" for="legal_representation_other">
+                        Précisez <span class="text-danger">*</span>
+                                                                </label>
+                                                                <input type="text" class="form-control" name="legal_representation_other" id="legal_representation_other" placeholder="Ex : Tuteur légal, Curateur..." t-att-value="dossier.legal_representation_other or ''"/>
+                                                            </div>
+                                                            <div class="col-md-6">
+                                                                <label class="form-label fw-semibold">Prénom</label>
+                                                                <input type="text" class="form-control" name="parent1_firstname" t-att-value="dossier.parent1_firstname or ''"/>
+                                                            </div>
+                                                            <div class="col-md-6">
+                                                                <label class="form-label fw-semibold">Nom</label>
+                                                                <input type="text" class="form-control" name="parent1_lastname" t-att-value="dossier.parent1_lastname or ''"/>
+                                                            </div>
+                                                            <div class="col-md-6">
+                                                                <label class="form-label fw-semibold">Email</label>
+                                                                <input type="email" class="form-control" name="parent1_email" t-att-value="dossier.parent1_email or ''"/>
+                                                            </div>
+                                                            <div class="col-md-6">
+                                                                <label class="form-label fw-semibold">Tél. mobile</label>
+                                                                <input type="tel" class="form-control" name="parent1_phone" t-att-value="dossier.parent1_phone or ''"/>
+                                                            </div>
+                                                            <div class="col-md-6">
+                                                                <label class="form-label fw-semibold">Tél. fixe</label>
+                                                                <input type="tel" class="form-control" name="parent1_phone_fixed" t-att-value="dossier.parent1_phone_fixed or ''"/>
+                                                            </div>
+                                                            <div class="col-md-6">
+                                                                <label class="form-label fw-semibold">Tél. professionnel</label>
+                                                                <input type="tel" class="form-control" name="parent1_phone_pro" t-att-value="dossier.parent1_phone_pro or ''"/>
+                                                            </div>
+                                                            <div class="col-12">
+                                                                <label class="form-label fw-semibold">Rue</label>
+                                                                <input type="text" class="form-control" name="parent1_street" t-att-value="dossier.parent1_street or ''"/>
+                                                            </div>
+                                                            <div class="col-md-4">
+                                                                <label class="form-label fw-semibold">NPA</label>
+                                                                <input type="text" class="form-control" name="parent1_zip" t-att-value="dossier.parent1_zip or ''"/>
+                                                            </div>
+                                                            <div class="col-md-8">
+                                                                <label class="form-label fw-semibold">Ville</label>
+                                                                <input type="text" class="form-control" name="parent1_city" t-att-value="dossier.parent1_city or ''"/>
+                                                            </div>
+                                                            <div class="col-md-6">
+                                                                <label class="form-label fw-semibold">Profession</label>
+                                                                <input type="text" class="form-control" name="parent1_profession" t-att-value="dossier.parent1_profession or ''"/>
+                                                            </div>
+                                                            <div class="col-md-6">
+                                                                <label class="form-label fw-semibold">Employeur</label>
+                                                                <input type="text" class="form-control" name="parent1_employeur" t-att-value="dossier.parent1_employeur or ''"/>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
 
-                        <!-- Page Finances (tronquée pour lisibilité, mais vous pouvez recopier l'intégralité) -->
-                        <page string="Finances">
-                            <h2>Écolage</h2>
-                            <div>
-                                <strong>Bénéficiez-vous d'une aide de votre employeur pour l'écolage ?</strong>
-                                <field name="employer_assistance" widget="radio"/>
-                                <div invisible="employer_assistance != 'yes'">
-                                    <field name="send_invoice_to_employer" widget="boolean_toggle"/>
-                                    <label for="send_invoice_to_employer" string="Envoyer la facture à l'employeur"/>
+                                    <!-- Parent 1 -->
+                                    <div id="block_parent1" t-att-style="'display:' + ('block' if dossier.legal_representation in ('both','parent1') else 'none')">
+                                        <div class="card mb-4">
+                                            <div class="card-header fw-semibold bg-light">
+                                                <i class="fa fa-user me-2 text-primary"/>
+Père / Parent 1
+                                            </div>
+                                            <div class="card-body">
+                                                <div class="row g-3">
+                                                    <div class="col-md-6">
+                                                        <label class="form-label fw-semibold">Prénom</label>
+                                                        <input type="text" class="form-control" name="parent1_firstname" t-att-value="dossier.parent1_firstname or ''"/>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <label class="form-label fw-semibold">Nom</label>
+                                                        <input type="text" class="form-control" name="parent1_lastname" t-att-value="dossier.parent1_lastname or ''"/>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <label class="form-label fw-semibold">Email</label>
+                                                        <input type="email" class="form-control" name="parent1_email" t-att-value="dossier.parent1_email or ''"/>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <label class="form-label fw-semibold">Tél. mobile</label>
+                                                        <input type="tel" class="form-control" name="parent1_phone" t-att-value="dossier.parent1_phone or ''"/>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <label class="form-label fw-semibold">Tél. fixe</label>
+                                                        <input type="tel" class="form-control" name="parent1_phone_fixed" t-att-value="dossier.parent1_phone_fixed or ''"/>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <label class="form-label fw-semibold">Tél. professionnel</label>
+                                                        <input type="tel" class="form-control" name="parent1_phone_pro" t-att-value="dossier.parent1_phone_pro or ''"/>
+                                                    </div>
+                                                    <div class="col-12">
+                                                        <label class="form-label fw-semibold">Rue</label>
+                                                        <input type="text" class="form-control" name="parent1_street" t-att-value="dossier.parent1_street or ''"/>
+                                                    </div>
+                                                    <div class="col-md-4">
+                                                        <label class="form-label fw-semibold">NPA</label>
+                                                        <input type="text" class="form-control" name="parent1_zip" t-att-value="dossier.parent1_zip or ''"/>
+                                                    </div>
+                                                    <div class="col-md-8">
+                                                        <label class="form-label fw-semibold">Ville</label>
+                                                        <input type="text" class="form-control" name="parent1_city" t-att-value="dossier.parent1_city or ''"/>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <label class="form-label fw-semibold">Profession</label>
+                                                        <input type="text" class="form-control" name="parent1_profession" t-att-value="dossier.parent1_profession or ''"/>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <label class="form-label fw-semibold">Employeur</label>
+                                                        <input type="text" class="form-control" name="parent1_employeur" t-att-value="dossier.parent1_employeur or ''"/>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Parent 2 -->
+                                    <div id="block_parent2" t-att-style="'display:' + ('block' if dossier.legal_representation in ('both','parent2') else 'none')">
+                                        <div class="card mb-4">
+                                            <div class="card-header fw-semibold bg-light">
+                                                <i class="fa fa-user me-2 text-success"/>
+Mère / Parent 2
+                                            </div>
+                                            <div class="card-body">
+                                                <div class="row g-3">
+                                                    <div class="col-md-6">
+                                                        <label class="form-label fw-semibold">Prénom</label>
+                                                        <input type="text" class="form-control" name="parent2_firstname" t-att-value="dossier.parent2_firstname or ''"/>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <label class="form-label fw-semibold">Nom</label>
+                                                        <input type="text" class="form-control" name="parent2_lastname" t-att-value="dossier.parent2_lastname or ''"/>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <label class="form-label fw-semibold">Email</label>
+                                                        <input type="email" class="form-control" name="parent2_email" t-att-value="dossier.parent2_email or ''"/>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <label class="form-label fw-semibold">Tél. mobile</label>
+                                                        <input type="tel" class="form-control" name="parent2_phone" t-att-value="dossier.parent2_phone or ''"/>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <label class="form-label fw-semibold">Tél. fixe</label>
+                                                        <input type="tel" class="form-control" name="parent2_phone_fixed" t-att-value="dossier.parent2_phone_fixed or ''"/>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <label class="form-label fw-semibold">Tél. professionnel</label>
+                                                        <input type="tel" class="form-control" name="parent2_phone_pro" t-att-value="dossier.parent2_phone_pro or ''"/>
+                                                    </div>
+                                                    <div class="col-12">
+                                                        <div class="form-check">
+                                                            <input class="form-check-input" type="checkbox" name="same_address_as_parent1" id="same_address_as_parent1" value="1" t-att-checked="dossier.same_address_as_parent1"/>
+                                                            <label class="form-check-label fw-semibold" for="same_address_as_parent1">
+                                                                Même adresse que le parent 1
+                                                            </label>
+                                                        </div>
+                                                    </div>
+                                                    <div id="block_parent2_address" class="col-12" t-att-style="'display:' + ('none' if dossier.same_address_as_parent1 else 'block')">
+                                                        <div class="row g-3">
+                                                            <div class="col-12">
+                                                                <label class="form-label fw-semibold">Rue</label>
+                                                                <input type="text" class="form-control" name="parent2_street" t-att-value="dossier.parent2_street or ''"/>
+                                                            </div>
+                                                            <div class="col-md-4">
+                                                                <label class="form-label fw-semibold">NPA</label>
+                                                                <input type="text" class="form-control" name="parent2_zip" t-att-value="dossier.parent2_zip or ''"/>
+                                                            </div>
+                                                            <div class="col-md-8">
+                                                                <label class="form-label fw-semibold">Ville</label>
+                                                                <input type="text" class="form-control" name="parent2_city" t-att-value="dossier.parent2_city or ''"/>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <label class="form-label fw-semibold">Profession</label>
+                                                        <input type="text" class="form-control" name="parent2_profession" t-att-value="dossier.parent2_profession or ''"/>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <label class="form-label fw-semibold">Employeur</label>
+                                                        <input type="text" class="form-control" name="parent2_employeur" t-att-value="dossier.parent2_employeur or ''"/>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Dépôt -->
+                                    <div class="card mb-2">
+                                        <div class="card-header fw-semibold bg-light">
+                                            <i class="fa fa-university me-2"/>
+Dépôt
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="alert alert-info">
+                                                Toute nouvelle famille doit verser un dépôt de <strong>1000 CHF</strong>.
+                                            </div>
+                                            <label class="form-label fw-semibold">Statut du dépôt</label>
+                                            <div class="d-flex flex-column gap-2">
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="radio" name="deposit_status" value="paid" t-att-checked="dossier.deposit_status == 'paid'"/>
+                                                    <label class="form-check-label">Déjà versé</label>
+                                                </div>
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="radio" name="deposit_status" value="pending" t-att-checked="dossier.deposit_status == 'pending'"/>
+                                                    <label class="form-check-label">En cours</label>
+                                                </div>
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="radio" name="deposit_status" value="exempt" t-att-checked="dossier.deposit_status == 'exempt'"/>
+                                                    <label class="form-check-label">Exempté</label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
                                 </div>
-                                <div invisible="employer_assistance != 'yes' or not send_invoice_to_employer">
-                                    <label for="employer_id"/>
-                                    <field name="employer_id" context="{'default_is_employer': True}" options="{'no_create': False}"/>
+                            </div>
+                        </div>
+                        <!-- Fin Section 1 -->
+
+                        <!-- Section 2 : Élèves -->
+                        <div class="accordion-item border mb-3 rounded shadow-sm">
+                            <h2 class="accordion-header" id="headingStudents">
+                                <button class="accordion-button collapsed rounded" type="button" data-bs-toggle="collapse" data-bs-target="#collapseStudents" aria-expanded="false" aria-controls="collapseStudents">
+                                    <i class="fa fa-child me-2 text-primary"/>
+                                    <strong>Informations élève(s)</strong>
+                                </button>
+                            </h2>
+                            <div id="collapseStudents" class="accordion-collapse collapse" aria-labelledby="headingStudents">
+                                <div class="accordion-body">
+
+                                    <div class="alert alert-info">
+                                        <i class="fa fa-info-circle me-2"/>
+                                        Lors de diverses activités organisées par l'école, les élèves
+                                        peuvent être amenés à être photographiés ou filmés.
+                                    </div>
+
+                                    <!-- Élèves existants -->
+                                    <div id="students_list">
+                                        <t t-foreach="dossier.student_line_ids" t-as="line">
+                                            <div class="card mb-3 student-line" t-att-data-line-id="line.id">
+                                                <div class="card-header fw-semibold bg-light d-flex justify-content-between align-items-center">
+                                                    <span>
+                                                        <i class="fa fa-user-circle me-2 text-primary"/>
+                                                        <t t-out="line.student_id.display_name or 'Nouvel élève'"/>
+                                                    </span>
+                                                    <button type="button" class="btn btn-sm btn-outline-danger btn-remove-student" t-att-data-line-id="line.id">
+                                                        <i class="fa fa-trash"/>
+                                                    </button>
+                                                </div>
+                                                <div class="card-body">
+                                                    <input type="hidden" t-att-name="'student_line_id_' + str(line.id)" t-att-value="line.id"/>
+                                                    <div class="row g-3">
+                                                        <div class="col-md-4">
+                                                            <label class="form-label fw-semibold">Prénom</label>
+                                                            <input type="text" class="form-control" t-att-name="'student_firstname_' + str(line.id)" t-att-value="line.student_id.firstname or ''"/>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <label class="form-label fw-semibold">Nom</label>
+                                                            <input type="text" class="form-control" t-att-name="'student_lastname_' + str(line.id)" t-att-value="line.student_id.lastname or ''"/>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <label class="form-label fw-semibold">Date de naissance</label>
+                                                            <input type="date" class="form-control" t-att-name="'student_birthdate_' + str(line.id)" t-att-value="line.student_id.birthdate or ''"/>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <label class="form-label fw-semibold">Sexe</label>
+                                                            <select class="form-select" t-att-name="'student_gender_' + str(line.id)">
+                                                                <option value="">-- Choisir --</option>
+                                                                <option value="M" t-att-selected="line.student_id.gender == 'M'">Masculin</option>
+                                                                <option value="F" t-att-selected="line.student_id.gender == 'F'">Féminin</option>
+                                                            </select>
+                                                        </div>
+                                                        <div class="col-md-6 d-flex align-items-end">
+                                                            <div class="form-check form-switch">
+                                                                <input class="form-check-input" type="checkbox" role="switch" t-att-name="'student_image_rights_' + str(line.id)" t-att-id="'image_rights_' + str(line.id)" value="1" t-att-checked="line.image_rights"/>
+                                                                <label class="form-check-label fw-semibold" t-att-for="'image_rights_' + str(line.id)">
+                                                                    Droit à l'image
+                                                                </label>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </t>
+                                    </div>
+
+                                    <!-- Bouton ajouter -->
+                                    <div class="mt-2">
+                                        <button type="button" class="btn btn-outline-primary" id="btn_add_student">
+                                            <i class="fa fa-plus me-2"/>
+Ajouter un élève
+                                        </button>
+                                    </div>
+
+                                    <!-- Template nouvel élève (caché) -->
+                                    <div id="new_student_template" style="display:none;">
+                                        <div class="card mb-3 student-line new-student">
+                                            <div class="card-header fw-semibold bg-light d-flex justify-content-between align-items-center">
+                                                <span>
+                                                    <i class="fa fa-user-circle me-2 text-success"/>
+                                                    Nouvel élève
+                                                </span>
+                                                <button type="button" class="btn btn-sm btn-outline-danger btn-remove-new-student">
+                                                    <i class="fa fa-trash"/>
+                                                </button>
+                                            </div>
+                                            <div class="card-body">
+                                                <div class="row g-3">
+                                                    <div class="col-md-4">
+                                                        <label class="form-label fw-semibold">Prénom</label>
+                                                        <input type="text" class="form-control" name="new_student_firstname[]"/>
+                                                    </div>
+                                                    <div class="col-md-4">
+                                                        <label class="form-label fw-semibold">Nom</label>
+                                                        <input type="text" class="form-control" name="new_student_lastname[]"/>
+                                                    </div>
+                                                    <div class="col-md-4">
+                                                        <label class="form-label fw-semibold">Date de naissance</label>
+                                                        <input type="date" class="form-control" name="new_student_birthdate[]"/>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <label class="form-label fw-semibold">Sexe</label>
+                                                        <select class="form-select" name="new_student_gender[]">
+                                                            <option value="">-- Choisir --</option>
+                                                            <option value="M">Masculin</option>
+                                                            <option value="F">Féminin</option>
+                                                        </select>
+                                                    </div>
+                                                    <div class="col-md-6 d-flex align-items-end">
+                                                        <div class="form-check form-switch">
+                                                            <input class="form-check-input" type="checkbox" role="switch" name="new_student_image_rights[]" value="1" checked="checked"/>
+                                                            <label class="form-check-label fw-semibold">
+                                                                Droit à l'image
+                                                            </label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
                                 </div>
                             </div>
-                            <h2>Forfaits</h2>
-                            <div class="alert alert-info">
-                                <strong>CHOISISSEZ VOTRE FORFAIT</strong>
-                                <br/>
-                                FRAIS DE SCOLARITÉ + MATÉRIEL SCOLAIRE DE BASE + REPAS DE MIDI* BIO<br/>
-                                *Selon l'emploi du temps<br/>
-                                Tarifs mensuels sur 12 mois - 1er versement au mois d'août. Frais non compris : Activités en dehors des murs de l'école (ex. voyage, échange linguistique...) et goûters aux jardins d'enfants.
                         </div>
-                        <field name="student_line_ids" nolabel="1">
-                            <list editable="bottom">
-                                <field name="student_id" readonly="1"/>
-                                <field name="forfait_id" options="{'no_create': True}"/>
-                                <field name="forfait_montant_mensuel" readonly="1"/>
-                            </list>
-                        </field>
-                        <div>
-                            <strong>Total mensuel (hors réduction) : </strong>
-                            <field name="base_monthly_fee" readonly="1" class="oe_inline"/>
- CHF
-                        </div>
-                        <!-- Réductions, etc. à copier depuis votre vue -->
-                    </page>
+                        <!-- Fin Section 2 -->
 
-                    <!-- Page Parascolaire -->
-                    <page string="Parascolaire">
-                        <field name="after_school_request" widget="radio" options="{'horizontal': true}"/>
-                        <label for="after_school_request" string="Souhaitez-vous inscrire votre enfant au parascolaire ?"/>
-                        <div invisible="after_school_request != 'yes'">
-                            <div class="alert alert-warning mt-2" role="alert">
-                                <i class="fa fa-exclamation-triangle"/>
-                                <strong>Important :</strong> remplir le formulaire ne signifie pas que votre demande sera forcément acceptée...
-                            </div>
-                            <group string="Inscriptions par élève">
-                                <field name="after_school_line_ids" nolabel="1">
-                                    <list>
-                                        <field name="student_id" readonly="1"/>
-                                        <field name="accueil_type"/>
-                                        <field name="prestation_ids" widget="many2many_tags"/>
-                                        <field name="montant_mensuel" readonly="1" sum="Total"/>
-                                    </list>
-                                    <form>
-                                        <group>
-                                            <field name="student_id" readonly="1"/>
-                                            <field name="accueil_type" widget="radio"/>
-                                            <field name="prestation_ids" widget="many2many_checkboxes" domain="[('active', '=', True), '|', ('applicable_to', '=', accueil_type), ('applicable_to', '=', 'both')]"/>
-                                            <field name="montant_mensuel" readonly="1"/>
-                                        </group>
-                                    </form>
-                                </field>
-                            </group>
-                            <!-- Descriptifs (jardin, classe, cirque) à recopier si besoin -->
-                        </div>
-                    </page>
+                    </div>
+                    <!-- Fin accordéon -->
 
-                    <!-- Page Récapitulatif -->
-                    <page string="Récapitulatif">
-                        <group string="Mensuel">
-                            <label for="total_monthly_tuition"/>
-                            <field name="total_monthly_tuition"/>
-                            <label for="total_monthly_after_school"/>
-                            <field name="total_monthly_after_school"/>
-                            <label for="total_monthly"/>
-                            <field name="total_monthly"/>
-                        </group>
-                        <group string="Annuel">
-                            <label for="total_annual_tuition"/>
-                            <field name="total_annual_tuition"/>
-                            <label for="total_annual_after_school"/>
-                            <field name="total_annual_after_school"/>
-                            <label for="membership_fee_amount"/>
-                            <field name="membership_fee_amount"/>
-                            <label for="deposit_amount"/>
-                            <field name="deposit_amount"/>
-                            <label for="total_annual"/>
-                            <field name="total_annual"/>
-                        </group>
-                    </page>
-
-                    <page string="Mentions">
-                        <field name="legal_notice" widget="html" readonly="1"/>
-                        <field name="technical_contact" widget="html" readonly="1"/>
-                    </page>
-
-                </notebook>
-
-                <div class="clearfix oe_buttons mt-3">
-                    <button type="submit" class="btn btn-primary">Enregistrer</button>
-                    <a href="/my/ecolage" class="btn btn-secondary">Annuler</a>
-                </div>
-            </form>
-        </div>
-    </t>
-</template>
-<template id="portal_famille_new" name="Créer ma famille">
-    <t t-call="portal.portal_layout">
-
-        <!-- Fil d'Ariane -->
-        <t t-set="o_portal_fullwidth_alert" t-value="False"/>
-
-        <div class="container mt-4">
-            <div class="card">
-                <div class="card-header">
-                    <h5 class="mb-0">
-                        <i class="fa fa-home me-2 text-primary"/>
-                        Créer votre famille
-                    </h5>
-                </div>
-                <div class="card-body">
-
-                    <!-- Message d'explication -->
-                    <div class="alert alert-info mb-4" role="alert">
-                        <i class="fa fa-info-circle me-2"/>
-                        Pour déposer un dossier d'écolage, vous devez d'abord
-                        <strong>créer votre famille</strong>.
-                        Cette étape est rapide et ne prend qu'une minute.
+                    <!-- Boutons -->
+                    <div class="d-flex gap-2 mt-3">
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="fa fa-save me-2"/>
+Enregistrer
+                        </button>
+                        <a href="/my/ecolage" class="btn btn-outline-secondary btn-lg">
+                            <i class="fa fa-arrow-left me-2"/>
+Annuler
+                        </a>
                     </div>
 
-                    <!-- Message d'erreur éventuel -->
-                    <t t-if="error">
-                        <div class="alert alert-danger mb-4" role="alert">
-                            <i class="fa fa-exclamation-triangle me-2"/>
-                            <t t-out="error"/>
+                </form>
+            </div>
+
+            <!-- ✅ CDATA obligatoire pour le JS dans un fichier XML -->
+            <script type="text/javascript">
+//                                                <![CDATA[
+document.addEventListener('DOMContentLoaded', function () {
+
+    function initForm() {
+        var radios = document.querySelectorAll('input[name="legal_representation"]');
+        if (radios.length === 0) {
+            // Pas encore prêt, on réessaie
+            setTimeout(initForm, 100);
+            return;
+        }
+
+        function updateVisibility() {
+    var checked = document.querySelector('input[name="legal_representation"]:checked');
+    var val = checked ? checked.value : null;
+
+    var p1    = document.getElementById('block_parent1');
+    var p2    = document.getElementById('block_parent2');
+    var other = document.getElementById('block_other');
+
+    if (p1)    p1.style.setProperty('display', (val === 'both' || val === 'parent1') ? 'block' : 'none', 'important');
+    if (p2)    p2.style.setProperty('display', (val === 'both' || val === 'parent2') ? 'block' : 'none', 'important');
+    if (other) other.style.setProperty('display', (val === 'other') ? 'block' : 'none', 'important');
+}
+
+        radios.forEach(function(r) {
+            r.addEventListener('change', updateVisibility);
+        });
+
+        // Adresse parent 2
+        var cbSameAddr = document.getElementById('same_address_as_parent1');
+        var blockAddr2 = document.getElementById('block_parent2_address');
+        if (cbSameAddr && blockAddr2) {
+            cbSameAddr.addEventListener('change', function() {
+                blockAddr2.style.display = this.checked ? 'none' : 'block';
+            });
+        }
+
+        // Ajouter un élève
+        var btnAdd = document.getElementById('btn_add_student');
+        if (btnAdd) {
+            btnAdd.addEventListener('click', function() {
+                var template = document.querySelector('#new_student_template .card');
+                if (!template) return;
+                var clone = template.cloneNode(true);
+                clone.querySelector('.btn-remove-new-student').addEventListener('click', function() {
+                    clone.remove();
+                });
+                document.getElementById('students_list').appendChild(clone);
+            });
+        }
+
+        // Supprimer élève existant
+        document.addEventListener('click', function(e) {
+            var btn = e.target.closest('.btn-remove-student');
+            if (!btn) return;
+            var lineId = btn.getAttribute('data-line-id');
+            var input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = 'delete_student_line_' + lineId;
+            input.value = '1';
+            document.querySelector('form').appendChild(input);
+            btn.closest('.student-line').remove();
+        });
+
+        updateVisibility();
+    }
+
+    initForm();
+});
+//]]>
+            </script>
+
+        </t>
+    </template>
+
+    <template id="portal_famille_new" name="Créer ma famille">
+        <t t-call="portal.portal_layout">
+            <div class="container mt-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fa fa-home me-2 text-primary"/>
+                            Créer votre famille
+                        </h5>
+                    </div>
+                    <div class="card-body">
+
+                        <div class="alert alert-info mb-4" role="alert">
+                            <i class="fa fa-info-circle me-2"/>
+                            Pour déposer un dossier d'écolage, vous devez d'abord
+                            <strong>créer votre famille</strong>.
+                            Cette étape est rapide et ne prend qu'une minute.
                         </div>
-                    </t>
 
-                    <!-- Formulaire -->
-                    <form action="/my/famille/new" method="POST" class="o_portal_details">
-                        <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
-                        <input type="hidden" name="next" t-att-value="next"/>
-
-                        <div class="row g-3">
-
-                            <!-- Nom de famille -->
-                            <div class="col-12">
-                                <label for="nom" class="form-label fw-semibold">
-                                    Nom de famille <span class="text-danger">*</span>
-                                </label>
-                                <input type="text" name="nom" id="nom" class="form-control form-control-lg" placeholder="Ex : Dupont" required="required" autofocus="autofocus" />
-                                <div class="form-text text-muted">
-                                    Le nom qui identifiera votre famille dans le système.
-                                </div>
+                        <t t-if="error">
+                            <div class="alert alert-danger mb-4" role="alert">
+                                <i class="fa fa-exclamation-triangle me-2"/>
+                                <t t-out="error"/>
                             </div>
+                        </t>
 
-                            <!-- Info partenaire connecté -->
-                            <div class="col-12">
-                                <label class="form-label fw-semibold">Compte rattaché</label>
-                                <div class="form-control bg-light text-muted">
-                                    <i class="fa fa-user me-2"/>
-                                    <t t-out="partner.name"/>
-                                    <span class="ms-2 small">(                                        <t t-out="partner.email"/>
+                        <form action="/my/famille/new" method="POST" class="o_portal_details">
+                            <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                            <input type="hidden" name="next" t-att-value="next"/>
+
+                            <div class="row g-3">
+                                <div class="col-12">
+                                    <label for="nom" class="form-label fw-semibold">
+                                        Nom de famille <span class="text-danger">*</span>
+                                    </label>
+                                    <input type="text" name="nom" id="nom" class="form-control form-control-lg" placeholder="Ex : Dupont" required="required" autofocus="autofocus"/>
+                                    <div class="form-text text-muted">
+                                        Le nom qui identifiera votre famille dans le système.
+                                    </div>
+                                </div>
+                                <div class="col-12">
+                                    <label class="form-label fw-semibold">Compte rattaché</label>
+                                    <div class="form-control bg-light text-muted">
+                                        <i class="fa fa-user me-2"/>
+                                        <t t-out="partner.name"/>
+                                        <span class="ms-2 small">(                                            <t t-out="partner.email"/>
 )</span>
-                                </div>
-                                <div class="form-text text-muted">
-                                    Vous serez automatiquement ajouté comme parent de cette famille.
+                                    </div>
+                                    <div class="form-text text-muted">
+                                        Vous serez automatiquement ajouté comme parent de cette famille.
+                                    </div>
                                 </div>
                             </div>
 
-                        </div>
+                            <div class="d-flex gap-2 mt-4 pt-3 border-top">
+                                <button type="submit" class="btn btn-primary btn-lg">
+                                    <i class="fa fa-check me-2"/>
+Créer ma famille et continuer
+                                </button>
+                                <a href="/my/ecolage" class="btn btn-outline-secondary btn-lg">
+                                    <i class="fa fa-arrow-left me-2"/>
+Annuler
+                                </a>
+                            </div>
 
-                        <!-- Boutons -->
-                        <div class="d-flex gap-2 mt-4 pt-3 border-top">
-                            <button type="submit" class="btn btn-primary btn-lg">
-                                <i class="fa fa-check me-2"/>
-                                Créer ma famille et continuer
-                            </button>
-                            <a href="/my/ecolage" class="btn btn-outline-secondary btn-lg">
-                                <i class="fa fa-arrow-left me-2"/>
-                                Annuler
-                            </a>
-                        </div>
-
-                    </form>
-
+                        </form>
+                    </div>
                 </div>
             </div>
-        </div>
+        </t>
+    </template>
 
-    </t>
-</template>
 </odoo>
