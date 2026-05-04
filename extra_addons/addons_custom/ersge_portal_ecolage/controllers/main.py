@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+import secrets
+from datetime import datetime, timedelta
 from odoo import http
 from odoo.http import request
 from odoo.exceptions import AccessError
@@ -6,80 +8,130 @@ import logging
 
 _logger = logging.getLogger(__name__)
 
+
 class PortalEcolage(http.Controller):
 
+    # ==================== UTILITAIRES ====================
     def _get_partner_family(self, partner):
         return request.env['ersge.family'].sudo().search([
             ('parent_ids', 'in', [partner.id])
         ], limit=1)
 
+    # ==================== CRÉATION DE FAMILLE AVEC CHOIX DU RÔLE ====================
+    @http.route('/my/ecolage/family/create', type='http', auth='user', website=True, methods=['GET', 'POST'])
+    def family_create(self, **kwargs):
+        partner = request.env.user.partner_id
+        # Si déjà membre d'une famille, rediriger vers la page des dossiers
+        if partner.family_id:
+            return request.redirect('/my/ecolage')
+
+        if request.httprequest.method == 'POST':
+            name = kwargs.get('name', '').strip()
+            my_role = kwargs.get('my_role')
+            if not name or not my_role or my_role not in ['parent1', 'parent2', 'tutor']:
+                return request.render('ersge_portal_ecolage.portal_famille_create', {
+                    'error': 'Tous les champs sont requis.'
+                })
+            # Création de la famille
+            family = request.env['ersge.family'].sudo().create({'name': name})
+            # Mise à jour du partenaire connecté
+            partner.sudo().write({
+                'family_id': family.id,
+                'family_role': my_role,
+                'is_parent': True if my_role in ['parent1', 'parent2'] else False,
+            })
+            _logger.info(f"[family_create] Famille '{name}' créée par {partner.id} avec rôle {my_role}")
+            # Rediriger vers la page d'invitation des autres membres
+            return request.redirect('/my/ecolage/invite')
+
+        # Affichage du formulaire (GET)
+        return request.render('ersge_portal_ecolage.portal_famille_create', {})
+
+    # ==================== INVITATIONS ====================
+    @http.route('/my/ecolage/invite', type='http', auth='user', website=True, methods=['GET', 'POST'])
+    def invite_partner(self, **kwargs):
+        partner = request.env.user.partner_id
+        if not partner.family_id:
+            return request.redirect('/my/ecolage/family/create')
+        family = partner.family_id
+
+        if request.httprequest.method == 'POST':
+            email = kwargs.get('email', '').strip()
+            role = kwargs.get('role')
+            if not email or role not in ['parent2', 'tutor']:
+                return request.render('ersge_portal_ecolage.portal_invite_form', {
+                    'error': 'Email et rôle valide requis'
+                })
+            token = secrets.token_urlsafe(32)
+            family.sudo().write({
+                'invitation_token': token,
+                'invitation_expiration': datetime.now() + timedelta(days=7),
+                'invited_role': role
+            })
+            invite_link = request.httprequest.host_url + f'/my/ecolage/join?token={token}'
+            # Ici vous devez envoyer un email réel (mail.mail ou template)
+            _logger.info(f"[invite] Invitation envoyée à {email} pour le rôle {role} : {invite_link}")
+            return request.render('ersge_portal_ecolage.portal_invite_sent', {'email': email})
+
+        return request.render('ersge_portal_ecolage.portal_invite_form', {})
+
+    @http.route('/my/ecolage/join', type='http', auth='public', website=True)
+    def join_from_invite(self, token=None, **kwargs):
+        if not token:
+            return request.redirect('/')
+        family = request.env['ersge.family'].sudo().search([('invitation_token', '=', token)], limit=1)
+        if not family or (family.invitation_expiration and family.invitation_expiration < datetime.now()):
+            return request.render('ersge_portal_ecolage.portal_invite_expired', {})
+        # Si l'utilisateur n'est pas connecté, stocker le token en session et rediriger vers login
+        if not request.session.uid:
+            request.session['invitation_token'] = token
+            return request.redirect('/web/login?redirect=/my/ecolage/join/confirm')
+        # Utilisateur déjà connecté
+        partner = request.env.user.partner_id
+        partner.sudo().write({'family_id': family.id})
+        if family.invited_role:
+            partner.sudo().write({'family_role': family.invited_role})
+        family.sudo().write({'invitation_token': False})
+        return request.redirect('/my/ecolage')
+
+    @http.route('/my/ecolage/join/confirm', type='http', auth='user', website=True)
+    def join_confirm(self, **kwargs):
+        token = request.session.get('invitation_token')
+        if not token:
+            return request.redirect('/my/ecolage')
+        family = request.env['ersge.family'].sudo().search([('invitation_token', '=', token)], limit=1)
+        if not family or (family.invitation_expiration and family.invitation_expiration < datetime.now()):
+            return request.render('ersge_portal_ecolage.portal_invite_expired', {})
+        partner = request.env.user.partner_id
+        partner.sudo().write({'family_id': family.id})
+        if family.invited_role:
+            partner.sudo().write({'family_role': family.invited_role})
+        family.sudo().write({'invitation_token': False})
+        request.session.pop('invitation_token', None)
+        return request.redirect('/my/ecolage')
+
+    # ==================== DOSSIERS (routes existantes) ====================
+    # Route de redirection pour les anciens liens /my/famille/new (optionnelle)
     @http.route('/my/famille/new', type='http', auth='user', website=True, methods=['GET', 'POST'])
     def famille_new(self, **kwargs):
-        partner = request.env.user.partner_id
-        next_url = kwargs.get('next', '/my/ecolage/new')
+        # Redirige simplement vers la nouvelle route de création de famille
+        return request.redirect('/my/ecolage/family/create')
 
-        # Si l'utilisateur a déjà une famille, rediriger directement
-        family = self._get_partner_family(partner)
-        if family:
-            return request.redirect(next_url)
-
-        # Traitement POST
-        if request.httprequest.method == 'POST':
-            nom = kwargs.get('nom', '').strip()
-
-            if not nom:
-                return request.render('ersge_portal_ecolage.portal_famille_new', {
-                    'partner': partner,
-                    'next': next_url,
-                    'error': 'Le nom de famille est obligatoire.',
-                })
-
-            try:
-                family = request.env['ersge.family'].sudo().create({
-                    'name': nom,
-                })
-                partner.sudo().write({
-                    'family_id': family.id,
-                    'is_parent': True,
-                })
-                _logger.info(f"[famille_new] Famille '{nom}' créée id={family.id} pour partner={partner.id}")
-                return request.redirect(next_url)
-
-            except Exception as e:
-                _logger.exception(f"[famille_new] ERREUR: {e}")
-                return request.render('ersge_portal_ecolage.portal_famille_new', {
-                    'partner': partner,
-                    'next': next_url,
-                    'error': f"Une erreur est survenue : {str(e)}",
-                })
-
-        # Affichage GET
-        return request.render('ersge_portal_ecolage.portal_famille_new', {
-            'partner': partner,
-            'next': next_url,
-            'error': kwargs.get('error'),
-        })
-
-    # ─── ROUTE EXISTANTE : modifiée pour rediriger au lieu d'afficher erreur ──
     @http.route('/my/ecolage/new', type='http', auth='user', website=True)
     def new_dossier(self, **kwargs):
+        partner = request.env.user.partner_id
+        if not partner.family_id:
+            # Pas de famille, rediriger vers la création
+            return request.redirect('/my/ecolage/family/create')
         try:
-            partner = request.env.user.partner_id
-            family = self._get_partner_family(partner)
-
-            if not family:
-                # ← Redirection vers création famille au lieu du message d'erreur
-                return request.redirect('/my/famille/new?next=/my/ecolage/new')
-
             new = request.env['ersge.dossier.famille'].sudo().with_context(
-                default_family_id=family.id
+                default_family_id=partner.family_id.id
             ).create({
-                'family_id': family.id,
+                'family_id': partner.family_id.id,
                 'annee_scolaire': request.env['ersge.dossier.famille']._get_current_school_year(),
                 'state': 'incomplet',
             })
             return request.redirect(f'/my/ecolage/edit/{new.id}')
-
         except Exception as e:
             _logger.exception(f"[new_dossier] ERREUR: {e}")
             return request.render('ersge_portal_ecolage.portal_my_dossiers', {
@@ -87,7 +139,6 @@ class PortalEcolage(http.Controller):
                 'error': f"Une erreur est survenue : {str(e)}",
             })
 
-    # ─── ROUTES EXISTANTES INCHANGÉES ─────────────────────────────────────────
     @http.route('/my/ecolage', type='http', auth='user', website=True)
     def my_ecolage(self, **kwargs):
         partner = request.env.user.partner_id
@@ -97,7 +148,7 @@ class PortalEcolage(http.Controller):
                 ('family_id', '=', family.id)
             ])
         else:
-            # Fallback : recherche sur parent1/parent2 (ancienne méthode)
+            # Fallback sur les dossiers où l'utilisateur est parent1 ou parent2
             dossiers = request.env['ersge.dossier.famille'].sudo().search([
                 '|',
                 ('parent1_id', '=', partner.id),
@@ -116,22 +167,15 @@ class PortalEcolage(http.Controller):
             if not dossier.exists():
                 return request.redirect('/my/ecolage')
 
-            family = self._get_partner_family(partner)
-            is_parent = (
-                dossier.parent1_id.id == partner.id or
-                dossier.parent2_id.id == partner.id
-            )
-            is_family_member = family and dossier.family_id.id == family.id
-
-            if not (is_parent or is_family_member):
+            # Vérification de l'accès via la famille
+            if not partner.family_id or dossier.family_id.id != partner.family_id.id:
                 raise AccessError("Vous n'avez pas accès à ce dossier.")
 
-            # ================== TRAITEMENT POST ==================
             if request.httprequest.method == 'POST':
                 params = request.params.copy()
                 params.pop('csrf_token', None)
 
-                # 1. Mise à jour des champs simples du dossier (qui existent directement)
+                # Champs simples
                 simple_fields = ['legal_representation', 'legal_representation_other', 'deposit_status',
                                 'employer_assistance', 'send_invoice_to_employer', 'same_address_as_parent1',
                                 'after_school_request', 'reduction_requested', 'requested_discount',
@@ -142,7 +186,7 @@ class PortalEcolage(http.Controller):
                 if dossier_vals:
                     dossier.sudo().write(dossier_vals)
 
-                # 2. Gestion du Parent 1 (création ou mise à jour)
+                # Parent 1 (utilisateur connecté)
                 parent1_vals = {
                     'firstname': params.get('parent1_firstname', ''),
                     'lastname': params.get('parent1_lastname', ''),
@@ -158,14 +202,13 @@ class PortalEcolage(http.Controller):
                     'is_parent': True,
                     'family_id': dossier.family_id.id,
                 }
-                if dossier.parent1_id:
-                    dossier.parent1_id.sudo().write(parent1_vals)
-                else:
-                    # Créer un nouveau partenaire
-                    parent1 = request.env['res.partner'].sudo().create(parent1_vals)
-                    dossier.sudo().write({'parent1_id': parent1.id})
+                fullname = f"{parent1_vals['firstname']} {parent1_vals['lastname']}".strip()
+                parent1_vals['name'] = fullname if fullname else parent1_vals.get('email', 'Parent 1')
+                partner.sudo().write(parent1_vals)
+                if not dossier.parent1_id:
+                    dossier.sudo().write({'parent1_id': partner.id})
 
-                # 3. Gestion du Parent 2
+                # Parent 2
                 if params.get('parent2_firstname') or params.get('parent2_lastname'):
                     parent2_vals = {
                         'firstname': params.get('parent2_firstname', ''),
@@ -179,6 +222,8 @@ class PortalEcolage(http.Controller):
                         'is_parent': True,
                         'family_id': dossier.family_id.id,
                     }
+                    fullname2 = f"{parent2_vals['firstname']} {parent2_vals['lastname']}".strip()
+                    parent2_vals['name'] = fullname2 if fullname2 else parent2_vals.get('email', 'Parent 2')
                     same_addr = params.get('same_address_as_parent1') == '1'
                     if same_addr and dossier.parent1_id:
                         parent2_vals.update({
@@ -196,16 +241,15 @@ class PortalEcolage(http.Controller):
                     if dossier.parent2_id:
                         dossier.parent2_id.sudo().write(parent2_vals)
                     else:
-                        parent2 = request.env['res.partner'].sudo().create(parent2_vals)
-                        dossier.sudo().write({'parent2_id': parent2.id})
+                        new_parent2 = request.env['res.partner'].sudo().create(parent2_vals)
+                        dossier.sudo().write({'parent2_id': new_parent2.id})
 
-                # 4. Gestion des lignes élèves existantes (modification)
+                # Élèves (existants, suppressions, nouveaux)
                 for key, value in params.items():
                     if key.startswith('student_line_id_'):
                         line_id = int(value)
                         line = request.env['ersge.dossier.student.line'].sudo().browse(line_id)
                         if line.exists() and line.dossier_id.id == dossier.id:
-                            # Mise à jour des données de l'élève (student_id)
                             student_vals = {
                                 'firstname': params.get(f'student_firstname_{line_id}', ''),
                                 'lastname': params.get(f'student_lastname_{line_id}', ''),
@@ -214,14 +258,12 @@ class PortalEcolage(http.Controller):
                                 'image_rights': params.get(f'student_image_rights_{line_id}') == '1',
                             }
                             line.student_id.sudo().write(student_vals)
-                            # Mise à jour du forfait sur la ligne
                             forfait_key = f'forfait_id_{line_id}'
                             if forfait_key in params and params[forfait_key]:
                                 line.sudo().write({'forfait_id': int(params[forfait_key])})
                             elif forfait_key in params:
                                 line.sudo().write({'forfait_id': False})
 
-                # 5. Suppression d'élèves
                 for key in list(params.keys()):
                     if key.startswith('delete_student_line_'):
                         line_id = int(key.replace('delete_student_line_', ''))
@@ -229,7 +271,6 @@ class PortalEcolage(http.Controller):
                         if line.exists() and line.dossier_id.id == dossier.id:
                             line.unlink()
 
-                # 6. Ajout de nouveaux élèves
                 new_firstnames = params.getlist('new_student_firstname[]')
                 new_lastnames = params.getlist('new_student_lastname[]')
                 new_birthdates = params.getlist('new_student_birthdate[]')
@@ -250,7 +291,7 @@ class PortalEcolage(http.Controller):
                             'student_id': student.id,
                         })
 
-                # 7. Gestion de l'employeur
+                # Employeur
                 if params.get('employer_assistance') == 'yes' and params.get('send_invoice_to_employer') == '1':
                     employer_vals = {
                         'name': params.get('employer_name', ''),
@@ -260,7 +301,8 @@ class PortalEcolage(http.Controller):
                         'country_id': int(params['employer_country_id']) if params.get('employer_country_id') else False,
                         'is_employer': True,
                     }
-                    # Vérifier si un employeur avec ce nom existe déjà
+                    if not employer_vals['name']:
+                        employer_vals['name'] = 'Employeur'
                     existing = request.env['res.partner'].sudo().search([
                         ('name', '=', employer_vals['name']),
                         ('is_employer', '=', True)
@@ -270,10 +312,9 @@ class PortalEcolage(http.Controller):
                 else:
                     dossier.sudo().write({'employer_id': False})
 
-                # Redirection après sauvegarde
                 return request.redirect('/my/ecolage?success=1')
 
-            # ================== AFFICHAGE GET ==================
+            # GET: afficher le formulaire
             countries = request.env['res.country'].sudo().search([])
             forfaits = request.env['ersge.forfait'].sudo().search([('active', '=', True)])
             return request.render('ersge_portal_ecolage.portal_dossier_form_complete', {

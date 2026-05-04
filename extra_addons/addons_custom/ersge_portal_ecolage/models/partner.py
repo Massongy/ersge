@@ -45,6 +45,12 @@ class Partner(models.Model):
     pronote_id = fields.Char(string="Identifiant ProNote")
     class_level = fields.Char(string="Classe")
 
+    family_role = fields.Selection([
+        ('parent1', 'Parent 1'),
+        ('parent2', 'Parent 2'),
+        ('tutor', 'Tuteur')
+    ], string="Rôle dans la famille", help="Rôle de cette personne dans sa famille")
+
     # Champs computed pour l'affichage
     def name_get(self):
         result = []

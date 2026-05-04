@@ -12,4 +12,117 @@
             </a>
         </xpath>
     </template>
+    <template id="portal_role_selection" name="Choix du rôle">
+        <t t-call="portal.portal_layout">
+            <t t-set="page_title">Quel est votre rôle ?</t>
+            <div class="container mt-4">
+                <form method="post" action="/my/ecolage/role/set">
+                    <input type="hidden" name="csrf_token" t-att-value="csrf_token"/>
+                    <div class="form-group mb-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="role" id="parent1" value="parent1" required="required"/>
+                            <label class="form-check-label" for="parent1">Je suis Parent 1</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="role" id="parent2" value="parent2" required="required"/>
+                            <label class="form-check-label" for="parent2">Je suis Parent 2</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="role" id="tutor" value="tutor" required="required"/>
+                            <label class="form-check-label" for="tutor">Je suis Tuteur / Autre</label>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Continuer</button>
+                </form>
+            </div>
+        </t>
+    </template>
+    <template id="portal_famille_new" name="Nouvelle famille">
+        <t t-call="portal.portal_layout">
+            <t t-set="page_title">Créer ou rejoindre une famille</t>
+            <div class="container mt-4">
+                <div class="alert alert-info">
+                    <i class="fa fa-info-circle me-2"/>
+                Vous pouvez créer une nouvelle famille ou rejoindre une famille existante via un lien d’invitation.
+                </div>
+                <div class="d-flex gap-3">
+                    <a href="/my/ecolage/family/create" class="btn btn-primary">Créer une famille</a>
+                    <a href="/my/ecolage/family/join" class="btn btn-secondary">Rejoindre une famille</a>
+                </div>
+            </div>
+        </t>
+    </template>
+    <template id="portal_famille_create" name="Créer votre famille">
+        <t t-call="portal.portal_layout">
+            <t t-set="page_title">Créer votre famille</t>
+            <div class="container mt-4">
+                <form method="post" action="/my/ecolage/family/create">
+                    <input type="hidden" name="csrf_token" t-att-value="csrf_token"/>
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <label for="name" class="form-label">Nom de la famille <span class="text-danger">*</span>
+                                </label>
+                                <input type="text" name="name" id="name" class="form-control" required="required"/>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Vous êtes : <span class="text-danger">*</span>
+                                </label>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="my_role" id="role_parent1" value="parent1" required="required"/>
+                                    <label class="form-check-label" for="role_parent1">Parent 1</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="my_role" id="role_parent2" value="parent2"/>
+                                    <label class="form-check-label" for="role_parent2">Parent 2</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="my_role" id="role_tutor" value="tutor"/>
+                                    <label class="form-check-label" for="role_tutor">Tuteur</label>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Créer la famille</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </t>
+    </template>
+    <template id="portal_invite_form" name="Inviter un membre">
+        <t t-call="portal.portal_layout">
+            <t t-set="page_title">Inviter un membre</t>
+            <div class="container mt-4">
+                <form method="post" action="/my/ecolage/invite">
+                    <input type="hidden" name="csrf_token" t-att-value="csrf_token"/>
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <label for="email" class="form-label">Adresse email</label>
+                                <input type="email" name="email" id="email" class="form-control" required="required"/>
+                            </div>
+                            <div class="mb-3">
+                                <label for="role" class="form-label">Rôle à attribuer</label>
+                                <select name="role" id="role" class="form-control">
+                                    <option value="parent2">Parent 2</option>
+                                    <option value="tutor">Tuteur</option>
+                                </select>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Envoyer l’invitation</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </t>
+    </template>
+    <template id="portal_invite_sent">
+        <t t-call="portal.portal_layout">
+            <div class="container mt-4">
+                <div class="alert alert-success">
+                Une invitation a été envoyée à <t t-out="email"/>
+.
+                </div>
+                <a href="/my/ecolage" class="btn btn-primary">Retour à mes dossiers</a>
+            </div>
+        </t>
+    </template>
 </odoo>
