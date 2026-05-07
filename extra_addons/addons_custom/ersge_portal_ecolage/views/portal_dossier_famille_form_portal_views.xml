@@ -60,16 +60,15 @@
                                 <div class="accordion-body">
 
 
-
                                     <!-- Représentant légal -->
                                     <div class="card mb-4">
                                         <div class="card-header fw-semibold bg-light">
-                                            <i class="fa fa-gavel me-2"/>
-Représentant légal
+                                            <i class="fa fa-gavel me-2"></i>
+        Représentant légal
                                         </div>
                                         <div class="card-body">
                                             <label class="form-label fw-semibold">
-                                                Qui exerce la représentation légale ?
+            Qui exerce la représentation légale ?
                                                 <span class="text-danger">*</span>
                                             </label>
                                             <div class="d-flex flex-column gap-2">
@@ -90,77 +89,79 @@ Représentant légal
                                                     <label class="form-check-label" for="rep_other">Autre</label>
                                                 </div>
                                             </div>
-                                            <div class="mt-3" id="block_other" t-att-style="'display:' + ('block' if dossier.legal_representation == 'other' else 'none')">
-                                                <div class="card mb-4">
-                                                    <div class="card-header fw-semibold bg-light">
-                                                        <i class="fa fa-user me-2 text-warning"/>
-Autre représentant légal
+                                        </div>
+                                    </div>
+
+                                    <!-- Bloc Autre représentant -->
+                                    <div id="block_other" t-att-style="'display:' + ('block' if dossier.legal_representation == 'other' else 'none')">
+                                        <div class="card mb-4">
+                                            <div class="card-header fw-semibold bg-light">
+                                                <i class="fa fa-user me-2 text-warning"></i>
+            Autre représentant légal
+                                            </div>
+                                            <div class="card-body">
+                                                <div class="row g-3">
+                                                    <div class="col-12">
+                                                        <label class="form-label fw-semibold" for="legal_representation_other">
+                        Précisez <span class="text-danger">*</span>
+                                                        </label>
+                                                        <input type="text" class="form-control" name="legal_representation_other" id="legal_representation_other" placeholder="Ex : Tuteur légal, Curateur..." t-att-value="dossier.legal_representation_other or ''"/>
                                                     </div>
-                                                    <div class="card-body">
-                                                        <div class="row g-3">
-                                                            <div class="col-12">
-                                                                <label class="form-label fw-semibold" for="legal_representation_other">
-        Précisez <span class="text-danger">*</span>
-                                                                </label>
-                                                                <input type="text" class="form-control" name="legal_representation_other" id="legal_representation_other" placeholder="Ex : Tuteur légal, Curateur..." t-att-value="dossier.legal_representation_other or ''"/>
-                                                            </div>
-                                                            <div class="col-md-6">
-                                                                <label class="form-label fw-semibold">Prénom</label>
-                                                                <input type="text" class="form-control" name="parent1_firstname" t-att-value="dossier.parent1_firstname or prefill_tutor.get('firstname', '')"/>
-                                                            </div>
-                                                            <div class="col-md-6">
-                                                                <label class="form-label fw-semibold">Nom</label>
-                                                                <input type="text" class="form-control" name="parent1_lastname" t-att-value="dossier.parent1_lastname or prefill_tutor.get('lastname', '')"/>
-                                                            </div>
-                                                            <div class="col-md-6">
-                                                                <label class="form-label fw-semibold">Email</label>
-                                                                <input type="email" class="form-control" name="parent1_email" t-att-value="dossier.parent1_email or prefill_tutor.get('email', '')"/>
-                                                            </div>
-                                                            <div class="col-md-6">
-                                                                <label class="form-label fw-semibold">Tél. mobile</label>
-                                                                <input type="tel" class="form-control" name="parent1_phone" t-att-value="dossier.parent1_phone or prefill_tutor.get('phone', '')"/>
-                                                            </div>
-                                                            <div class="col-md-6">
-                                                                <label class="form-label fw-semibold">Tél. fixe</label>
-                                                                <input type="tel" class="form-control" name="parent1_phone_fixed" t-att-value="dossier.parent1_phone_fixed or prefill_tutor.get('phone_fixed', '')"/>
-                                                            </div>
-                                                            <div class="col-md-6">
-                                                                <label class="form-label fw-semibold">Tél. professionnel</label>
-                                                                <input type="tel" class="form-control" name="parent1_phone_pro" t-att-value="dossier.parent1_phone_pro or prefill_tutor.get('phone_pro', '')"/>
-                                                            </div>
-                                                            <div class="col-12">
-                                                                <label class="form-label fw-semibold">Rue</label>
-                                                                <input type="text" class="form-control" name="parent1_street" t-att-value="dossier.parent1_street or prefill_tutor.get('street', '')"/>
-                                                            </div>
-                                                            <div class="col-md-4">
-                                                                <label class="form-label fw-semibold">NPA</label>
-                                                                <input type="text" class="form-control" name="parent1_zip" t-att-value="dossier.parent1_zip or prefill_tutor.get('zip', '')"/>
-                                                            </div>
-                                                            <div class="col-md-8">
-                                                                <label class="form-label fw-semibold">Ville</label>
-                                                                <input type="text" class="form-control" name="parent1_city" t-att-value="dossier.parent1_city or prefill_tutor.get('city', '')"/>
-                                                            </div>
-                                                            <div class="col-md-6">
-                                                                <label class="form-label fw-semibold">Profession</label>
-                                                                <input type="text" class="form-control" name="parent1_profession" t-att-value="dossier.parent1_profession or ''"/>
-                                                            </div>
-                                                            <div class="col-md-6">
-                                                                <label class="form-label fw-semibold">Employeur</label>
-                                                                <input type="text" class="form-control" name="parent1_employeur" t-att-value="dossier.parent1_employeur or ''"/>
-                                                            </div>
-                                                        </div>
+                                                    <div class="col-md-6">
+                                                        <label class="form-label fw-semibold">Prénom</label>
+                                                        <input type="text" class="form-control" name="other_firstname" t-att-value="dossier.parent1_firstname or prefill_tutor.get('firstname', '')"/>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <label class="form-label fw-semibold">Nom</label>
+                                                        <input type="text" class="form-control" name="other_lastname" t-att-value="dossier.parent1_lastname or prefill_tutor.get('lastname', '')"/>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <label class="form-label fw-semibold">Email</label>
+                                                        <input type="email" class="form-control" name="other_email" t-att-value="dossier.parent1_email or prefill_tutor.get('email', '')"/>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <label class="form-label fw-semibold">Tél. mobile</label>
+                                                        <input type="tel" class="form-control" name="other_phone" t-att-value="dossier.parent1_phone or prefill_tutor.get('phone', '')"/>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <label class="form-label fw-semibold">Tél. fixe</label>
+                                                        <input type="tel" class="form-control" name="other_phone_fixed" t-att-value="dossier.parent1_phone_fixed or prefill_tutor.get('phone_fixed', '')"/>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <label class="form-label fw-semibold">Tél. professionnel</label>
+                                                        <input type="tel" class="form-control" name="other_phone_pro" t-att-value="dossier.parent1_phone_pro or prefill_tutor.get('phone_pro', '')"/>
+                                                    </div>
+                                                    <div class="col-12">
+                                                        <label class="form-label fw-semibold">Rue</label>
+                                                        <input type="text" class="form-control" name="other_street" t-att-value="dossier.parent1_street or prefill_tutor.get('street', '')"/>
+                                                    </div>
+                                                    <div class="col-md-4">
+                                                        <label class="form-label fw-semibold">NPA</label>
+                                                        <input type="text" class="form-control" name="other_zip" t-att-value="dossier.parent1_zip or prefill_tutor.get('zip', '')"/>
+                                                    </div>
+                                                    <div class="col-md-8">
+                                                        <label class="form-label fw-semibold">Ville</label>
+                                                        <input type="text" class="form-control" name="other_city" t-att-value="dossier.parent1_city or prefill_tutor.get('city', '')"/>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <label class="form-label fw-semibold">Profession</label>
+                                                        <input type="text" class="form-control" name="other_profession" t-att-value="dossier.parent1_profession or ''"/>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <label class="form-label fw-semibold">Employeur</label>
+                                                        <input type="text" class="form-control" name="other_employeur" t-att-value="dossier.parent1_employeur or ''"/>
                                                     </div>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
 
-                                    <!-- Parent 1 -->
-                                    <div id="block_parent1" t-att-style="'display:' + ('block' if dossier.legal_representation in ('both','parent1') else 'none')">
+                                    <!-- Bloc Parent 1 -->
+                                    <div id="block_parent1" t-att-style="'display:' + ('block' if dossier.legal_representation in ('both', 'father_only') else 'none')">
                                         <div class="card mb-4">
                                             <div class="card-header fw-semibold bg-light">
-                                                <i class="fa fa-user me-2 text-primary"/>
-Père / Parent 1
+                                                <i class="fa fa-user me-2 text-primary"></i>
+            Parent 1
                                             </div>
                                             <div class="card-body">
                                                 <div class="row g-3">
@@ -213,12 +214,12 @@ Père / Parent 1
                                         </div>
                                     </div>
 
-                                    <!-- Parent 2 -->
-                                    <div id="block_parent2" t-att-style="'display:' + ('block' if dossier.legal_representation in ('both','parent2') else 'none')">
+                                    <!-- Bloc Parent 2 -->
+                                    <div id="block_parent2" t-att-style="'display:' + ('block' if dossier.legal_representation in ('both', 'mother_only') else 'none')">
                                         <div class="card mb-4">
                                             <div class="card-header fw-semibold bg-light">
-                                                <i class="fa fa-user me-2 text-success"/>
-Mère / Parent 2
+                                                <i class="fa fa-user me-2 text-success"></i>
+            Parent 2
                                             </div>
                                             <div class="card-body">
                                                 <div class="row g-3">
@@ -240,7 +241,7 @@ Mère / Parent 2
                                                     </div>
                                                     <div class="col-md-6">
                                                         <label class="form-label fw-semibold">Tél. fixe</label>
-                                                        <input type="tel" class="form-control" name="parent2_phone_fixed" t-att-value="dossier.parent2_phone_fixed or prefill_parent2.get('phone_fixed', '')    "/>
+                                                        <input type="tel" class="form-control" name="parent2_phone_fixed" t-att-value="dossier.parent2_phone_fixed or prefill_parent2.get('phone_fixed', '')"/>
                                                     </div>
                                                     <div class="col-md-6">
                                                         <label class="form-label fw-semibold">Tél. professionnel</label>
@@ -250,7 +251,7 @@ Mère / Parent 2
                                                         <div class="form-check">
                                                             <input class="form-check-input" type="checkbox" name="same_address_as_parent1" id="same_address_as_parent1" value="1" t-att-checked="dossier.same_address_as_parent1"/>
                                                             <label class="form-check-label fw-semibold" for="same_address_as_parent1">
-                                                                Même adresse que le parent 1
+                            Même adresse que le parent 1
                                                             </label>
                                                         </div>
                                                     </div>
@@ -282,12 +283,13 @@ Mère / Parent 2
                                             </div>
                                         </div>
                                     </div>
+
                                     <div class="alert alert-info">
-                                        <i class="fa fa-info-circle me-2"/>
-                                        Cotisation annuelle à l'Association en faveur de l'école Rudolf Steiner de Genève :
+                                        <i class="fa fa-info-circle me-2"></i>
+    Cotisation annuelle à l'Association en faveur de l'école Rudolf Steiner de Genève :
                                         <strong>Individuelle 40 CHF</strong>,
                                         <strong>Couple 60 CHF</strong>,
-                                        Curateur/trice et Tuteur/trice <strong>Gratuit</strong>.
+    Curateur/trice et Tuteur/trice <strong>Gratuit</strong>.
                                     </div>
                                     <!-- Dépôt -->
                                     <div class="card mb-2">
@@ -534,7 +536,7 @@ Aide employeur
                                                                     <select class="form-select" name="employer_country_id" id="employer_country_id">
                                                                         <option value="">-- Sélectionner un pays --</option>
                                                                         <t t-foreach="countries" t-as="country">
-                                                                            <option t-att-value="country.id" t-att-selected="dossier.employer_country_id == country.id">
+                                                                            <option t-att-value="country.id" t-att-selected="dossier.employer_country_id.id == country.id">
                                                                                 <t t-out="country.name"/>
                                                                             </option>
                                                                         </t>
@@ -653,7 +655,7 @@ Annuler
     </div>
 
     <script type="text/javascript">
-//                                                                                                                                                                <![CDATA[
+//                                                                                                                                                                                                                <![CDATA[
 document.addEventListener('DOMContentLoaded', function () {
     function initForm() {
         // ---- Représentant légal ----
