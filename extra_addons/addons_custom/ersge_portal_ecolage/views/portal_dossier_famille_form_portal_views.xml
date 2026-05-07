@@ -91,6 +91,13 @@
                                             </div>
                                         </div>
                                     </div>
+                                    <div class="alert alert-info">
+                                        <i class="fa fa-info-circle me-2"></i>
+    Cotisation annuelle à l'Association en faveur de l'école Rudolf Steiner de Genève :
+                                        <strong>Individuelle 40 CHF</strong>,
+                                        <strong>Couple 60 CHF</strong>,
+    Curateur/trice et Tuteur/trice <strong>Gratuit</strong>.
+                                    </div>
 
                                     <!-- Bloc Autre représentant (corrigé) -->
                                     <div id="block_other" t-att-style="'display:' + ('block' if dossier.legal_representation == 'other' else 'none')">
@@ -283,13 +290,7 @@
                                         </div>
                                     </div>
 
-                                    <div class="alert alert-info">
-                                        <i class="fa fa-info-circle me-2"></i>
-    Cotisation annuelle à l'Association en faveur de l'école Rudolf Steiner de Genève :
-                                        <strong>Individuelle 40 CHF</strong>,
-                                        <strong>Couple 60 CHF</strong>,
-    Curateur/trice et Tuteur/trice <strong>Gratuit</strong>.
-                                    </div>
+
                                     <!-- Dépôt -->
                                     <div class="card mb-2">
                                         <div class="card-header fw-semibold bg-light">
@@ -654,7 +655,7 @@ Annuler
     </div>
 
     <script type="text/javascript">
-//                                                                                                                                                                                                                        <![CDATA[
+//                                                                                                                                                                                                                                        <![CDATA[
 document.addEventListener('DOMContentLoaded', function () {
     function initForm() {
         // ---- Représentant légal ----
