@@ -21,7 +21,6 @@ class PortalEcolage(http.Controller):
     @http.route('/my/ecolage/family/create', type='http', auth='user', website=True, methods=['GET', 'POST'], csrf=False)
     def family_create(self, **kwargs):
         partner = request.env.user.partner_id
-        # Si déjà membre d'une famille, rediriger vers la page des dossiers
         if partner.family_id:
             return request.redirect('/my/ecolage')
 
@@ -31,23 +30,35 @@ class PortalEcolage(http.Controller):
             if not name or not my_role or my_role not in ['parent1', 'parent2', 'tutor']:
                 return request.render('ersge_portal_ecolage.portal_famille_create', {
                     'error': 'Tous les champs sont requis.',
-                    'csrf_token': request.csrf_token()   # ← AJOUT
+                    'csrf_token': request.csrf_token()
                 })
-            # Création de la famille
+
+            # Création famille
             family = request.env['ersge.family'].sudo().create({'name': name})
-            # Mise à jour du partenaire connecté
             partner.sudo().write({
                 'family_id': family.id,
                 'family_role': my_role,
-                'is_parent': True if my_role in ['parent1', 'parent2'] else False,
+                'is_parent': my_role in ['parent1', 'parent2'],
             })
-            _logger.info(f"[family_create] Famille '{name}' créée par {partner.id} avec rôle {my_role}")
-            # Rediriger vers la page d'invitation des autres membres
-            return request.redirect('/my/ecolage/invite')
 
-        # Affichage du formulaire (GET)
+            # ✅ Création immédiate du dossier
+            new_dossier = request.env['ersge.dossier.famille'].sudo().with_context(
+                default_family_id=family.id
+            ).create({
+                'family_id': family.id,
+                'annee_scolaire': request.env['ersge.dossier.famille']._get_current_school_year(),
+                'state': 'incomplet',
+            })
+
+            # ✅ Si parent1 ou parent2 : proposer l'invitation (page intermédiaire)
+            # Si tuteur : aller directement au dossier
+            if my_role in ['parent1', 'parent2']:
+                return request.redirect(f'/my/ecolage/invite?dossier_id={new_dossier.id}')
+            else:
+                return request.redirect(f'/my/ecolage/edit/{new_dossier.id}')
+
         return request.render('ersge_portal_ecolage.portal_famille_create', {
-            'csrf_token': request.csrf_token()   # ← AJOUT
+            'csrf_token': request.csrf_token()
         })
 
     # ==================== INVITATIONS ====================
@@ -56,30 +67,69 @@ class PortalEcolage(http.Controller):
         partner = request.env.user.partner_id
         if not partner.family_id:
             return request.redirect('/my/ecolage/family/create')
+
+        # ✅ Tuteur : pas d'accès à cette page
+        if partner.family_role == 'tutor':
+            return request.redirect('/my/ecolage')
+
         family = partner.family_id
+        dossier_id = kwargs.get('dossier_id')  # passé en query string depuis family_create
 
         if request.httprequest.method == 'POST':
             email = kwargs.get('email', '').strip()
             role = kwargs.get('role')
-            if not email or role not in ['parent2', 'tutor']:
+            dossier_id = kwargs.get('dossier_id')
+
+            # ✅ Bouton "Passer cette étape" : soumis sans email
+            if not email:
+                if dossier_id:
+                    return request.redirect(f'/my/ecolage/edit/{dossier_id}')
+                return request.redirect('/my/ecolage')
+
+            if role not in ['parent2', 'tutor']:
                 return request.render('ersge_portal_ecolage.portal_invite_form', {
-                    'error': 'Email et rôle valide requis',
-                    'csrf_token': request.csrf_token()   # ← AJOUT
+                    'error': 'Rôle invalide.',
+                    'dossier_id': dossier_id,
+                    'csrf_token': request.csrf_token()
                 })
+
+            # Générer et stocker le token
             token = secrets.token_urlsafe(32)
             family.sudo().write({
                 'invitation_token': token,
                 'invitation_expiration': datetime.now() + timedelta(days=7),
-                'invited_role': role
+                'invited_role': role,
             })
-            invite_link = request.httprequest.host_url + f'/my/ecolage/join?token={token}'
-            _logger.info(f"[invite] Invitation envoyée à {email} pour le rôle {role} : {invite_link}")
-            return request.render('ersge_portal_ecolage.portal_invite_sent', {'email': email})
 
-        # GET : afficher le formulaire avec le token CSRF
+            # Envoyer l'email
+            invite_link = request.httprequest.host_url.rstrip('/') + f'/my/ecolage/join?token={token}'
+            try:
+                request.env['mail.mail'].sudo().create({
+                    'subject': f"Invitation à rejoindre la famille {family.name}",
+                    'email_to': email,
+                    'body_html': f"""
+                        <p>Bonjour,</p>
+                        <p>Vous avez été invité(e) à rejoindre la famille <strong>{family.name}</strong>
+                        en tant que <strong>{role}</strong>.</p>
+                        <p><a href="{invite_link}">Cliquez ici pour accepter l'invitation</a></p>
+                        <p>Ce lien expire dans 7 jours.</p>
+                    """,
+                    'auto_delete': True,
+                }).send()
+            except Exception as e:
+                _logger.exception(f"[invite] Erreur envoi email : {e}")
+
+            # ✅ Rediriger vers le dossier après envoi
+            if dossier_id:
+                return request.redirect(f'/my/ecolage/edit/{dossier_id}')
+            return request.redirect('/my/ecolage')
+
+        # GET
         return request.render('ersge_portal_ecolage.portal_invite_form', {
-            'csrf_token': request.csrf_token()   # ← AJOUT
+            'dossier_id': dossier_id,
+            'csrf_token': request.csrf_token()
         })
+    
     @http.route('/my/ecolage/join', type='http', auth='public', website=True)
     def join_from_invite(self, token=None, **kwargs):
         if not token:
