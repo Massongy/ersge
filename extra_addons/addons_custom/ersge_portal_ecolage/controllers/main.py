@@ -226,9 +226,7 @@ class PortalEcolage(http.Controller):
                 raise AccessError("Vous n'avez pas accès à ce dossier.")
 
             if request.httprequest.method == 'POST':
-                # Pour les champs simples, on peut utiliser request.params (dict)
                 params = request.params
-                # Pour les listes (new_student_*[]), on utilise request.httprequest.form (MultiDict)
                 form = request.httprequest.form
 
                 _logger.warning("=== POST RECU ===")
@@ -248,27 +246,42 @@ class PortalEcolage(http.Controller):
 
                 # 2. Parent 1
                 parent1_vals = {
-                    'firstname': params.get('parent1_firstname', ''),
-                    'lastname': params.get('parent1_lastname', ''),
-                    'email': params.get('parent1_email', ''),
-                    'phone': params.get('parent1_phone', ''),
-                    'phone_fixed': params.get('parent1_phone_fixed', ''),
-                    'phone_pro': params.get('parent1_phone_pro', ''),
-                    'street': params.get('parent1_street', ''),
-                    'zip': params.get('parent1_zip', ''),
-                    'city': params.get('parent1_city', ''),
-                    'profession': params.get('parent1_profession', ''),
-                    'employer_name': params.get('parent1_employeur', ''),
+                    'firstname': params.get('parent1_firstname', '').strip(),
+                    'lastname': params.get('parent1_lastname', '').strip(),
+                    'email': params.get('parent1_email', '').strip(),
+                    'phone': params.get('parent1_phone', '').strip(),
+                    'phone_fixed': params.get('parent1_phone_fixed', '').strip(),
+                    'phone_pro': params.get('parent1_phone_pro', '').strip(),
+                    'street': params.get('parent1_street', '').strip(),
+                    'zip': params.get('parent1_zip', '').strip(),
+                    'city': params.get('parent1_city', '').strip(),
+                    'profession': params.get('parent1_profession', '').strip(),
+                    'employer_name': params.get('parent1_employeur', '').strip(),
                     'is_parent': True,
                     'family_id': dossier.family_id.id,
+                    'family_role': 'parent1',
                 }
                 fullname = f"{parent1_vals['firstname']} {parent1_vals['lastname']}".strip()
                 parent1_vals['name'] = fullname if fullname else parent1_vals.get('email', 'Parent 1')
+
                 if dossier.parent1_id:
                     dossier.parent1_id.sudo().write(parent1_vals)
                 else:
-                    new_parent1 = request.env['res.partner'].sudo().create(parent1_vals)
-                    dossier.sudo().write({'parent1_id': new_parent1.id})
+                    if partner.family_role == 'parent1' and partner.family_id.id == dossier.family_id.id:
+                        partner.sudo().write(parent1_vals)
+                        dossier.sudo().write({'parent1_id': partner.id})
+                    else:
+                        existing = request.env['res.partner'].sudo().search([
+                            ('firstname', '=', parent1_vals['firstname']),
+                            ('lastname', '=', parent1_vals['lastname']),
+                            ('family_id', '=', dossier.family_id.id),
+                        ], limit=1)
+                        if existing:
+                            existing.sudo().write(parent1_vals)
+                            dossier.sudo().write({'parent1_id': existing.id})
+                        else:
+                            new_parent1 = request.env['res.partner'].sudo().create(parent1_vals)
+                            dossier.sudo().write({'parent1_id': new_parent1.id})
 
                 # 3. Parent 2
                 if params.get('parent2_firstname') or params.get('parent2_lastname'):
@@ -306,7 +319,7 @@ class PortalEcolage(http.Controller):
                         new_parent2 = request.env['res.partner'].sudo().create(parent2_vals)
                         dossier.sudo().write({'parent2_id': new_parent2.id})
 
-                # 4. Élèves existants (modifier)
+                # 4. Élèves existants
                 for key in list(params.keys()):
                     if key.startswith('student_line_id_'):
                         line_id = int(params.get(key))
@@ -334,7 +347,7 @@ class PortalEcolage(http.Controller):
                         if line.exists() and line.dossier_id.id == dossier.id:
                             line.unlink()
 
-                # 6. Ajout de nouveaux élèves (utilisation de form.getlist)
+                # 6. Ajout de nouveaux élèves
                 new_firstnames = form.getlist('new_student_firstname[]')
                 new_lastnames = form.getlist('new_student_lastname[]')
                 new_birthdates = form.getlist('new_student_birthdate[]')
@@ -378,11 +391,61 @@ class PortalEcolage(http.Controller):
 
                 return request.redirect('/my/ecolage?success=1')
 
-            # GET
+            # ✅ GET — pré-remplir depuis le partenaire connecté
+            prefill_firstname = partner.firstname or ''
+            prefill_lastname = partner.lastname or partner.name or ''
+
+            prefill_parent1 = {}
+            if not dossier.parent1_id and partner.family_role in ['parent1', 'parent2']:
+                prefill_parent1 = {
+                    'firstname': prefill_firstname,
+                    'lastname': prefill_lastname,
+                    'email': partner.email or '',
+                    'phone': partner.phone or '',
+                    'phone_fixed': getattr(partner, 'phone_fixed', '') or '',
+                    'phone_pro': getattr(partner, 'phone_pro', '') or '',
+                    'street': partner.street or '',
+                    'zip': partner.zip or '',
+                    'city': partner.city or '',
+                }
+
+            prefill_parent2 = {}
+            if not dossier.parent2_id and partner.family_role == 'parent2':
+                prefill_parent2 = {
+                    'firstname': prefill_firstname,
+                    'lastname': prefill_lastname,
+                    'email': partner.email or '',
+                    'phone': partner.phone or '',
+                    'phone_fixed': getattr(partner, 'phone_fixed', '') or '',
+                    'phone_pro': getattr(partner, 'phone_pro', '') or '',
+                    'street': partner.street or '',
+                    'zip': partner.zip or '',
+                    'city': partner.city or '',
+                }
+
+            prefill_tutor = {}
+            if not dossier.parent1_id and partner.family_role == 'tutor':
+                prefill_tutor = {
+                    'firstname': prefill_firstname,
+                    'lastname': prefill_lastname,
+                    'email': partner.email or '',
+                    'phone': partner.phone or '',
+                    'phone_fixed': getattr(partner, 'phone_fixed', '') or '',
+                    'phone_pro': getattr(partner, 'phone_pro', '') or '',
+                    'street': partner.street or '',
+                    'zip': partner.zip or '',
+                    'city': partner.city or '',
+                }
+
+            _logger.warning(f"[prefill] name={partner.name} firstname={prefill_firstname} lastname={prefill_lastname} parent1_id={dossier.parent1_id.id if dossier.parent1_id else 'VIDE'} role={partner.family_role}")
+
             countries = request.env['res.country'].sudo().search([])
             forfaits = request.env['ersge.forfait'].sudo().search([('active', '=', True)])
             return request.render('ersge_portal_ecolage.portal_dossier_form_complete', {
                 'dossier': dossier,
+                'prefill_parent1': prefill_parent1,
+                'prefill_parent2': prefill_parent2,
+                'prefill_tutor': prefill_tutor,
                 'csrf_token': request.csrf_token(),
                 'countries': countries,
                 'forfaits': forfaits,

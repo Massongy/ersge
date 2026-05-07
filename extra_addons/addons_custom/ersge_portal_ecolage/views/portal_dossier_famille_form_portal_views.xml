@@ -100,45 +100,45 @@ Autre représentant légal
                                                         <div class="row g-3">
                                                             <div class="col-12">
                                                                 <label class="form-label fw-semibold" for="legal_representation_other">
-                        Précisez <span class="text-danger">*</span>
+        Précisez <span class="text-danger">*</span>
                                                                 </label>
                                                                 <input type="text" class="form-control" name="legal_representation_other" id="legal_representation_other" placeholder="Ex : Tuteur légal, Curateur..." t-att-value="dossier.legal_representation_other or ''"/>
                                                             </div>
                                                             <div class="col-md-6">
                                                                 <label class="form-label fw-semibold">Prénom</label>
-                                                                <input type="text" class="form-control" name="parent1_firstname" t-att-value="dossier.parent1_firstname or ''"/>
+                                                                <input type="text" class="form-control" name="parent1_firstname" t-att-value="dossier.parent1_firstname or prefill_tutor.get('firstname', '')"/>
                                                             </div>
                                                             <div class="col-md-6">
                                                                 <label class="form-label fw-semibold">Nom</label>
-                                                                <input type="text" class="form-control" name="parent1_lastname" t-att-value="dossier.parent1_lastname or ''"/>
+                                                                <input type="text" class="form-control" name="parent1_lastname" t-att-value="dossier.parent1_lastname or prefill_tutor.get('lastname', '')"/>
                                                             </div>
                                                             <div class="col-md-6">
                                                                 <label class="form-label fw-semibold">Email</label>
-                                                                <input type="email" class="form-control" name="parent1_email" t-att-value="dossier.parent1_email or ''"/>
+                                                                <input type="email" class="form-control" name="parent1_email" t-att-value="dossier.parent1_email or prefill_tutor.get('email', '')"/>
                                                             </div>
                                                             <div class="col-md-6">
                                                                 <label class="form-label fw-semibold">Tél. mobile</label>
-                                                                <input type="tel" class="form-control" name="parent1_phone" t-att-value="dossier.parent1_phone or ''"/>
+                                                                <input type="tel" class="form-control" name="parent1_phone" t-att-value="dossier.parent1_phone or prefill_tutor.get('phone', '')"/>
                                                             </div>
                                                             <div class="col-md-6">
                                                                 <label class="form-label fw-semibold">Tél. fixe</label>
-                                                                <input type="tel" class="form-control" name="parent1_phone_fixed" t-att-value="dossier.parent1_phone_fixed or ''"/>
+                                                                <input type="tel" class="form-control" name="parent1_phone_fixed" t-att-value="dossier.parent1_phone_fixed or prefill_tutor.get('phone_fixed', '')"/>
                                                             </div>
                                                             <div class="col-md-6">
                                                                 <label class="form-label fw-semibold">Tél. professionnel</label>
-                                                                <input type="tel" class="form-control" name="parent1_phone_pro" t-att-value="dossier.parent1_phone_pro or ''"/>
+                                                                <input type="tel" class="form-control" name="parent1_phone_pro" t-att-value="dossier.parent1_phone_pro or prefill_tutor.get('phone_pro', '')"/>
                                                             </div>
                                                             <div class="col-12">
                                                                 <label class="form-label fw-semibold">Rue</label>
-                                                                <input type="text" class="form-control" name="parent1_street" t-att-value="dossier.parent1_street or ''"/>
+                                                                <input type="text" class="form-control" name="parent1_street" t-att-value="dossier.parent1_street or prefill_tutor.get('street', '')"/>
                                                             </div>
                                                             <div class="col-md-4">
                                                                 <label class="form-label fw-semibold">NPA</label>
-                                                                <input type="text" class="form-control" name="parent1_zip" t-att-value="dossier.parent1_zip or ''"/>
+                                                                <input type="text" class="form-control" name="parent1_zip" t-att-value="dossier.parent1_zip or prefill_tutor.get('zip', '')"/>
                                                             </div>
                                                             <div class="col-md-8">
                                                                 <label class="form-label fw-semibold">Ville</label>
-                                                                <input type="text" class="form-control" name="parent1_city" t-att-value="dossier.parent1_city or ''"/>
+                                                                <input type="text" class="form-control" name="parent1_city" t-att-value="dossier.parent1_city or prefill_tutor.get('city', '')"/>
                                                             </div>
                                                             <div class="col-md-6">
                                                                 <label class="form-label fw-semibold">Profession</label>
@@ -166,47 +166,47 @@ Père / Parent 1
                                                 <div class="row g-3">
                                                     <div class="col-md-6">
                                                         <label class="form-label fw-semibold">Prénom</label>
-                                                        <input type="text" class="form-control" name="parent1_firstname" t-att-value="dossier.parent1_firstname or ''"/>
+                                                        <input type="text" class="form-control" name="parent1_firstname" t-att-value="dossier.parent1_firstname or prefill_parent1.get('firstname', '')"/>
                                                     </div>
                                                     <div class="col-md-6">
                                                         <label class="form-label fw-semibold">Nom</label>
-                                                        <input type="text" class="form-control" name="parent1_lastname" t-att-value="dossier.parent1_lastname or ''"/>
+                                                        <input type="text" class="form-control" name="parent1_lastname" t-att-value="dossier.parent1_lastname or prefill_parent1.get('lastname', '')"/>
                                                     </div>
                                                     <div class="col-md-6">
                                                         <label class="form-label fw-semibold">Email</label>
-                                                        <input type="email" class="form-control" name="parent1_email" t-att-value="dossier.parent1_email or ''"/>
+                                                        <input type="email" class="form-control" name="parent1_email" t-att-value="dossier.parent1_email or prefill_parent1.get('email', '')"/>
                                                     </div>
                                                     <div class="col-md-6">
                                                         <label class="form-label fw-semibold">Tél. mobile</label>
-                                                        <input type="tel" class="form-control" name="parent1_phone" t-att-value="dossier.parent1_phone or ''"/>
+                                                        <input type="tel" class="form-control" name="parent1_phone" t-att-value="dossier.parent1_phone or prefill_parent1.get('phone', '')"/>
                                                     </div>
                                                     <div class="col-md-6">
                                                         <label class="form-label fw-semibold">Tél. fixe</label>
-                                                        <input type="tel" class="form-control" name="parent1_phone_fixed" t-att-value="dossier.parent1_phone_fixed or ''"/>
+                                                        <input type="tel" class="form-control" name="parent1_phone_fixed" t-att-value="dossier.parent1_phone_fixed or prefill_parent1.get('phone_fixed', '')"/>
                                                     </div>
                                                     <div class="col-md-6">
                                                         <label class="form-label fw-semibold">Tél. professionnel</label>
-                                                        <input type="tel" class="form-control" name="parent1_phone_pro" t-att-value="dossier.parent1_phone_pro or ''"/>
+                                                        <input type="tel" class="form-control" name="parent1_phone_pro" t-att-value="dossier.parent1_phone_pro or prefill_parent1.get('phone_pro', '')"/>
                                                     </div>
                                                     <div class="col-12">
                                                         <label class="form-label fw-semibold">Rue</label>
-                                                        <input type="text" class="form-control" name="parent1_street" t-att-value="dossier.parent1_street or ''"/>
+                                                        <input type="text" class="form-control" name="parent1_street" t-att-value="dossier.parent1_street or prefill_parent1.get('street', '')"/>
                                                     </div>
                                                     <div class="col-md-4">
                                                         <label class="form-label fw-semibold">NPA</label>
-                                                        <input type="text" class="form-control" name="parent1_zip" t-att-value="dossier.parent1_zip or ''"/>
+                                                        <input type="text" class="form-control" name="parent1_zip" t-att-value="dossier.parent1_zip or prefill_parent1.get('zip', '')"/>
                                                     </div>
                                                     <div class="col-md-8">
                                                         <label class="form-label fw-semibold">Ville</label>
-                                                        <input type="text" class="form-control" name="parent1_city" t-att-value="dossier.parent1_city or ''"/>
+                                                        <input type="text" class="form-control" name="parent1_city" t-att-value="dossier.parent1_city or prefill_parent1.get('city', '')"/>
                                                     </div>
                                                     <div class="col-md-6">
                                                         <label class="form-label fw-semibold">Profession</label>
-                                                        <input type="text" class="form-control" name="parent1_profession" t-att-value="dossier.parent1_profession or ''"/>
+                                                        <input type="text" class="form-control" name="parent1_profession" t-att-value="dossier.parent1_profession or prefill_parent1.get('profession', '')"/>
                                                     </div>
                                                     <div class="col-md-6">
                                                         <label class="form-label fw-semibold">Employeur</label>
-                                                        <input type="text" class="form-control" name="parent1_employeur" t-att-value="dossier.parent1_employeur or ''"/>
+                                                        <input type="text" class="form-control" name="parent1_employeur" t-att-value="dossier.parent1_employeur or prefill_parent1.get('employeur', '')"/>
                                                     </div>
                                                 </div>
                                             </div>
@@ -224,27 +224,27 @@ Mère / Parent 2
                                                 <div class="row g-3">
                                                     <div class="col-md-6">
                                                         <label class="form-label fw-semibold">Prénom</label>
-                                                        <input type="text" class="form-control" name="parent2_firstname" t-att-value="dossier.parent2_firstname or ''"/>
+                                                        <input type="text" class="form-control" name="parent2_firstname" t-att-value="dossier.parent2_firstname or prefill_parent2.get('firstname', '')"/>
                                                     </div>
                                                     <div class="col-md-6">
                                                         <label class="form-label fw-semibold">Nom</label>
-                                                        <input type="text" class="form-control" name="parent2_lastname" t-att-value="dossier.parent2_lastname or ''"/>
+                                                        <input type="text" class="form-control" name="parent2_lastname" t-att-value="dossier.parent2_lastname or prefill_parent2.get('lastname', '')"/>
                                                     </div>
                                                     <div class="col-md-6">
                                                         <label class="form-label fw-semibold">Email</label>
-                                                        <input type="email" class="form-control" name="parent2_email" t-att-value="dossier.parent2_email or ''"/>
+                                                        <input type="email" class="form-control" name="parent2_email" t-att-value="dossier.parent2_email or prefill_parent2.get('email', '')"/>
                                                     </div>
                                                     <div class="col-md-6">
                                                         <label class="form-label fw-semibold">Tél. mobile</label>
-                                                        <input type="tel" class="form-control" name="parent2_phone" t-att-value="dossier.parent2_phone or ''"/>
+                                                        <input type="tel" class="form-control" name="parent2_phone" t-att-value="dossier.parent2_phone or prefill_parent2.get('phone', '')"/>
                                                     </div>
                                                     <div class="col-md-6">
                                                         <label class="form-label fw-semibold">Tél. fixe</label>
-                                                        <input type="tel" class="form-control" name="parent2_phone_fixed" t-att-value="dossier.parent2_phone_fixed or ''"/>
+                                                        <input type="tel" class="form-control" name="parent2_phone_fixed" t-att-value="dossier.parent2_phone_fixed or prefill_parent2.get('phone_fixed', '')    "/>
                                                     </div>
                                                     <div class="col-md-6">
                                                         <label class="form-label fw-semibold">Tél. professionnel</label>
-                                                        <input type="tel" class="form-control" name="parent2_phone_pro" t-att-value="dossier.parent2_phone_pro or ''"/>
+                                                        <input type="tel" class="form-control" name="parent2_phone_pro" t-att-value="dossier.parent2_phone_pro or prefill_parent2.get('phone_pro', '')"/>
                                                     </div>
                                                     <div class="col-12">
                                                         <div class="form-check">
@@ -258,25 +258,25 @@ Mère / Parent 2
                                                         <div class="row g-3">
                                                             <div class="col-12">
                                                                 <label class="form-label fw-semibold">Rue</label>
-                                                                <input type="text" class="form-control" name="parent2_street" t-att-value="dossier.parent2_street or ''"/>
+                                                                <input type="text" class="form-control" name="parent2_street" t-att-value="dossier.parent2_street or prefill_parent2.get('street', '')"/>
                                                             </div>
                                                             <div class="col-md-4">
                                                                 <label class="form-label fw-semibold">NPA</label>
-                                                                <input type="text" class="form-control" name="parent2_zip" t-att-value="dossier.parent2_zip or ''"/>
+                                                                <input type="text" class="form-control" name="parent2_zip" t-att-value="dossier.parent2_zip or prefill_parent2.get('zip', '')"/>
                                                             </div>
                                                             <div class="col-md-8">
                                                                 <label class="form-label fw-semibold">Ville</label>
-                                                                <input type="text" class="form-control" name="parent2_city" t-att-value="dossier.parent2_city or ''"/>
+                                                                <input type="text" class="form-control" name="parent2_city" t-att-value="dossier.parent2_city or prefill_parent2.get('city', '')"/>
                                                             </div>
                                                         </div>
                                                     </div>
                                                     <div class="col-md-6">
                                                         <label class="form-label fw-semibold">Profession</label>
-                                                        <input type="text" class="form-control" name="parent2_profession" t-att-value="dossier.parent2_profession or ''"/>
+                                                        <input type="text" class="form-control" name="parent2_profession" t-att-value="dossier.parent2_profession or prefill_parent2.get('profession', '')"/>
                                                     </div>
                                                     <div class="col-md-6">
                                                         <label class="form-label fw-semibold">Employeur</label>
-                                                        <input type="text" class="form-control" name="parent2_employeur" t-att-value="dossier.parent2_employeur or ''"/>
+                                                        <input type="text" class="form-control" name="parent2_employeur" t-att-value="dossier.parent2_employeur or prefill_parent2.get('employeur', '')"/>
                                                     </div>
                                                 </div>
                                             </div>
@@ -653,7 +653,7 @@ Annuler
     </div>
 
     <script type="text/javascript">
-//                                                                                                                                        <![CDATA[
+//                                                                                                                                                                <![CDATA[
 document.addEventListener('DOMContentLoaded', function () {
     function initForm() {
         // ---- Représentant légal ----
