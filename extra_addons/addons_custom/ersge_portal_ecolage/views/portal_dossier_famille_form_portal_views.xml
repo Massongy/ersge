@@ -92,7 +92,7 @@
                                         </div>
                                     </div>
 
-                                    <!-- Bloc Autre représentant -->
+                                    <!-- Bloc Autre représentant (corrigé) -->
                                     <div id="block_other" t-att-style="'display:' + ('block' if dossier.legal_representation == 'other' else 'none')">
                                         <div class="card mb-4">
                                             <div class="card-header fw-semibold bg-light">
@@ -109,53 +109,52 @@
                                                     </div>
                                                     <div class="col-md-6">
                                                         <label class="form-label fw-semibold">Prénom</label>
-                                                        <input type="text" class="form-control" name="other_firstname" t-att-value="dossier.parent1_firstname or prefill_tutor.get('firstname', '')"/>
+                                                        <input type="text" class="form-control" name="other_firstname" t-att-value="dossier.other_firstname or prefill_tutor.get('firstname', '')"/>
                                                     </div>
                                                     <div class="col-md-6">
                                                         <label class="form-label fw-semibold">Nom</label>
-                                                        <input type="text" class="form-control" name="other_lastname" t-att-value="dossier.parent1_lastname or prefill_tutor.get('lastname', '')"/>
+                                                        <input type="text" class="form-control" name="other_lastname" t-att-value="dossier.other_lastname or prefill_tutor.get('lastname', '')"/>
                                                     </div>
                                                     <div class="col-md-6">
                                                         <label class="form-label fw-semibold">Email</label>
-                                                        <input type="email" class="form-control" name="other_email" t-att-value="dossier.parent1_email or prefill_tutor.get('email', '')"/>
+                                                        <input type="email" class="form-control" name="other_email" t-att-value="dossier.other_email or prefill_tutor.get('email', '')"/>
                                                     </div>
                                                     <div class="col-md-6">
                                                         <label class="form-label fw-semibold">Tél. mobile</label>
-                                                        <input type="tel" class="form-control" name="other_phone" t-att-value="dossier.parent1_phone or prefill_tutor.get('phone', '')"/>
+                                                        <input type="tel" class="form-control" name="other_phone" t-att-value="dossier.other_phone or prefill_tutor.get('phone', '')"/>
                                                     </div>
                                                     <div class="col-md-6">
                                                         <label class="form-label fw-semibold">Tél. fixe</label>
-                                                        <input type="tel" class="form-control" name="other_phone_fixed" t-att-value="dossier.parent1_phone_fixed or prefill_tutor.get('phone_fixed', '')"/>
+                                                        <input type="tel" class="form-control" name="other_phone_fixed" t-att-value="dossier.other_phone_fixed or prefill_tutor.get('phone_fixed', '')"/>
                                                     </div>
                                                     <div class="col-md-6">
                                                         <label class="form-label fw-semibold">Tél. professionnel</label>
-                                                        <input type="tel" class="form-control" name="other_phone_pro" t-att-value="dossier.parent1_phone_pro or prefill_tutor.get('phone_pro', '')"/>
+                                                        <input type="tel" class="form-control" name="other_phone_pro" t-att-value="dossier.other_phone_pro or prefill_tutor.get('phone_pro', '')"/>
                                                     </div>
                                                     <div class="col-12">
                                                         <label class="form-label fw-semibold">Rue</label>
-                                                        <input type="text" class="form-control" name="other_street" t-att-value="dossier.parent1_street or prefill_tutor.get('street', '')"/>
+                                                        <input type="text" class="form-control" name="other_street" t-att-value="dossier.other_street or prefill_tutor.get('street', '')"/>
                                                     </div>
                                                     <div class="col-md-4">
                                                         <label class="form-label fw-semibold">NPA</label>
-                                                        <input type="text" class="form-control" name="other_zip" t-att-value="dossier.parent1_zip or prefill_tutor.get('zip', '')"/>
+                                                        <input type="text" class="form-control" name="other_zip" t-att-value="dossier.other_zip or prefill_tutor.get('zip', '')"/>
                                                     </div>
                                                     <div class="col-md-8">
                                                         <label class="form-label fw-semibold">Ville</label>
-                                                        <input type="text" class="form-control" name="other_city" t-att-value="dossier.parent1_city or prefill_tutor.get('city', '')"/>
+                                                        <input type="text" class="form-control" name="other_city" t-att-value="dossier.other_city or prefill_tutor.get('city', '')"/>
                                                     </div>
                                                     <div class="col-md-6">
                                                         <label class="form-label fw-semibold">Profession</label>
-                                                        <input type="text" class="form-control" name="other_profession" t-att-value="dossier.parent1_profession or ''"/>
+                                                        <input type="text" class="form-control" name="other_profession" t-att-value="dossier.other_profession or ''"/>
                                                     </div>
                                                     <div class="col-md-6">
                                                         <label class="form-label fw-semibold">Employeur</label>
-                                                        <input type="text" class="form-control" name="other_employeur" t-att-value="dossier.parent1_employeur or ''"/>
+                                                        <input type="text" class="form-control" name="other_employeur" t-att-value="dossier.other_employeur or ''"/>
                                                     </div>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
-
                                     <!-- Bloc Parent 1 -->
                                     <div id="block_parent1" t-att-style="'display:' + ('block' if dossier.legal_representation in ('both', 'father_only') else 'none')">
                                         <div class="card mb-4">
@@ -655,7 +654,7 @@ Annuler
     </div>
 
     <script type="text/javascript">
-//                                                                                                                                                                                                                <![CDATA[
+//                                                                                                                                                                                                                        <![CDATA[
 document.addEventListener('DOMContentLoaded', function () {
     function initForm() {
         // ---- Représentant légal ----

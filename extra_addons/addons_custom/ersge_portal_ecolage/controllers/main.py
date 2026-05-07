@@ -235,6 +235,7 @@ class PortalEcolage(http.Controller):
                     if 'parent1' in key or 'other' in key or 'parent1_firstname' in key:
                         _logger.warning(f"{key} = {value!r}")
                 _logger.warning(f"legal_representation = {params.get('legal_representation')!r}")
+
                 # 1. Champs simples du dossier
                 simple_fields = [
                     'legal_representation', 'legal_representation_other', 'deposit_status',
@@ -248,7 +249,7 @@ class PortalEcolage(http.Controller):
                 if dossier_vals:
                     dossier.sudo().write(dossier_vals)
 
-                # 2. Parent 1
+                # 2. Parent 1 (inchangé)
                 parent1_vals = {
                     'firstname': params.get('parent1_firstname', '').strip(),
                     'lastname': params.get('parent1_lastname', '').strip(),
@@ -269,19 +270,13 @@ class PortalEcolage(http.Controller):
                 parent1_vals['name'] = fullname if fullname else parent1_vals.get('email', 'Parent 1')
 
                 if dossier.parent1_id:
-                    try:
-                        dossier.parent1_id.sudo().write(parent1_vals)
-                        _logger.warning(f"[POST parent1] write existant OK — id={dossier.parent1_id.id} firstname={dossier.parent1_id.firstname} lastname={dossier.parent1_id.lastname}")
-                    except Exception as e:
-                        _logger.error(f"[POST parent1] ERREUR write existant : {e}")
+                    dossier.parent1_id.sudo().write(parent1_vals)
+                    _logger.warning(f"[POST parent1] write existant OK — id={dossier.parent1_id.id}")
                 else:
                     if partner.family_role == 'parent1' and partner.family_id.id == dossier.family_id.id:
-                        try:
-                            partner.sudo().write(parent1_vals)
-                            dossier.sudo().write({'parent1_id': partner.id})
-                            _logger.warning(f"[POST parent1] write connecté OK — id={partner.id} firstname={partner.firstname} lastname={partner.lastname}")
-                        except Exception as e:
-                            _logger.error(f"[POST parent1] ERREUR write connecté : {e}")
+                        partner.sudo().write(parent1_vals)
+                        dossier.sudo().write({'parent1_id': partner.id})
+                        _logger.warning(f"[POST parent1] write connecté OK — id={partner.id}")
                     else:
                         existing = request.env['res.partner'].sudo().search([
                             ('firstname', '=', parent1_vals['firstname']),
@@ -289,19 +284,14 @@ class PortalEcolage(http.Controller):
                             ('family_id', '=', dossier.family_id.id),
                         ], limit=1)
                         if existing:
-                            try:
-                                existing.sudo().write(parent1_vals)
-                                dossier.sudo().write({'parent1_id': existing.id})
-                                _logger.warning(f"[POST parent1] write existing OK — id={existing.id}")
-                            except Exception as e:
-                                _logger.error(f"[POST parent1] ERREUR write existing : {e}")
+                            existing.sudo().write(parent1_vals)
+                            dossier.sudo().write({'parent1_id': existing.id})
+                            _logger.warning(f"[POST parent1] write existing OK — id={existing.id}")
                         else:
-                            try:
-                                new_parent1 = request.env['res.partner'].sudo().create(parent1_vals)
-                                dossier.sudo().write({'parent1_id': new_parent1.id})
-                                _logger.warning(f"[POST parent1] create OK — id={new_parent1.id} firstname={new_parent1.firstname}")
-                            except Exception as e:
-                                _logger.error(f"[POST parent1] ERREUR create : {e}")
+                            new_parent1 = request.env['res.partner'].sudo().create(parent1_vals)
+                            dossier.sudo().write({'parent1_id': new_parent1.id})
+                            _logger.warning(f"[POST parent1] create OK — id={new_parent1.id}")
+
                 # 3. Parent 2
                 if params.get('parent2_firstname') or params.get('parent2_lastname'):
                     parent2_vals = {
@@ -321,10 +311,10 @@ class PortalEcolage(http.Controller):
                     same_addr = params.get('same_address_as_parent1') == '1'
                     if same_addr and dossier.parent1_id:
                         parent2_vals.update({
-                            'street': dossier.parent1_id.street,
-                            'zip': dossier.parent1_id.zip,
-                            'city': dossier.parent1_id.city,
-                            'country_id': dossier.parent1_id.country_id.id,
+                            'street': dossier.parent1_id.street or '',
+                            'zip': dossier.parent1_id.zip or '',
+                            'city': dossier.parent1_id.city or '',
+                            'country_id': dossier.parent1_id.country_id.id if dossier.parent1_id.country_id else False,
                         })
                     else:
                         parent2_vals.update({
@@ -338,7 +328,19 @@ class PortalEcolage(http.Controller):
                         new_parent2 = request.env['res.partner'].sudo().create(parent2_vals)
                         dossier.sudo().write({'parent2_id': new_parent2.id})
 
-                # 4. Élèves existants
+                # 4. ⭐ NOUVEAU : Autre représentant légal (tuteur, curateur...)
+                other_fields = [
+                    'other_firstname', 'other_lastname', 'other_email',
+                    'other_phone', 'other_phone_fixed', 'other_phone_pro',
+                    'other_street', 'other_zip', 'other_city',
+                    'other_profession', 'other_employeur'
+                ]
+                other_vals = {k: params.get(k, '').strip() for k in other_fields if params.get(k) is not None}
+                if other_vals:
+                    dossier.sudo().write(other_vals)
+                    _logger.warning(f"[POST other] sauvegardé: {other_vals}")
+
+                # 5. Élèves existants
                 for key in list(params.keys()):
                     if key.startswith('student_line_id_'):
                         line_id = int(params.get(key))
@@ -358,7 +360,7 @@ class PortalEcolage(http.Controller):
                             elif forfait_key in params:
                                 line.sudo().write({'forfait_id': False})
 
-                # 5. Suppression d'élèves
+                # 6. Suppression d'élèves
                 for key in list(params.keys()):
                     if key.startswith('delete_student_line_'):
                         line_id = int(key.replace('delete_student_line_', ''))
@@ -366,7 +368,7 @@ class PortalEcolage(http.Controller):
                         if line.exists() and line.dossier_id.id == dossier.id:
                             line.unlink()
 
-                # 6. Ajout de nouveaux élèves
+                # 7. Ajout de nouveaux élèves
                 new_firstnames = form.getlist('new_student_firstname[]')
                 new_lastnames = form.getlist('new_student_lastname[]')
                 new_birthdates = form.getlist('new_student_birthdate[]')
@@ -387,7 +389,7 @@ class PortalEcolage(http.Controller):
                             'student_id': student.id,
                         })
 
-                # 7. Employeur
+                # 8. Employeur
                 if params.get('employer_assistance') == 'yes' and params.get('send_invoice_to_employer') == '1':
                     employer_vals = {
                         'name': params.get('employer_name', ''),
@@ -410,7 +412,7 @@ class PortalEcolage(http.Controller):
 
                 return request.redirect('/my/ecolage?success=1')
 
-            # ✅ GET — pré-remplir depuis le partenaire connecté
+            # === GET : préremplissage ===
             prefill_firstname = partner.firstname or ''
             prefill_lastname = partner.lastname or partner.name or ''
 
@@ -474,4 +476,4 @@ class PortalEcolage(http.Controller):
             raise
         except Exception as e:
             _logger.exception(f"[edit_dossier] ERREUR: {e}")
-            return request.redirect('/my/ecolage')
+            return request.redirect('/my/ecolage')    

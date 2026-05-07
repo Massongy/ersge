@@ -174,6 +174,19 @@ class DossierFamille(models.Model):
     )
     parent2_profession = fields.Char(string="Profession")
     parent2_employeur = fields.Char(string="Employeur")
+   
+    # === AUTRE REPRÉSENTANT LÉGAL (Tuteur, curateur, etc.) ===
+    other_firstname = fields.Char(string="Prénom autre représentant")
+    other_lastname = fields.Char(string="Nom autre représentant")
+    other_email = fields.Char(string="Email autre représentant")
+    other_phone = fields.Char(string="Tél. mobile autre représentant")
+    other_phone_fixed = fields.Char(string="Tél. fixe autre représentant")
+    other_phone_pro = fields.Char(string="Tél. professionnel autre représentant")
+    other_street = fields.Char(string="Rue autre représentant")
+    other_zip = fields.Char(string="NPA autre représentant")
+    other_city = fields.Char(string="Ville autre représentant")
+    other_profession = fields.Char(string="Profession autre représentant")
+    other_employeur = fields.Char(string="Employeur autre représentant")
 
     # === CURRENCY ===
     currency_id = fields.Many2one(
