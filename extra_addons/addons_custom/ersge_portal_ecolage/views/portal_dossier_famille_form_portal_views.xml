@@ -926,7 +926,6 @@ Ajouter un élève
 
                                                         <!-- Bloc tableau (mode en ligne) -->
                                                         <div id="block_budget_online" t-att-style="'display:' + ('block' if dossier.budget_method == 'online' else 'none')">
-
                                                             <!-- Tableau des REVENUS -->
                                                             <div class="mb-4">
                                                                 <h5 class="fw-semibold text-success mb-2">Revenus</h5>
@@ -941,16 +940,16 @@ Ajouter un élève
                                                                         </thead>
                                                                         <tbody>
                                                                             <t t-foreach="dossier.budget_income_line_ids" t-as="line">
-                                                                                <tr t-att-data-line-id="line.id">
+                                                                                <tr>
                                                                                     <td>
                                                                                         <t t-out="line.category_id.name"/>
                                                                                         <input type="hidden" name="budget_line_id" t-att-value="line.id"/>
                                                                                     </td>
                                                                                     <td>
-                                                                                        <input type="number" name="montant_madame" t-att-value="line.montant_madame" class="form-control form-control-sm" step="0.01" lang="fr"/>
+                                                                                        <input type="number" t-attf-name="montant_madame_{{line.id}}" t-att-value="line.montant_madame" class="form-control form-control-sm" step="0.01" lang="fr"/>
                                                                                     </td>
                                                                                     <td>
-                                                                                        <input type="number" name="montant_monsieur" t-att-value="line.montant_monsieur" class="form-control form-control-sm" step="0.01" lang="fr"/>
+                                                                                        <input type="number" t-attf-name="montant_monsieur_{{line.id}}" t-att-value="line.montant_monsieur" class="form-control form-control-sm" step="0.01" lang="fr"/>
                                                                                     </td>
                                                                                 </tr>
                                                                             </t>
@@ -960,7 +959,7 @@ Ajouter un élève
                                                             </div>
 
                                                             <!-- Tableau des CHARGES -->
-                                                            <div>
+                                                            <div class="mb-4">
                                                                 <h5 class="fw-semibold text-danger mb-2">Charges</h5>
                                                                 <div class="table-responsive">
                                                                     <table class="table table-sm table-bordered">
@@ -973,16 +972,16 @@ Ajouter un élève
                                                                         </thead>
                                                                         <tbody>
                                                                             <t t-foreach="dossier.budget_expense_line_ids" t-as="line">
-                                                                                <tr t-att-data-line-id="line.id">
+                                                                                <tr>
                                                                                     <td>
                                                                                         <t t-out="line.category_id.name"/>
                                                                                         <input type="hidden" name="budget_line_id" t-att-value="line.id"/>
                                                                                     </td>
                                                                                     <td>
-                                                                                        <input type="number" name="montant_madame" t-att-value="line.montant_madame" class="form-control form-control-sm" step="0.01" lang="fr"/>
+                                                                                        <input type="number" t-attf-name="montant_madame_{{line.id}}" t-att-value="line.montant_madame" class="form-control form-control-sm" step="0.01" lang="fr"/>
                                                                                     </td>
                                                                                     <td>
-                                                                                        <input type="number" name="montant_monsieur" t-att-value="line.montant_monsieur" class="form-control form-control-sm" step="0.01" lang="fr"/>
+                                                                                        <input type="number" t-attf-name="montant_monsieur_{{line.id}}" t-att-value="line.montant_monsieur" class="form-control form-control-sm" step="0.01" lang="fr"/>
                                                                                     </td>
                                                                                 </tr>
                                                                             </t>
@@ -991,8 +990,51 @@ Ajouter un élève
                                                                 </div>
                                                             </div>
 
+
                                                             <div class="form-text text-muted mt-2">
         Saisissez les montants mensuels pour chaque catégorie. Les totaux seront automatiquement recalculés.
+                                                            </div>
+                                                            <!-- Affichage des totaux (visible uniquement si mode online) -->
+                                                            <div t-if="dossier.budget_method == 'online'">
+                                                                <hr/>
+                                                                <h4 class="mt-3">Totaux</h4>
+                                                                <div class="row">
+                                                                    <div class="col-md-6">
+                                                                        <strong>Revenus Madame :</strong>
+                                                                        <span t-out="dossier.total_revenus_madame or 0.00"/>
+ CHF
+                                                                    </div>
+                                                                    <div class="col-md-6">
+                                                                        <strong>Revenus Monsieur :</strong>
+                                                                        <span t-out="dossier.total_revenus_monsieur or 0.00"/>
+ CHF
+                                                                    </div>
+                                                                    <div class="col-md-6">
+                                                                        <strong>Total revenus :</strong>
+                                                                        <span t-out="dossier.total_revenus or 0.00"/>
+ CHF
+                                                                    </div>
+                                                                    <div class="col-md-6">
+                                                                        <strong>Charges Madame :</strong>
+                                                                        <span t-out="dossier.total_charges_madame or 0.00"/>
+ CHF
+                                                                    </div>
+                                                                    <div class="col-md-6">
+                                                                        <strong>Charges Monsieur :</strong>
+                                                                        <span t-out="dossier.total_charges_monsieur or 0.00"/>
+ CHF
+                                                                    </div>
+                                                                    <div class="col-md-6">
+                                                                        <strong>Total charges :</strong>
+                                                                        <span t-out="dossier.total_charges or 0.00"/>
+ CHF
+                                                                    </div>
+                                                                    <div class="col-md-6">
+                                                                        <strong>Solde :</strong>
+                                                                        <span t-out="dossier.solde or 0.00"/>
+ CHF
+                                                                    </div>
+                                                                </div>
                                                             </div>
                                                         </div>
 
@@ -1058,7 +1100,7 @@ Annuler
     </div>
 
     <script type="text/javascript">
-//                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                <![CDATA[
+//                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        <![CDATA[
 document.addEventListener('DOMContentLoaded', function () {
     function initForm() {
         // ---- Représentant légal ----

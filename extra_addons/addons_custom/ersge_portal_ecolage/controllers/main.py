@@ -405,21 +405,26 @@ class PortalEcolage(http.Controller):
                             'dossier_id': dossier.id,
                             'student_id': student.id,
                         })
-                # 8. Budget en ligne : sauvegarde des lignes
+                # 8. Budget en ligne : sauvegarde des lignes (méthode robuste avec ID dans le nom)
                 if params.get('budget_method') == 'online':
-                    # Récupération des listes (dans l'ordre du HTML)
-                    line_ids = params.getlist('budget_line_id')
-                    montants_madame = params.getlist('montant_madame')
-                    montants_monsieur = params.getlist('montant_monsieur')
-                    for i, line_id in enumerate(line_ids):
-                        line = request.env['ersge.budget.line'].sudo().browse(int(line_id))
-                        if line.exists() and line.dossier_id.id == dossier.id:
-                            val_madame = float(montants_madame[i] or 0)
-                            val_monsieur = float(montants_monsieur[i] or 0)
-                            line.sudo().write({
-                                'montant_madame': val_madame,
-                                'montant_monsieur': val_monsieur,
-                            })
+                    for key, value in params.items():
+                        if key.startswith('montant_madame_'):
+                            # Extraire l'ID de la ligne
+                            line_id = int(key.split('_')[-1])
+                            # Récupérer le montant monsieur correspondant
+                            monsieur_key = f'montant_monsieur_{line_id}'
+                            montant_madame = float(value or 0)
+                            montant_monsieur = float(params.get(monsieur_key, 0) or 0)
+                            
+                            line = request.env['ersge.budget.line'].sudo().browse(line_id)
+                            if line.exists() and line.dossier_id.id == dossier.id:
+                                line.sudo().write({
+                                    'montant_madame': montant_madame,
+                                    'montant_monsieur': montant_monsieur,
+                                })
+                                _logger.warning(f"Budget line {line_id} mis à jour : Mme={montant_madame}, M={montant_monsieur}")
+                            else:
+                                _logger.warning(f"Ligne budget {line_id} introuvable ou non liée au dossier")
                     _logger.warning("Budget en ligne sauvegardé")
                     
                 # 9. Employeur
