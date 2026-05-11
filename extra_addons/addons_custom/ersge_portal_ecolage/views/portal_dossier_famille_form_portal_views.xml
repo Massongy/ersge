@@ -91,12 +91,15 @@
                                             </div>
                                         </div>
                                     </div>
+                                    <!-- Cotisation annuelle -->
+                                    <h2 class="mt-4">Cotisation annuelle</h2>
                                     <div class="alert alert-info">
-                                        <i class="fa fa-info-circle me-2"></i>
-    Cotisation annuelle à l'Association en faveur de l'école Rudolf Steiner de Genève :
-                                        <strong>Individuelle 40 CHF</strong>,
-                                        <strong>Couple 60 CHF</strong>,
-    Curateur/trice et Tuteur/trice <strong>Gratuit</strong>.
+                À l'Association en faveur de l'école Rudolf Steiner de Genève :<br/>
+                Individuelle 40 CHF, Couple 60 CHF, Curateur/trice et Tuteur/trice Gratuit.
+                                    </div>
+                                    <div class="alert alert-secondary">
+                                        <strong>Total de la cotisation : </strong>
+                                        <span id="membership_fee_amount">0.00</span> CHF
                                     </div>
 
                                     <!-- Bloc Autre représentant (corrigé) -->
@@ -619,16 +622,7 @@ Aide employeur
                                 <span id="total_monthly_fee">0.00</span> CHF
                             </div>
 
-                            <!-- Cotisation annuelle -->
-                            <h2 class="mt-4">Cotisation annuelle</h2>
-                            <div class="alert alert-info">
-                À l'Association en faveur de l'école Rudolf Steiner de Genève :<br/>
-                Individuelle 40 CHF, Couple 60 CHF, Curateur/trice et Tuteur/trice Gratuit.
-                            </div>
-                            <div class="alert alert-secondary">
-                                <strong>Total de la cotisation : </strong>
-                                <span id="membership_fee_amount">0.00</span> CHF
-                            </div>
+
 
                         </div>
                     </div>
@@ -655,7 +649,7 @@ Annuler
     </div>
 
     <script type="text/javascript">
-//                                                                                                                                                                                                                                                <![CDATA[
+//                                                                                                                                                                                                                                                                <![CDATA[
 document.addEventListener('DOMContentLoaded', function () {
     function initForm() {
         // ---- Représentant légal ----
