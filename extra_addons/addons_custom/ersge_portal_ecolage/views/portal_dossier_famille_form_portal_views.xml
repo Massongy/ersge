@@ -899,12 +899,106 @@ Ajouter un élève
 
                                                     </div>
                                                 </div>
+                                                <!-- Budget familial mensuel -->
+                                                <div class="card mb-4">
+                                                    <div class="card-header fw-semibold bg-light">
+                                                        <i class="fa fa-line-chart me-2"></i>
+        Budget familial mensuel
+                                                    </div>
+                                                    <div class="card-body">
+                                                        <!-- Choix du mode -->
+                                                        <div class="d-flex flex-column gap-2 mb-3">
+                                                            <div class="form-check">
+                                                                <input class="form-check-input" type="radio" name="budget_method" id="budget_upload" value="upload" t-att-checked="dossier.budget_method == 'upload'"/>
+                                                                <label class="form-check-label" for="budget_upload">Télécharger un fichier</label>
+                                                            </div>
+                                                            <div class="form-check">
+                                                                <input class="form-check-input" type="radio" name="budget_method" id="budget_online" value="online" t-att-checked="dossier.budget_method == 'online'"/>
+                                                                <label class="form-check-label" for="budget_online">Remplir en ligne</label>
+                                                            </div>
+                                                        </div>
 
-                                                <div class="col-12">
-                                                    <label class="form-label fw-semibold">Budget familial mensuel</label>
-                                                    <input type="file" class="form-control" name="budget_attachment" accept=".pdf"/>
-                                                    <div class="form-text text-muted">Taille de fichier maximale : 4MB</div>
+                                                        <!-- Bloc upload (mode fichier) -->
+                                                        <div id="block_budget_upload" t-att-style="'display:' + ('block' if dossier.budget_method == 'upload' else 'none')">
+                                                            <input type="file" class="form-control" name="budget_attachment" accept=".pdf"/>
+                                                            <div class="form-text text-muted">Taille de fichier maximale : 4MB</div>
+                                                        </div>
+
+                                                        <!-- Bloc tableau (mode en ligne) -->
+                                                        <div id="block_budget_online" t-att-style="'display:' + ('block' if dossier.budget_method == 'online' else 'none')">
+
+                                                            <!-- Tableau des REVENUS -->
+                                                            <div class="mb-4">
+                                                                <h5 class="fw-semibold text-success mb-2">Revenus</h5>
+                                                                <div class="table-responsive">
+                                                                    <table class="table table-sm table-bordered">
+                                                                        <thead class="table-light">
+                                                                            <tr>
+                                                                                <th>Catégorie</th>
+                                                                                <th style="width: 120px">Madame (CHF)</th>
+                                                                                <th style="width: 120px">Monsieur (CHF)</th>
+                                                                            </tr>
+                                                                        </thead>
+                                                                        <tbody>
+                                                                            <t t-foreach="dossier.budget_income_line_ids" t-as="line">
+                                                                                <tr t-att-data-line-id="line.id">
+                                                                                    <td>
+                                                                                        <t t-out="line.category_id.name"/>
+                                                                                        <input type="hidden" name="budget_line_id" t-att-value="line.id"/>
+                                                                                    </td>
+                                                                                    <td>
+                                                                                        <input type="number" name="montant_madame" t-att-value="line.montant_madame" class="form-control form-control-sm" step="0.01" lang="fr"/>
+                                                                                    </td>
+                                                                                    <td>
+                                                                                        <input type="number" name="montant_monsieur" t-att-value="line.montant_monsieur" class="form-control form-control-sm" step="0.01" lang="fr"/>
+                                                                                    </td>
+                                                                                </tr>
+                                                                            </t>
+                                                                        </tbody>
+                                                                    </table>
+                                                                </div>
+                                                            </div>
+
+                                                            <!-- Tableau des CHARGES -->
+                                                            <div>
+                                                                <h5 class="fw-semibold text-danger mb-2">Charges</h5>
+                                                                <div class="table-responsive">
+                                                                    <table class="table table-sm table-bordered">
+                                                                        <thead class="table-light">
+                                                                            <tr>
+                                                                                <th>Catégorie</th>
+                                                                                <th style="width: 120px">Madame (CHF)</th>
+                                                                                <th style="width: 120px">Monsieur (CHF)</th>
+                                                                            </tr>
+                                                                        </thead>
+                                                                        <tbody>
+                                                                            <t t-foreach="dossier.budget_expense_line_ids" t-as="line">
+                                                                                <tr t-att-data-line-id="line.id">
+                                                                                    <td>
+                                                                                        <t t-out="line.category_id.name"/>
+                                                                                        <input type="hidden" name="budget_line_id" t-att-value="line.id"/>
+                                                                                    </td>
+                                                                                    <td>
+                                                                                        <input type="number" name="montant_madame" t-att-value="line.montant_madame" class="form-control form-control-sm" step="0.01" lang="fr"/>
+                                                                                    </td>
+                                                                                    <td>
+                                                                                        <input type="number" name="montant_monsieur" t-att-value="line.montant_monsieur" class="form-control form-control-sm" step="0.01" lang="fr"/>
+                                                                                    </td>
+                                                                                </tr>
+                                                                            </t>
+                                                                        </tbody>
+                                                                    </table>
+                                                                </div>
+                                                            </div>
+
+                                                            <div class="form-text text-muted mt-2">
+        Saisissez les montants mensuels pour chaque catégorie. Les totaux seront automatiquement recalculés.
+                                                            </div>
+                                                        </div>
+
+                                                    </div>
                                                 </div>
+
                                             </div>
                                         </div>
                                     </div>
@@ -964,7 +1058,7 @@ Annuler
     </div>
 
     <script type="text/javascript">
-//                                                                                                                                                                                                                                                                                                                                                                                                                                                                                <![CDATA[
+//                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                <![CDATA[
 document.addEventListener('DOMContentLoaded', function () {
     function initForm() {
         // ---- Représentant légal ----
@@ -1145,6 +1239,24 @@ function toggleExplanatoryLetter() {
     var isWrite = (checked && checked.value === 'write');
     blockUpload.style.display = isWrite ? 'none' : 'block';
     blockWrite.style.display = isWrite ? 'block' : 'none';
+}
+
+// ---- Budget (upload / online) ----
+function toggleBudgetMethod() {
+    var checked = document.querySelector('input[name="budget_method"]:checked');
+    var blockUpload = document.getElementById('block_budget_upload');
+    var blockOnline = document.getElementById('block_budget_online');
+    if (!blockUpload || !blockOnline) return;
+    var isOnline = (checked && checked.value === 'online');
+    blockUpload.style.display = isOnline ? 'none' : 'block';
+    blockOnline.style.display = isOnline ? 'block' : 'none';
+}
+var budgetRadios = document.querySelectorAll('input[name="budget_method"]');
+if (budgetRadios.length) {
+    budgetRadios.forEach(function(radio) {
+        radio.addEventListener('change', toggleBudgetMethod);
+    });
+    toggleBudgetMethod();
 }
 
 // Attacher les événements

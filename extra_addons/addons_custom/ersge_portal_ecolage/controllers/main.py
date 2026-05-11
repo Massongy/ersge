@@ -244,6 +244,7 @@ class PortalEcolage(http.Controller):
                     'gross_annual_income', 'additional_reduction_request', 'proposed_monthly_amount',
                     'contract_accepted', 'convention_accepted', 'procedures_accepted', 'terms_accepted',
                     'lpd_consent', 'explanatory_letter_text', 'explanatory_letter_mode',
+                    'budget_method',
                     
                 ]
                 dossier_vals = {k: params.get(k) for k in simple_fields if params.get(k) is not None}
@@ -251,6 +252,19 @@ class PortalEcolage(http.Controller):
                     _logger.warning(f"explanatory_letter_text = {params.get('explanatory_letter_text')!r}")
                     dossier.sudo().write(dossier_vals)
                     _logger.warning(f"Après write, explanatory_letter_text = {dossier.explanatory_letter_text!r}")
+
+                            # 1bis. Gestion du fichier budget (mode upload)
+                budget_attachment = request.httprequest.files.get('budget_attachment')
+                if budget_attachment and budget_attachment.filename:
+                    attachment = request.env['ir.attachment'].sudo().create({
+                        'name': budget_attachment.filename,
+                        'datas': budget_attachment.read().hex(),
+                        'res_model': 'ersge.dossier.famille',
+                        'res_id': dossier.id,
+                        'mimetype': budget_attachment.content_type or 'application/pdf',
+                    })
+                    dossier.sudo().write({'budget_attachment': attachment.id})
+                    _logger.warning(f"Fichier budget uploadé : {budget_attachment.filename}")
 
                 # 2. Parent 1 (inchangé)
                 parent1_vals = {
@@ -391,8 +405,24 @@ class PortalEcolage(http.Controller):
                             'dossier_id': dossier.id,
                             'student_id': student.id,
                         })
-
-                # 8. Employeur
+                # 8. Budget en ligne : sauvegarde des lignes
+                if params.get('budget_method') == 'online':
+                    # Récupération des listes (dans l'ordre du HTML)
+                    line_ids = params.getlist('budget_line_id')
+                    montants_madame = params.getlist('montant_madame')
+                    montants_monsieur = params.getlist('montant_monsieur')
+                    for i, line_id in enumerate(line_ids):
+                        line = request.env['ersge.budget.line'].sudo().browse(int(line_id))
+                        if line.exists() and line.dossier_id.id == dossier.id:
+                            val_madame = float(montants_madame[i] or 0)
+                            val_monsieur = float(montants_monsieur[i] or 0)
+                            line.sudo().write({
+                                'montant_madame': val_madame,
+                                'montant_monsieur': val_monsieur,
+                            })
+                    _logger.warning("Budget en ligne sauvegardé")
+                    
+                # 9. Employeur
                 if params.get('employer_assistance') == 'yes' and params.get('send_invoice_to_employer') == '1':
                     employer_vals = {
                         'name': params.get('employer_name', ''),
