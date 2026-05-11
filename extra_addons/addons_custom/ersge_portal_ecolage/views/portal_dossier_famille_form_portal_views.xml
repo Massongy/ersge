@@ -1078,29 +1078,212 @@ Ajouter un élève
                         </div>
                     </div>
                     <!-- Fin Section 5 -->
+                    <!-- ==================== Section 6 : Parascolaire ==================== -->
+                    <div class="accordion-item border mb-3 rounded shadow-sm">
+                        <h2 class="accordion-header" id="headingAfterSchool">
+                            <button class="accordion-button collapsed rounded" type="button" data-bs-toggle="collapse" data-bs-target="#collapseAfterSchool" aria-expanded="false" aria-controls="collapseAfterSchool">
+                                <i class="fa fa-clock-o me-2 text-primary"/>
+                                <strong>Parascolaire</strong>
+                            </button>
+                        </h2>
+                        <div id="collapseAfterSchool" class="accordion-collapse collapse" aria-labelledby="headingAfterSchool">
+                            <div class="accordion-body">
 
-                </div>
+                                <!-- Question principale Oui/Non (global) -->
+                                <div class="card mb-4">
+                                    <div class="card-header fw-semibold bg-light">
+                                        <i class="fa fa-question-circle me-2"/>
+                    Inscription au parascolaire
+                                    </div>
+                                    <div class="card-body">
+                                        <label class="form-label fw-semibold">
+                        Souhaitez-vous inscrire votre enfant au parascolaire ?
+                                        </label>
+                                        <div class="d-flex gap-3">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" name="after_school_request" id="after_school_yes" value="yes" t-att-checked="dossier.after_school_request == 'yes'"/>
+                                                <label class="form-check-label" for="after_school_yes">Oui</label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" name="after_school_request" id="after_school_no" value="no" t-att-checked="dossier.after_school_request == 'no' or not dossier.after_school_request"/>
+                                                <label class="form-check-label" for="after_school_no">Non</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
 
-            </div>
-            <!-- Fin accordéon -->
+                                <!-- Bloc conditionnel : visible seulement si la réponse globale est "Oui" -->
+                                <div id="block_after_school_yes" t-att-style="'display:' + ('block' if dossier.after_school_request == 'yes' else 'none')">
 
-            <!-- Boutons -->
-            <div class="d-flex gap-2 mt-3">
-                <button type="submit" class="btn btn-primary btn-lg">
-                    <i class="fa fa-save me-2"/>
-Enregistrer
-                </button>
-                <a href="/my/ecolage" class="btn btn-outline-secondary btn-lg">
-                    <i class="fa fa-arrow-left me-2"/>
-Annuler
-                </a>
-            </div>
+                                    <div class="alert alert-warning" role="alert">
+                                        <i class="fa fa-exclamation-triangle me-2"></i>
+                                        <strong>Important :</strong> remplir le formulaire ne signifie pas que votre demande sera forcément acceptée.<br/>
+                    En effet, il se peut que certains créneaux horaires soient déjà complets (il peut y avoir une liste d’attente). Ce n’est donc qu’une fois que le responsable de l’accueil considéré (jardin d'accueil ou classe d’accueil) vous aura donné son accord (email) que la comptabilité émettra une facture associée et que votre enfant sera inscrit au parascolaire.<br/>
+                    Si nécessaire, vous pourrez modifier ultérieurement les jours et horaires de vos inscriptions au parascolaire.<br/>
+                            <a href="https://ersge.ch/emploi-du-temps/" target="_blank">Au besoin, cliquez ici pour voir les horaires de classe</a>
+                        </div>
 
-        </form>
+                        <!-- Liste des élèves (boucle sur les lignes student_line_ids) -->
+                        <div class="card mb-4">
+                            <div class="card-header fw-semibold bg-light">
+                                <i class="fa fa-users me-2"/>
+                        Inscriptions par élève
+                            </div>
+                            <div class="card-body">
+                                <t t-foreach="dossier.student_line_ids" t-as="student_line">
+                                    <!-- Chercher si une ligne after_school existe déjà pour cet élève -->
+                                    <t t-set="after_line" t-value="dossier.after_school_line_ids.filtered(lambda l: l.student_id.id == student_line.student_id.id)"/>
+                                    <t t-set="has_after" t-value="bool(after_line)"/>
+
+                                    <div class="card mb-3 border">
+                                        <div class="card-header bg-light-subtle fw-semibold">
+                                            <t t-out="student_line.student_id.display_name or 'Élève'"/>
+                                        </div>
+                                        <div class="card-body">
+                                            <input type="hidden" t-att-name="'student_line_id_' + str(student_line.id)" t-att-value="student_line.id"/>
+
+                                            <!-- Case à cocher "Inscrire cet élève" -->
+                                            <div class="form-check form-switch mb-3">
+                                                <input class="form-check-input after-school-toggle" type="checkbox" role="switch" t-att-name="'after_school_selected_' + str(student_line.id)" value="1" t-att-checked="has_after"/>
+                                                <label class="form-check-label fw-semibold">
+                                            Inscrire cet élève au parascolaire
+                                                </label>
+                                            </div>
+
+                                            <!-- Bloc des options (affiché uniquement si la case est cochée) -->
+                                            <div class="after-school-options" t-att-style="'display:' + ('block' if has_after else 'none')">
+                                                <div class="row g-3 mt-2">
+                                                    <!-- Type d'accueil -->
+                                                    <div class="col-12">
+                                                        <label class="form-label fw-semibold">Type d'accueil</label>
+                                                        <div class="d-flex gap-3">
+                                                            <div class="form-check">
+                                                                <input class="form-check-input" type="radio" t-att-name="'accueil_type_' + str(student_line.id)" value="jardin" t-att-checked="after_line and after_line.accueil_type == 'jardin'"/>
+                                                                <label class="form-check-label">Jardin d'accueil (3‑6 ans)</label>
+                                                            </div>
+                                                            <div class="form-check">
+                                                                <input class="form-check-input" type="radio" t-att-name="'accueil_type_' + str(student_line.id)" value="classe" t-att-checked="after_line and after_line.accueil_type == 'classe'"/>
+                                                                <label class="form-check-label">Classe d'accueil (6‑12 ans)</label>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    <!-- Prestations (many2many) -->
+                                                    <div class="col-12">
+                                                        <label class="form-label fw-semibold">Prestations souhaitées</label>
+                                                        <div class="d-flex flex-wrap gap-2">
+                                                            <t t-foreach="after_school_prestations" t-as="prestation">
+                                                                <div class="form-check">
+                                                                    <input class="form-check-input" type="checkbox" t-att-name="'prestation_' + str(student_line.id) + '_' + str(prestation.id)" value="1" t-att-checked="after_line and prestation.id in after_line.prestation_ids.ids"/>
+                                                                    <label class="form-check-label">
+                                                                        <t t-out="prestation.name"/>
+                                                                    </label>
+                                                                </div>
+                                                            </t>
+                                                        </div>
+                                                    </div>
+
+                                                    <!-- Montant mensuel (affiché à titre indicatif) -->
+                                                    <div class="col-md-4">
+                                                        <label class="form-label fw-semibold">Montant mensuel (CHF)</label>
+                                                        <input type="text" class="form-control bg-light" readonly="readonly" t-att-value="after_line and after_line.montant_mensuel or '0.00'"/>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </t>
+                                <div t-if="not dossier.student_line_ids" class="alert alert-info">
+                            Aucun élève inscrit. Veuillez d'abord renseigner la section "Élèves".
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Descriptif JARDIN D'ACCUEIL -->
+                        <div class="card mb-4">
+                            <div class="card-header fw-semibold bg-light">
+                                <i class="fa fa-tree me-2"/>
+                        Jardin d'accueil
+                            </div>
+                            <div class="card-body">
+                                <p>
+                                    <em>pour les enfants des jardins d'enfants - 3 à 6 ans</em>
+                                </p>
+                                <p>
+                                    <strong>PRÉVOIR :</strong>
+                                </p>
+                                <ul>
+                                    <li>Des pantoufles</li>
+                                    <li>Pantalons de pluie</li>
+                                    <li>Pour la sieste des petits : couverture, coussin, vêtements de rechange, et, selon les besoins, doudou ou tétine.</li>
+                                    <li>Si besoin, couches</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <!-- Descriptif CLASSE D'ACCUEIL -->
+                        <div class="card mb-4">
+                            <div class="card-header fw-semibold bg-light">
+                                <i class="fa fa-graduation-cap me-2"/>
+                        Classe d'accueil
+                            </div>
+                            <div class="card-body">
+                                <p>
+                                    <em>pour les enfants du primaire - 6 à 12 ans</em>
+                                </p>
+                                <p>
+                                    <strong>LES ÉTUDES SURVEILLÉES</strong> sont incluses dans le prix du parascolaire.</p>
+                                <p>De la 5<sup>ème</sup> à la 9<sup>ème</sup> classe, les élèves bénéficient d'études surveillées de 15h30 à 17h, le lundi, mardi &amp; jeudi. Les études surveillées permettent à vos enfants de faire leurs devoirs encadrés par un professeur.</p>
+                            </div>
+                        </div>
+
+                        <!-- Tarif "Accompagnement cirque" -->
+                        <div class="card mb-4">
+                            <div class="card-header fw-semibold bg-light">
+                                <i class="fa fa-magic me-2"/>
+                        Tarif “Accompagnement cirque”
+                            </div>
+                            <div class="card-body">
+                                <p>Le tarif “accompagnement cirque” ne comprend pas l’inscription aux cours de cirque, ni le paiement aux cours de cirque, dispensés par l’association Cirque Rustelli Confetti. Vous pouvez vous inscrire à leurs cours par e-mail <a href="mailto:info@rustelli-confetti.ch">info@rustelli-confetti.ch</a> ou sur leur site : <a href="https://www.rustelliconfetticirque.com" target="_blank">www.rustelliconfetticirque.com</a>.
+                                </p>
+                                <p>
+                                    <strong>LE TARIF "ACCOMPAGNEMENT CIRQUE" COMPREND :</strong>
+                                </p>
+                                <ul>
+                                    <li>Repas + Prise en charge de votre enfant avant et après le cours de cirque entre 12h et 15h30.</li>
+                                    <li>En cas d'annulation du cours de cirque, l’enfant est également pris en charge par la classe d’accueil.</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                    </div>                    <!-- fin block_after_school_yes -->
+                </div>                <!-- fin accordion-body -->
+            </div>            <!-- fin collapse -->
+        </div>        <!-- fin accordion-item -->
+        <!-- ==================== Fin Section 6 : Parascolaire ==================== -->
+
     </div>
 
-    <script type="text/javascript">
-//                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                <![CDATA[
+</div>
+<!-- Fin accordéon -->
+
+<!-- Boutons -->
+<div class="d-flex gap-2 mt-3">
+    <button type="submit" class="btn btn-primary btn-lg">
+        <i class="fa fa-save me-2"/>
+Enregistrer
+    </button>
+    <a href="/my/ecolage" class="btn btn-outline-secondary btn-lg">
+        <i class="fa fa-arrow-left me-2"/>
+Annuler
+    </a>
+</div>
+
+</form>
+</div>
+
+<script type="text/javascript">
+//                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        <![CDATA[
 document.addEventListener('DOMContentLoaded', function () {
     function initForm() {
         // ---- Représentant légal ----
@@ -1404,81 +1587,172 @@ toggleAdditionalReduction();
         }
     }, 100);
 })();
+// ---- Parascolaire : affichage conditionnel ----
+function toggleAfterSchool() {
+    var checked = document.querySelector('input[name="after_school_request"]:checked');
+    var block = document.getElementById('block_after_school_yes');
+    if (block) {
+        block.style.display = (checked && checked.value === 'yes') ? 'block' : 'none';
+    }
+}
+document.querySelectorAll('input[name="after_school_request"]').forEach(function(r) {
+    r.addEventListener('change', toggleAfterSchool);
+});
+toggleAfterSchool();
 
+// ---- Calcul du montant mensuel parascolaire par élève ----
+// Cette fonction suppose que les prestations sont passées dans le template
+// et que chaque checkbox a un attribut data-montant (ex: data-montant="XX")
+// Si ce n'est pas le cas, on peut récupérer le prix via un appel AJAX ou l'injecter.
+
+function updateAfterSchoolAmount(lineElement) {
+    // Récupérer l'ID de la ligne (stocké dans un attribut data-line-id ou dans un hidden)
+    var lineId = lineElement.closest('[data-line-id]')?.getAttribute('data-line-id');
+    if (!lineId) {
+        // Essayer de trouver un input hidden nommé after_school_line_id_XXX
+        var hidden = lineElement.querySelector('input[name^="after_school_line_id_"]');
+        if (hidden) {
+            lineId = hidden.value;
+        }
+    }
+    if (!lineId) return;
+
+    // Déterminer le type d'accueil (jardin ou classe)
+    var accueilRadios = lineElement.querySelectorAll('input[name^="accueil_type_"]');
+    var accueilType = null;
+    accueilRadios.forEach(function(radio) {
+        if (radio.checked) accueilType = radio.value;
+    });
+
+    // Récupérer toutes les prestations cochées pour cette ligne
+    var prestationCheckboxes = lineElement.querySelectorAll('input[name^="prestation_' + lineId + '_"]:checked');
+    var totalMontant = 0;
+
+    // Ajouter le tarif de base selon le type d'accueil (à adapter selon votre grille tarifaire)
+    // Exemple : jardin = 200 CHF, classe = 250 CHF
+    if (accueilType === 'jardin') {
+        totalMontant += 200;  // valeur par défaut, à modifier
+    } else if (accueilType === 'classe') {
+        totalMontant += 250;  // valeur par défaut, à modifier
+    }
+
+    // Ajouter le montant de chaque prestation
+    prestationCheckboxes.forEach(function(cb) {
+        var montant = cb.getAttribute('data-montant');
+        if (montant) totalMontant += parseFloat(montant);
+    });
+
+    // Mettre à jour le champ readonly "montant_mensuel"
+    var montantField = lineElement.querySelector('.montant-mensuel, input[readonly]');
+    if (montantField) montantField.value = totalMontant.toFixed(2);
+}
+
+// Attacher les événements sur chaque ligne parascolaire (à l'initialisation et après mutations)
+function attachAfterSchoolEvents() {
+    var lines = document.querySelectorAll('#block_after_school_yes .card[data-line-id]');
+    lines.forEach(function(line) {
+        // Événements pour les radios du type d'accueil
+        var accueilRadios = line.querySelectorAll('input[name^="accueil_type_"]');
+        accueilRadios.forEach(function(radio) {
+            radio.removeEventListener('change', function() { updateAfterSchoolAmount(line); });
+            radio.addEventListener('change', function() { updateAfterSchoolAmount(line); });
+        });
+        // Événements pour les checkboxes de prestations
+        var prestaCheckboxes = line.querySelectorAll('input[name^="prestation_"]');
+        prestaCheckboxes.forEach(function(cb) {
+            cb.removeEventListener('change', function() { updateAfterSchoolAmount(line); });
+            cb.addEventListener('change', function() { updateAfterSchoolAmount(line); });
+        });
+        // Calcul initial
+        updateAfterSchoolAmount(line);
+    });
+}
+
+// MutationObserver pour capturer les lignes ajoutées dynamiquement (si l'utilisateur ajoute un élève plus tard)
+var afterSchoolObserver = new MutationObserver(function(mutations) {
+    attachAfterSchoolEvents();
+});
+var container = document.getElementById('block_after_school_yes');
+if (container) {
+    afterSchoolObserver.observe(container, { childList: true, subtree: true });
+}
+
+// Appel initial
+attachAfterSchoolEvents();
 //]]>
-    </script>
+</script>
 </t>
 </template>
 
 <template id="portal_famille_new" name="Créer ma famille">
 <t t-call="portal.portal_layout">
-    <div class="container mt-4">
-        <div class="card">
-            <div class="card-header">
-                <h5 class="mb-0">
-                    <i class="fa fa-home me-2 text-primary"/>
+<div class="container mt-4">
+<div class="card">
+<div class="card-header">
+    <h5 class="mb-0">
+        <i class="fa fa-home me-2 text-primary"/>
                             Créer votre famille
-                </h5>
-            </div>
-            <div class="card-body">
+    </h5>
+</div>
+<div class="card-body">
 
-                <div class="alert alert-info mb-4" role="alert">
-                    <i class="fa fa-info-circle me-2"/>
+    <div class="alert alert-info mb-4" role="alert">
+        <i class="fa fa-info-circle me-2"/>
                             Pour déposer un dossier d'écolage, vous devez d'abord
-                    <strong>créer votre famille</strong>.
+        <strong>créer votre famille</strong>.
                             Cette étape est rapide et ne prend qu'une minute.
-                </div>
+    </div>
 
-                <t t-if="error">
-                    <div class="alert alert-danger mb-4" role="alert">
-                        <i class="fa fa-exclamation-triangle me-2"/>
-                        <t t-out="error"/>
-                    </div>
-                </t>
+    <t t-if="error">
+        <div class="alert alert-danger mb-4" role="alert">
+            <i class="fa fa-exclamation-triangle me-2"/>
+            <t t-out="error"/>
+        </div>
+    </t>
 
-                <form action="/my/famille/new" method="POST" class="o_portal_details">
-                    <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
-                    <input type="hidden" name="next" t-att-value="next"/>
+    <form action="/my/famille/new" method="POST" class="o_portal_details">
+        <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+        <input type="hidden" name="next" t-att-value="next"/>
 
-                    <div class="row g-3">
-                        <div class="col-12">
-                            <label for="nom" class="form-label fw-semibold">
+        <div class="row g-3">
+            <div class="col-12">
+                <label for="nom" class="form-label fw-semibold">
                                         Nom de famille <span class="text-danger">*</span>
-                            </label>
-                            <input type="text" name="nom" id="nom" class="form-control form-control-lg" placeholder="Ex : Dupont" autofocus="autofocus"/>
-                            <div class="form-text text-muted">
+                </label>
+                <input type="text" name="nom" id="nom" class="form-control form-control-lg" placeholder="Ex : Dupont" autofocus="autofocus"/>
+                <div class="form-text text-muted">
                                         Le nom qui identifiera votre famille dans le système.
-                            </div>
-                        </div>
-                        <div class="col-12">
-                            <label class="form-label fw-semibold">Compte rattaché</label>
-                            <div class="form-control bg-light text-muted">
-                                <i class="fa fa-user me-2"/>
-                                <t t-out="partner.name"/>
-                                <span class="ms-2 small">(                                    <t t-out="partner.email"/>
+                </div>
+            </div>
+            <div class="col-12">
+                <label class="form-label fw-semibold">Compte rattaché</label>
+                <div class="form-control bg-light text-muted">
+                    <i class="fa fa-user me-2"/>
+                    <t t-out="partner.name"/>
+                    <span class="ms-2 small">(                        <t t-out="partner.email"/>
 )</span>
-                            </div>
-                            <div class="form-text text-muted">
+                </div>
+                <div class="form-text text-muted">
                                         Vous serez automatiquement ajouté comme parent de cette famille.
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="d-flex gap-2 mt-4 pt-3 border-top">
-                        <button type="submit" class="btn btn-primary btn-lg">
-                            <i class="fa fa-check me-2"/>
-Créer ma famille et continuer
-                        </button>
-                        <a href="/my/ecolage" class="btn btn-outline-secondary btn-lg">
-                            <i class="fa fa-arrow-left me-2"/>
-Annuler
-                        </a>
-                    </div>
-
-                </form>
+                </div>
             </div>
         </div>
-    </div>
+
+        <div class="d-flex gap-2 mt-4 pt-3 border-top">
+            <button type="submit" class="btn btn-primary btn-lg">
+                <i class="fa fa-check me-2"/>
+Créer ma famille et continuer
+            </button>
+            <a href="/my/ecolage" class="btn btn-outline-secondary btn-lg">
+                <i class="fa fa-arrow-left me-2"/>
+Annuler
+            </a>
+        </div>
+
+    </form>
+</div>
+</div>
+</div>
 </t>
 </template>
 
