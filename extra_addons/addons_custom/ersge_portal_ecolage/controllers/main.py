@@ -243,7 +243,8 @@ class PortalEcolage(http.Controller):
                     'after_school_request', 'reduction_requested', 'requested_discount',
                     'gross_annual_income', 'additional_reduction_request', 'proposed_monthly_amount',
                     'contract_accepted', 'convention_accepted', 'procedures_accepted', 'terms_accepted',
-                    'lpd_consent', 'explanatory_letter_text', 'explanatory_letter_mode'
+                    'lpd_consent', 'explanatory_letter_text', 'explanatory_letter_mode',
+                    
                 ]
                 dossier_vals = {k: params.get(k) for k in simple_fields if params.get(k) is not None}
                 if dossier_vals:

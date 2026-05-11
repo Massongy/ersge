@@ -124,8 +124,18 @@ class DossierFamille(models.Model):
         readonly=False,
         store=True,
     )
-    parent1_profession = fields.Char(string="Profession")
-    parent1_employeur = fields.Char(string="Employeur")
+    parent1_profession = fields.Char(
+        string="Profession",
+        related="parent1_id.profession",
+        readonly=False,
+        store=True,
+    )
+    parent1_employeur = fields.Char(
+        string="Employeur",
+        related="parent1_id.employer_name",
+        readonly=False,
+        store=True,
+    )
 
     parent2_id = fields.Many2one("res.partner", string="Parent 2", ondelete="restrict")
     same_address_as_parent1 = fields.Boolean(default=False)
@@ -172,9 +182,19 @@ class DossierFamille(models.Model):
         readonly=False,
         store=True,
     )
-    parent2_profession = fields.Char(string="Profession")
-    parent2_employeur = fields.Char(string="Employeur")
-   
+    parent2_profession = fields.Char(
+        string="Profession",
+        related="parent2_id.profession",
+        readonly=False,
+        store=True,
+    )
+    parent2_employeur = fields.Char(
+        string="Employeur",
+        related="parent2_id.employer_name",
+        readonly=False,
+        store=True,
+    )
+    
     # === AUTRE REPRÉSENTANT LÉGAL (Tuteur, curateur, etc.) ===
     other_firstname = fields.Char(string="Prénom autre représentant")
     other_lastname = fields.Char(string="Nom autre représentant")
