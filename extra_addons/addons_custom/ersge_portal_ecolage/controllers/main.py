@@ -248,7 +248,9 @@ class PortalEcolage(http.Controller):
                 ]
                 dossier_vals = {k: params.get(k) for k in simple_fields if params.get(k) is not None}
                 if dossier_vals:
+                    _logger.warning(f"explanatory_letter_text = {params.get('explanatory_letter_text')!r}")
                     dossier.sudo().write(dossier_vals)
+                    _logger.warning(f"Après write, explanatory_letter_text = {dossier.explanatory_letter_text!r}")
 
                 # 2. Parent 1 (inchangé)
                 parent1_vals = {

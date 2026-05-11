@@ -460,115 +460,97 @@ Ajouter un élève
                             </div>
                         </div>
                         <!-- Fin Section 2 -->
-                        <!-- ── Section 3 : Finances / Aide employeur ── -->
+                        <!-- ── Section 3 : Aide employeur ── -->
                         <div class="accordion-item border mb-3 rounded shadow-sm">
                             <h2 class="accordion-header" id="headingFinances">
                                 <button class="accordion-button collapsed rounded" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFinances" aria-expanded="false" aria-controls="collapseFinances">
-                                    <i class="fa fa-euro me-2 text-primary"/>
-                                    <strong>Finances</strong>
+                                    <i class="fa fa-briefcase me-2 text-primary"/>
+                                    <strong>Aide employeur</strong>
                                 </button>
                             </h2>
                             <div id="collapseFinances" class="accordion-collapse collapse" aria-labelledby="headingFinances">
                                 <div class="accordion-body">
 
-                                    <!-- Aide employeur -->
-                                    <div class="card mb-4">
-                                        <div class="card-header fw-semibold bg-light">
-                                            <i class="fa fa-briefcase me-2"/>
-Aide employeur
+                                    <label class="form-label fw-semibold">
+                Bénéficiez-vous d'une aide de votre employeur pour l'écolage ?
+                                        <span class="text-danger">*</span>
+                                    </label>
+                                    <div class="d-flex flex-column gap-2 mb-3">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio" name="employer_assistance" id="employer_yes" value="yes" t-att-checked="dossier.employer_assistance == 'yes'"/>
+                                            <label class="form-check-label" for="employer_yes">Oui</label>
                                         </div>
-                                        <div class="card-body">
-
-                                            <label class="form-label fw-semibold">
-                        Bénéficiez-vous d'une aide de votre employeur pour l'écolage ?
-                                                <span class="text-danger">*</span>
-                                            </label>
-                                            <div class="d-flex flex-column gap-2 mb-3">
-                                                <div class="form-check">
-                                                    <input class="form-check-input" type="radio" name="employer_assistance" id="employer_yes" value="yes" t-att-checked="dossier.employer_assistance == 'yes'"/>
-                                                    <label class="form-check-label" for="employer_yes">Oui</label>
-                                                </div>
-                                                <div class="form-check">
-                                                    <input class="form-check-input" type="radio" name="employer_assistance" id="employer_no" value="no" t-att-checked="dossier.employer_assistance == 'no' or not dossier.employer_assistance"/>
-                                                    <label class="form-check-label" for="employer_no">Non</label>
-                                                </div>
-                                            </div>
-
-                                            <!-- Bloc conditionnel : affiché si oui -->
-                                            <div id="block_employer_yes" t-att-style="'display:' + ('block' if dossier.employer_assistance == 'yes' else 'none')">
-
-                                                <!-- Envoyer facture à l'employeur -->
-                                                <div class="card mb-3 bg-light border-0">
-                                                    <div class="card-body">
-                                                        <div class="form-check form-switch">
-                                                            <input class="form-check-input" type="checkbox" role="switch" name="send_invoice_to_employer" id="send_invoice_to_employer" value="1" t-att-checked="dossier.send_invoice_to_employer"/>
-                                                            <label class="form-check-label fw-semibold" for="send_invoice_to_employer">
-                    Envoyer la facture à l'employeur
-                                                            </label>
-                                                        </div>
-                                                    </div>
-                                                </div>
-
-                                                <!-- Bloc employeur : affiché si facture à l'employeur -->
-                                                <div id="block_employer_id" t-att-style="'display:' + ('block' if dossier.send_invoice_to_employer else 'none')">
-                                                    <div class="card mb-3">
-                                                        <div class="card-header fw-semibold bg-light">
-                                                            <i class="fa fa-building me-2"/>
-                Coordonnées de l'employeur
-                                                        </div>
-                                                        <div class="card-body">
-                                                            <div class="row g-3">
-                                                                <div class="col-12">
-                                                                    <label class="form-label fw-semibold">
-                            Nom de l'employeur <span class="text-danger">*</span>
-                                                                    </label>
-                                                                    <input type="text" class="form-control" name="employer_name" id="employer_name" t-att-value="dossier.employer_name or ''" />
-                                                                </div>
-                                                                <div class="col-12">
-                                                                    <label class="form-label fw-semibold">
-                            Adresse de l'employeur <span class="text-danger">*</span>
-                                                                    </label>
-                                                                    <input type="text" class="form-control" name="employer_street" id="employer_street" t-att-value="dossier.employer_street or ''" />
-                                                                </div>
-                                                                <div class="col-md-4">
-                                                                    <label class="form-label fw-semibold">
-                            Code Postal <span class="text-danger">*</span>
-                                                                    </label>
-                                                                    <input type="text" class="form-control" name="employer_zip" id="employer_zip" t-att-value="dossier.employer_zip or ''" />
-                                                                </div>
-                                                                <div class="col-md-8">
-                                                                    <label class="form-label fw-semibold">
-                            Ville <span class="text-danger">*</span>
-                                                                    </label>
-                                                                    <input type="text" class="form-control" name="employer_city" id="employer_city" t-att-value="dossier.employer_city or ''" />
-                                                                </div>
-                                                                <div class="col-12">
-                                                                    <label class="form-label fw-semibold">
-                            Pays
-                                                                    </label>
-                                                                    <select class="form-select" name="employer_country_id" id="employer_country_id">
-                                                                        <option value="">-- Sélectionner un pays --</option>
-                                                                        <t t-foreach="countries" t-as="country">
-                                                                            <option t-att-value="country.id" t-att-selected="dossier.employer_country_id.id == country.id">
-                                                                                <t t-out="country.name"/>
-                                                                            </option>
-                                                                        </t>
-                                                                    </select>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-
-                                            </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio" name="employer_assistance" id="employer_no" value="no" t-att-checked="dossier.employer_assistance == 'no' or not dossier.employer_assistance"/>
+                                            <label class="form-check-label" for="employer_no">Non</label>
                                         </div>
                                     </div>
 
+                                    <!-- Bloc conditionnel : affiché si oui -->
+                                    <div id="block_employer_yes" t-att-style="'display:' + ('block' if dossier.employer_assistance == 'yes' else 'none')">
+
+                                        <div class="form-check form-switch mb-3">
+                                            <input class="form-check-input" type="checkbox" role="switch" name="send_invoice_to_employer" id="send_invoice_to_employer" value="1" t-att-checked="dossier.send_invoice_to_employer"/>
+                                            <label class="form-check-label fw-semibold" for="send_invoice_to_employer">
+                        Envoyer la facture à l'employeur
+                                            </label>
+                                        </div>
+
+                                        <!-- Bloc employeur : affiché si facture à l'employeur -->
+                                        <div id="block_employer_id" t-att-style="'display:' + ('block' if dossier.send_invoice_to_employer else 'none')">
+                                            <div class="card mb-3">
+                                                <div class="card-header fw-semibold bg-light">
+                                                    <i class="fa fa-building me-2"/>
+                            Coordonnées de l'employeur
+                                                </div>
+                                                <div class="card-body">
+                                                    <div class="row g-3">
+                                                        <div class="col-12">
+                                                            <label class="form-label fw-semibold">
+                                        Nom de l'employeur <span class="text-danger">*</span>
+                                                            </label>
+                                                            <input type="text" class="form-control" name="employer_name" id="employer_name" t-att-value="dossier.employer_name or ''"/>
+                                                        </div>
+                                                        <div class="col-12">
+                                                            <label class="form-label fw-semibold">
+                                        Adresse de l'employeur <span class="text-danger">*</span>
+                                                            </label>
+                                                            <input type="text" class="form-control" name="employer_street" id="employer_street" t-att-value="dossier.employer_street or ''"/>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <label class="form-label fw-semibold">
+                                        Code Postal <span class="text-danger">*</span>
+                                                            </label>
+                                                            <input type="text" class="form-control" name="employer_zip" id="employer_zip" t-att-value="dossier.employer_zip or ''"/>
+                                                        </div>
+                                                        <div class="col-md-8">
+                                                            <label class="form-label fw-semibold">
+                                        Ville <span class="text-danger">*</span>
+                                                            </label>
+                                                            <input type="text" class="form-control" name="employer_city" id="employer_city" t-att-value="dossier.employer_city or ''"/>
+                                                        </div>
+                                                        <div class="col-12">
+                                                            <label class="form-label fw-semibold">Pays</label>
+                                                            <select class="form-select" name="employer_country_id" id="employer_country_id">
+                                                                <option value="">-- Sélectionner un pays --</option>
+                                                                <t t-foreach="countries" t-as="country">
+                                                                    <option t-att-value="country.id" t-att-selected="dossier.employer_country_id.id == country.id">
+                                                                        <t t-out="country.name"/>
+                                                                    </option>
+                                                                </t>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                    </div>
                                 </div>
                             </div>
                         </div>
                         <!-- ── Fin Section 3 ── -->
-                        <!-- Section 4 : Forfaits et cotisation -->
+                        <!-- Section 4 : Forfaits  -->
                         <div class="accordion-item border mb-3 rounded shadow-sm">
                             <h2 class="accordion-header" id="headingForfaits">
                                 <button class="accordion-button collapsed rounded" type="button" data-bs-toggle="collapse" data-bs-target="#collapseForfaits" aria-expanded="false" aria-controls="collapseForfaits">
@@ -638,6 +620,329 @@ Aide employeur
                     </div>
 
                     <!-- Fin Section 4 -->
+
+                    <!-- Section 5 : Réductions -->
+                    <div class="accordion-item border mb-3 rounded shadow-sm">
+                        <h2 class="accordion-header" id="headingReductions">
+                            <button class="accordion-button collapsed rounded" type="button" data-bs-toggle="collapse" data-bs-target="#collapseReductions" aria-expanded="false" aria-controls="collapseReductions">
+                                <i class="fa fa-percent me-2 text-primary"/>
+                                <strong>Réductions</strong>
+                            </button>
+                        </h2>
+                        <div id="collapseReductions" class="accordion-collapse collapse" aria-labelledby="headingReductions">
+                            <div class="accordion-body">
+
+                                <!-- Solliciter une réduction -->
+                                <div class="card mb-4">
+                                    <div class="card-header fw-semibold bg-light">
+                                        <i class="fa fa-scissors me-2"/>
+                    Réductions
+                                    </div>
+                                    <div class="card-body">
+                                        <label class="form-label fw-semibold">
+                        Je sollicite une réduction en raison du nombre d'enfants inscrit à l'école et/ou une réduction d'ancienneté
+                                        </label>
+                                        <div class="d-flex flex-column gap-2">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" name="reduction_requested" id="reduction_no" value="0" t-att-checked="not dossier.reduction_requested"/>
+                                                <label class="form-check-label" for="reduction_no">Non</label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" name="reduction_requested" id="reduction_yes" value="1" t-att-checked="dossier.reduction_requested"/>
+                                                <label class="form-check-label" for="reduction_yes">Oui</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Bloc réductions (visible si oui) -->
+                                <div id="block_reduction_yes" t-att-style="'display:' + ('block' if dossier.reduction_requested else 'none')">
+
+                                    <!-- Réduction enfants -->
+                                    <div class="card mb-4">
+                                        <div class="card-header fw-semibold bg-light">
+                                            <i class="fa fa-child me-2"/>
+                        Demande de réduction en raison du nombre d'enfants
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="row g-3">
+                                                <div class="col-12">
+                                                    <label class="form-label fw-semibold">
+                                    Réduction maximale possible en fonction du nombre d'enfants
+                                                    </label>
+                                                    <div class="input-group">
+                                                        <input type="text" class="form-control bg-light" readonly="readonly" t-att-value="dossier.max_children_discount"/>
+                                                        <span class="input-group-text">%</span>
+                                                    </div>
+                                                    <div class="form-text text-muted">Zone non modifiable</div>
+                                                </div>
+                                                <div class="col-12">
+                                                    <div class="form-check form-switch">
+                                                        <input class="form-check-input" type="checkbox" role="switch" name="apply_children_discount" id="apply_children_discount" value="1" t-att-checked="dossier.apply_children_discount"/>
+                                                        <label class="form-check-label fw-semibold" for="apply_children_discount">
+                                        Vous sollicitez une réduction en raison du nombre d'enfants de votre famille inscrits dans l'école.
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                                <div class="col-12">
+                                                    <label class="form-label fw-semibold">Total mensuel après ces rabais (CHF)</label>
+                                                    <input type="text" class="form-control bg-light" readonly="readonly" t-att-value="dossier.monthly_fee_after_children"/>
+                                                    <div class="form-text text-muted">Zone non modifiable</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Réduction ancienneté -->
+                                    <div class="card mb-4">
+                                        <div class="card-header fw-semibold bg-light">
+                                            <i class="fa fa-clock-o me-2"/>
+                        Demande de réduction selon l'ancienneté
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="row g-3">
+                                                <div class="col-12">
+                                                    <label class="form-label fw-semibold">Années d'ancienneté</label>
+                                                    <select class="form-select" name="seniority_years">
+                                                        <option value="5" t-att-selected="dossier.seniority_years == '5'">Moins de 6 ans</option>
+                                                        <option value="6" t-att-selected="dossier.seniority_years == '6'">6 années</option>
+                                                        <option value="7" t-att-selected="dossier.seniority_years == '7'">7 années</option>
+                                                        <option value="8" t-att-selected="dossier.seniority_years == '8'">8 années</option>
+                                                        <option value="9" t-att-selected="dossier.seniority_years == '9'">9 années</option>
+                                                        <option value="10" t-att-selected="dossier.seniority_years == '10'">10 ans et plus</option>
+                                                    </select>
+                                                </div>
+                                                <div class="col-12">
+                                                    <label class="form-label fw-semibold">Réduction maximale possible pour l'ancienneté</label>
+                                                    <div class="input-group">
+                                                        <input type="text" class="form-control bg-light" readonly="readonly" t-att-value="dossier.max_seniority_discount"/>
+                                                        <span class="input-group-text">%</span>
+                                                    </div>
+                                                    <div class="form-text text-muted">Zone non modifiable</div>
+                                                </div>
+                                                <div class="col-12">
+                                                    <div class="form-check form-switch">
+                                                        <input class="form-check-input" type="checkbox" role="switch" name="apply_seniority_discount" id="apply_seniority_discount" value="1" t-att-checked="dossier.apply_seniority_discount"/>
+                                                        <label class="form-check-label fw-semibold" for="apply_seniority_discount">
+                                        Vous sollicitez une réduction d'ancienneté relative au temps pendant lequel votre famille a contribué à l'école.
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                                <div class="col-12">
+                                                    <label class="form-label fw-semibold">Total mensuel après ces rabais (CHF)</label>
+                                                    <input type="text" class="form-control bg-light" readonly="readonly" t-att-value="dossier.monthly_fee_after_seniority"/>
+                                                    <div class="form-text text-muted">Zone non modifiable</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Ajustement réduction -->
+                                    <div class="card mb-4">
+                                        <div class="card-header fw-semibold bg-light">
+                                            <i class="fa fa-sliders me-2"/>
+                        Ajustez vos réductions
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="alert alert-info">
+                                                <i class="fa fa-info-circle me-2"/>
+                            Sollicitez, en conscience, la réduction juste en fonction de votre situation.
+                                            </div>
+                                            <div class="row g-3">
+                                                <div class="col-12">
+                                                    <label class="form-label fw-semibold">
+                                    Vous pourriez solliciter la réduction maximale suivante (ancienneté et/ou nombre d'enfants)
+                                                    </label>
+                                                    <div class="input-group">
+                                                        <input type="text" class="form-control bg-light" readonly="readonly" t-att-value="dossier.max_total_discount"/>
+                                                        <span class="input-group-text">%</span>
+                                                    </div>
+                                                    <div class="form-text text-muted">Zone non modifiable</div>
+                                                </div>
+                                                <div class="col-12">
+                                                    <label class="form-label fw-semibold">Total mensuel après rabais maximal (CHF)</label>
+                                                    <input type="text" class="form-control bg-light" readonly="readonly" t-att-value="dossier.monthly_fee_at_max"/>
+                                                    <div class="form-text text-muted">Zone non modifiable</div>
+                                                </div>
+                                                <div class="col-12">
+                                                    <label class="form-label fw-semibold">
+                                    Compte tenu de votre situation personnelle, vous sollicitez une réduction moindre, indiquez le pourcentage
+                                                        <span class="text-danger">*</span>
+                                                    </label>
+                                                    <div class="input-group">
+                                                        <input type="number" class="form-control" name="requested_discount" min="0" t-att-max="dossier.max_total_discount" step="0.1" t-att-value="dossier.requested_discount or 0"/>
+                                                        <span class="input-group-text">%</span>
+                                                    </div>
+                                                    <div class="form-text text-muted">Ce pourcentage doit rester inférieur au maximum possible.</div>
+                                                </div>
+                                                <div class="col-12">
+                                                    <label class="form-label fw-semibold">Total mensuel après votre réduction (CHF)</label>
+                                                    <input type="text" class="form-control bg-light" readonly="readonly" t-att-value="dossier.monthly_fee_after_requested"/>
+                                                    <div class="form-text text-muted">Zone non modifiable</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+                                <!-- Fin bloc réductions -->
+
+                                <!-- Réduction complémentaire -->
+                                <div class="card mb-4">
+                                    <div class="card-header fw-semibold bg-light">
+                                        <i class="fa fa-plus-circle me-2"/>
+                    Réduction complémentaire
+                                    </div>
+                                    <div class="card-body">
+                                        <label class="form-label fw-semibold">
+                        Je sollicite une demande de réduction complémentaire
+                                        </label>
+                                        <div class="d-flex flex-column gap-2">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" name="additional_reduction_request" id="add_reduction_no" value="0" t-att-checked="not dossier.additional_reduction_request"/>
+                                                <label class="form-check-label" for="add_reduction_no">Non</label>
+                                            </div>
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" name="additional_reduction_request" id="add_reduction_yes" value="1" t-att-checked="dossier.additional_reduction_request"/>
+                                                <label class="form-check-label" for="add_reduction_yes">Oui</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Bloc réduction complémentaire (visible si oui) -->
+                                <div id="block_additional_reduction" t-att-style="'display:' + ('block' if dossier.additional_reduction_request else 'none')">
+
+                                    <div class="alert alert-info">
+                                        <i class="fa fa-info-circle me-2"/>
+                    Merci de prendre impérativement connaissance de ce document :
+                                        <a href="/ersge_portal_ecolage/static/src/Procedure-demande-reduction-ecolage-2025-26.pdf" target="_blank">
+                        Demande de réduction d'écolage
+                                        </a>
+                                    </div>
+                                    <div class="alert alert-warning">
+                                        <i class="fa fa-info-circle me-2"/>
+                    En cas d'impossibilité d'envoi de documents numériques, vous pouvez déposer une version papier de ces documents au secrétariat.
+                                    </div>
+
+                                    <div class="card mb-4">
+                                        <div class="card-header fw-semibold bg-light">
+                                            <i class="fa fa-bar-chart me-2"/>
+                        Situation financière
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="row g-3">
+                                                <div class="col-12">
+                                                    <label class="form-label fw-semibold">
+                                    Revenu brut annuel familial (CHF)
+                                                    </label>
+                                                    <input type="number" class="form-control" name="gross_annual_income" t-att-value="dossier.gross_annual_income or ''"/>
+                                                </div>
+                                                <div class="col-12">
+                                                    <label class="form-label fw-semibold">
+                                    Pourcentage que représente le tarif sur votre revenu annuel familial brut
+                                                        <span class="text-danger">*</span>
+                                                    </label>
+                                                    <div class="input-group">
+                                                        <input type="text" class="form-control bg-light" readonly="readonly" t-att-value="dossier.additional_reduction_income_percentage"/>
+                                                        <span class="input-group-text">%</span>
+                                                    </div>
+                                                    <div class="form-text text-muted">Zone non modifiable</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="card mb-4">
+                                        <div class="card-header fw-semibold bg-light">
+                                            <i class="fa fa-paperclip me-2"/>
+                        Justificatifs
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="row g-3">
+                                                <div class="col-12">
+                                                    <label class="form-label fw-semibold">Dernier avis de taxation</label>
+                                                    <input type="file" class="form-control" name="tax_notice_attachment" accept=".pdf"/>
+                                                    <div class="form-text text-muted">Taille de fichier maximale : 4MB</div>
+                                                </div>
+                                                <div class="col-12">
+                                                    <label class="form-label fw-semibold">Trois dernières fiches de salaire</label>
+                                                    <input type="file" class="form-control" name="payslip_ids" accept=".pdf" multiple="multiple"/>
+                                                    <div class="form-text text-muted">Taille de fichier maximale : 8MB — Vous pouvez télécharger plusieurs fichiers.</div>
+                                                </div>
+
+                                                <!-- Lettre explicative de la situation familiale -->
+                                                <div class="card mb-4">
+                                                    <div class="card-header fw-semibold bg-light">
+                                                        <i class="fa fa-file-text-o me-2"></i>
+        Lettre explicative de la situation familiale
+                                                    </div>
+                                                    <div class="card-body">
+                                                        <div class="d-flex flex-column gap-2 mb-3">
+                                                            <div class="form-check">
+                                                                <input class="form-check-input" type="radio" name="explanatory_letter_mode" id="letter_upload" value="upload" t-att-checked="dossier.explanatory_letter_mode == 'upload' or not dossier.explanatory_letter_mode"/>
+                                                                <label class="form-check-label" for="letter_upload">Télécharger un fichier</label>
+                                                            </div>
+                                                            <div class="form-check">
+                                                                <input class="form-check-input" type="radio" name="explanatory_letter_mode" id="letter_write" value="write" t-att-checked="dossier.explanatory_letter_mode == 'write'"/>
+                                                                <label class="form-check-label" for="letter_write">Écrire directement</label>
+                                                            </div>
+                                                        </div>
+
+                                                        <div id="block_letter_upload" t-att-style="'display:' + ('block' if dossier.explanatory_letter_mode != 'write' else 'none')">
+                                                            <input type="file" class="form-control" name="explanatory_letter_attachment" accept=".pdf"/>
+                                                            <div class="form-text text-muted">Taille de fichier maximale : 4MB</div>
+                                                        </div>
+                                                        <div id="block_letter_write" t-att-style="'display:' + ('block' if dossier.explanatory_letter_mode == 'write' else 'none')">
+                                                            <textarea class="form-control" name="explanatory_letter_text" rows="6" placeholder="Décrivez votre situation..." t-att-data-initial="dossier.explanatory_letter_text or ''"></textarea>
+                                                        </div>
+
+                                                    </div>
+                                                </div>
+
+                                                <div class="col-12">
+                                                    <label class="form-label fw-semibold">Budget familial mensuel</label>
+                                                    <input type="file" class="form-control" name="budget_attachment" accept=".pdf"/>
+                                                    <div class="form-text text-muted">Taille de fichier maximale : 4MB</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="card mb-4">
+                                        <div class="card-header fw-semibold bg-light">
+                                            <i class="fa fa-handshake-o me-2"/>
+                        Merci de préciser
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="row g-3">
+                                                <div class="col-md-6">
+                                                    <label class="form-label fw-semibold">
+                                    Merci d'indiquer l'écolage mensuel que vous proposez
+                                                        <span class="text-danger">*</span>
+                                                    </label>
+                                                    <div class="input-group">
+                                                        <input type="number" class="form-control" name="proposed_monthly_amount" t-att-value="dossier.proposed_monthly_amount or ''"/>
+                                                        <span class="input-group-text">CHF</span>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label class="form-label fw-semibold">Total proposé (CHF)</label>
+                                                    <input type="text" class="form-control bg-light" readonly="readonly" t-att-value="dossier.proposed_monthly_amount or 0"/>
+                                                    <div class="form-text text-muted">Zone non modifiable</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+                                <!-- Fin bloc réduction complémentaire -->
+
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Fin Section 5 -->
+
                 </div>
 
             </div>
@@ -659,7 +964,7 @@ Annuler
     </div>
 
     <script type="text/javascript">
-//                                                                                                                                                                                                                                                                                                                                        <![CDATA[
+//                                                                                                                                                                                                                                                                                                                                                                                                                                                                                <![CDATA[
 document.addEventListener('DOMContentLoaded', function () {
     function initForm() {
         // ---- Représentant légal ----
@@ -669,15 +974,15 @@ document.addEventListener('DOMContentLoaded', function () {
             return;
         }
         function updateLegalVisibility() {
-    var checked = document.querySelector('input[name="legal_representation"]:checked');
-    var val = checked ? checked.value : null;
-    var p1 = document.getElementById('block_parent1');
-    var p2 = document.getElementById('block_parent2');
-    var other = document.getElementById('block_other');
-    if (p1) p1.style.display = (val === 'both' || val === 'father_only') ? 'block' : 'none';
-    if (p2) p2.style.display = (val === 'both' || val === 'mother_only') ? 'block' : 'none';
-    if (other) other.style.display = (val === 'other') ? 'block' : 'none';
-}
+            var checked = document.querySelector('input[name="legal_representation"]:checked');
+            var val = checked ? checked.value : null;
+            var p1 = document.getElementById('block_parent1');
+            var p2 = document.getElementById('block_parent2');
+            var other = document.getElementById('block_other');
+            if (p1) p1.style.display = (val === 'both' || val === 'father_only') ? 'block' : 'none';
+            if (p2) p2.style.display = (val === 'both' || val === 'mother_only') ? 'block' : 'none';
+            if (other) other.style.display = (val === 'other') ? 'block' : 'none';
+        }
         radiosLegal.forEach(function(r) {
             r.addEventListener('change', updateLegalVisibility);
         });
@@ -740,7 +1045,6 @@ document.addEventListener('DOMContentLoaded', function () {
         var blockEmployerId = document.getElementById('block_employer_id');
         if (chkInvoice && blockEmployerId) {
             function toggleEmployerBlock() {
-                // Forcer l'affichage en supprimant tout style inline conflictuel
                 if (chkInvoice.checked) {
                     blockEmployerId.style.display = 'block';
                     blockEmployerId.style.removeProperty('display');
@@ -748,82 +1052,131 @@ document.addEventListener('DOMContentLoaded', function () {
                     blockEmployerId.style.display = 'none';
                 }
             }
-            // Initialisation et écoute
             toggleEmployerBlock();
             chkInvoice.addEventListener('change', toggleEmployerBlock);
         }
+
+        // ---- Initialiser les textareas avec data-initial (pour éviter les espaces) ----
+        document.querySelectorAll('textarea[data-initial]').forEach(function(textarea) {
+            var initialValue = textarea.getAttribute('data-initial') || '';
+            if (textarea.value !== initialValue) {
+                textarea.value = initialValue;
+            }
+        });
     }
 
     // ---- Gestion des forfaits et cotisation ----
-function updateForfaitMontant(selectEl, montantInput) {
-    var selectedOption = selectEl.options[selectEl.selectedIndex];
-    var montant = 0;
-    if (selectedOption && selectedOption.value) {
-        var text = selectedOption.text;
-        var match = text.match(/(\d+(?:\.\d+)?)\s*CHF/);
-        if (match) montant = parseFloat(match[1]);
+    function updateForfaitMontant(selectEl, montantInput) {
+        var selectedOption = selectEl.options[selectEl.selectedIndex];
+        var montant = 0;
+        if (selectedOption && selectedOption.value) {
+            var text = selectedOption.text;
+            var match = text.match(/(\d+(?:\.\d+)?)\s*CHF/);
+            if (match) montant = parseFloat(match[1]);
+        }
+        montantInput.value = montant.toFixed(2);
+        updateTotalMensuel();
+        updateCotisation();
     }
-    montantInput.value = montant.toFixed(2);
-    updateTotalMensuel();
-    updateCotisation();
-}
 
-function updateTotalMensuel() {
-    var total = 0;
-    document.querySelectorAll('.montant-mensuel').forEach(function(input) {
-        var val = parseFloat(input.value);
-        if (!isNaN(val)) total += val;
+    function updateTotalMensuel() {
+        var total = 0;
+        document.querySelectorAll('.montant-mensuel').forEach(function(input) {
+            var val = parseFloat(input.value);
+            if (!isNaN(val)) total += val;
+        });
+        document.getElementById('total_monthly_fee').innerText = total.toFixed(2);
+    }
+
+    function updateCotisation() {
+        var legalChecked = document.querySelector('input[name="legal_representation"]:checked');
+        var legalValue = legalChecked ? legalChecked.value : null;
+        var hasParent2 = (legalValue === 'both' || legalValue === 'parent2');
+        var hasOther = (legalValue === 'other');
+        var montantCotisation = 0;
+        if (hasOther) {
+            montantCotisation = 0;
+        } else if (hasParent2) {
+            montantCotisation = 60;
+        } else {
+            montantCotisation = 40;
+        }
+        document.getElementById('membership_fee_amount').innerText = montantCotisation.toFixed(2);
+    }
+
+    function updateDepot() {
+        var checked = document.querySelector('input[name="deposit_status"]:checked');
+        var val = checked ? checked.value : null;
+        var montant = (val === 'unpaid') ? 1000 : 0;
+        var el = document.getElementById('deposit_amount');
+        if (el) el.innerText = montant.toFixed(2);
+    }
+
+    document.querySelectorAll('input[name="deposit_status"]').forEach(function(radio) {
+        radio.addEventListener('change', updateDepot);
     });
-    document.getElementById('total_monthly_fee').innerText = total.toFixed(2);
-}
+    updateDepot();
 
-function updateCotisation() {
-    var legalChecked = document.querySelector('input[name="legal_representation"]:checked');
-    var legalValue = legalChecked ? legalChecked.value : null;
-    var hasParent2 = (legalValue === 'both' || legalValue === 'parent2');
-    var hasOther = (legalValue === 'other');
-    var montantCotisation = 0;
-    if (hasOther) {
-        montantCotisation = 0;
-    } else if (hasParent2) {
-        montantCotisation = 60;
-    } else {
-        montantCotisation = 40;
-    }
-    document.getElementById('membership_fee_amount').innerText = montantCotisation.toFixed(2);
-}
+    document.querySelectorAll('.forfait-select').forEach(function(select) {
+        var lineId = select.getAttribute('data-line-id');
+        var montantInput = document.querySelector('.montant-mensuel[data-line-id="' + lineId + '"]');
+        if (montantInput) {
+            function onChange() { updateForfaitMontant(select, montantInput); }
+            select.addEventListener('change', onChange);
+            onChange();
+        }
+    });
 
-function updateDepot() {
-    var checked = document.querySelector('input[name="deposit_status"]:checked');
-    var val = checked ? checked.value : null;
-    var montant = (val === 'unpaid') ? 1000 : 0;
-    var el = document.getElementById('deposit_amount');
-    if (el) el.innerText = montant.toFixed(2);
-}
-
-document.querySelectorAll('input[name="deposit_status"]').forEach(function(radio) {
-    radio.addEventListener('change', updateDepot);
-});
-updateDepot();
-
-document.querySelectorAll('.forfait-select').forEach(function(select) {
-    var lineId = select.getAttribute('data-line-id');
-    var montantInput = document.querySelector('.montant-mensuel[data-line-id="' + lineId + '"]');
-    if (montantInput) {
-        function onChange() { updateForfaitMontant(select, montantInput); }
-        select.addEventListener('change', onChange);
-        onChange();
-    }
-});
-
-var legalRadios = document.querySelectorAll('input[name="legal_representation"]');
-legalRadios.forEach(function(radio) {
-    radio.addEventListener('change', updateCotisation);
-});
-updateCotisation();
+    var legalRadios = document.querySelectorAll('input[name="legal_representation"]');
+    legalRadios.forEach(function(radio) {
+        radio.addEventListener('change', updateCotisation);
+    });
+    updateCotisation();
 
     initForm();
 });
+
+// ---- Lettre explicative (upload / write) ----
+function toggleExplanatoryLetter() {
+    var checked = document.querySelector('input[name="explanatory_letter_mode"]:checked');
+    var blockUpload = document.getElementById('block_letter_upload');
+    var blockWrite = document.getElementById('block_letter_write');
+    if (!blockUpload || !blockWrite) return;
+    var isWrite = (checked && checked.value === 'write');
+    blockUpload.style.display = isWrite ? 'none' : 'block';
+    blockWrite.style.display = isWrite ? 'block' : 'none';
+}
+
+// Attacher les événements
+var letterRadios = document.querySelectorAll('input[name="explanatory_letter_mode"]');
+if (letterRadios.length) {
+    letterRadios.forEach(function(radio) {
+        radio.addEventListener('change', toggleExplanatoryLetter);
+    });
+    toggleExplanatoryLetter();
+}
+
+// ---- Réduction ----
+function toggleReduction() {
+    var checked = document.querySelector('input[name="reduction_requested"]:checked');
+    var block = document.getElementById('block_reduction_yes');
+    if (block) block.style.display = (checked && checked.value === '1') ? 'block' : 'none';
+}
+document.querySelectorAll('input[name="reduction_requested"]').forEach(function(r) {
+    r.addEventListener('change', toggleReduction);
+});
+toggleReduction();
+
+// ---- Réduction complémentaire ----
+function toggleAdditionalReduction() {
+    var checked = document.querySelector('input[name="additional_reduction_request"]:checked');
+    var block = document.getElementById('block_additional_reduction');
+    if (block) block.style.display = (checked && checked.value === '1') ? 'block' : 'none';
+}
+document.querySelectorAll('input[name="additional_reduction_request"]').forEach(function(r) {
+    r.addEventListener('change', toggleAdditionalReduction);
+});
+toggleAdditionalReduction();
 //]]>
     </script>
 </t>
