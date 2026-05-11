@@ -92,7 +92,7 @@
                                         </div>
                                     </div>
                                     <!-- Cotisation annuelle -->
-                                    <h2 class="mt-4">Cotisation annuelle</h2>
+                                    <h3 class="mt-4">Cotisation annuelle</h3>
                                     <div class="alert alert-info">
                 À l'Association en faveur de l'école Rudolf Steiner de Genève :<br/>
                 Individuelle 40 CHF, Couple 60 CHF, Curateur/trice et Tuteur/trice Gratuit.
@@ -315,6 +315,10 @@ Dépôt
                                                     <label class="form-check-label">Versement du dépôt</label>
                                                 </div>
 
+                                            </div>
+                                            <div class="alert alert-secondary mt-3">
+                                                <strong>Total du dépôt : </strong>
+                                                <span id="deposit_amount">0.00</span> CHF
                                             </div>
                                         </div>
                                     </div>
@@ -649,7 +653,7 @@ Annuler
     </div>
 
     <script type="text/javascript">
-//                                                                                                                                                                                                                                                                <![CDATA[
+//                                                                                                                                                                                                                                                                                                                <![CDATA[
 document.addEventListener('DOMContentLoaded', function () {
     function initForm() {
         // ---- Représentant légal ----
@@ -782,6 +786,19 @@ function updateCotisation() {
     }
     document.getElementById('membership_fee_amount').innerText = montantCotisation.toFixed(2);
 }
+
+function updateDepot() {
+    var checked = document.querySelector('input[name="deposit_status"]:checked');
+    var val = checked ? checked.value : null;
+    var montant = (val === 'pending') ? 1000 : 0;
+    var el = document.getElementById('deposit_amount');
+    if (el) el.innerText = montant.toFixed(2);
+}
+
+document.querySelectorAll('input[name="deposit_status"]').forEach(function(radio) {
+    radio.addEventListener('change', updateDepot);
+});
+updateDepot();
 
 document.querySelectorAll('.forfait-select').forEach(function(select) {
     var lineId = select.getAttribute('data-line-id');
