@@ -92,14 +92,21 @@
                                         </div>
                                     </div>
                                     <!-- Cotisation annuelle -->
-                                    <h3 class="mt-4">Cotisation annuelle</h3>
-                                    <div class="alert alert-info">
-                À l'Association en faveur de l'école Rudolf Steiner de Genève :<br/>
-                Individuelle 40 CHF, Couple 60 CHF, Curateur/trice et Tuteur/trice Gratuit.
-                                    </div>
-                                    <div class="alert alert-secondary">
-                                        <strong>Total de la cotisation : </strong>
-                                        <span id="membership_fee_amount">0.00</span> CHF
+                                    <div class="card mb-2">
+                                        <div class="card-header fw-semibold bg-light">
+                                            <i class="fa fa-university me-2"/>
+        Cotisation annuelle
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="alert alert-info">
+            À l'Association en faveur de l'école Rudolf Steiner de Genève :<br/>
+            Individuelle 40 CHF, Couple 60 CHF, Curateur/trice et Tuteur/trice Gratuit.
+                                            </div>
+                                            <div class="alert alert-secondary">
+                                                <strong>Total de la cotisation : </strong>
+                                                <span id="membership_fee_amount">0.00</span> CHF
+                                            </div>
+                                        </div>
                                     </div>
 
                                     <!-- Bloc Autre représentant (corrigé) -->
@@ -302,19 +309,18 @@ Dépôt
                                         </div>
                                         <div class="card-body">
                                             <div class="alert alert-info">
-                                                Toute nouvelle famille doit verser un dépôt de <strong>1000 CHF</strong>.
+        Toute nouvelle famille doit verser un dépôt de <strong>1000 CHF</strong>.
                                             </div>
                                             <label class="form-label fw-semibold">Statut du dépôt</label>
                                             <div class="d-flex flex-column gap-2">
                                                 <div class="form-check">
-                                                    <input class="form-check-input" type="radio" name="deposit_status" value="paid" t-att-checked="dossier.deposit_status == 'paid'"/>
-                                                    <label class="form-check-label">Déjà versé</label>
+                                                    <input class="form-check-input" type="radio" name="deposit_status" id="deposit_paid" value="paid" t-att-checked="dossier.deposit_status == 'paid'"/>
+                                                    <label class="form-check-label" for="deposit_paid">Déjà versé</label>
                                                 </div>
                                                 <div class="form-check">
-                                                    <input class="form-check-input" type="radio" name="deposit_status" value="pending" t-att-checked="dossier.deposit_status == 'pending'"/>
-                                                    <label class="form-check-label">Versement du dépôt</label>
+                                                    <input class="form-check-input" type="radio" name="deposit_status" id="deposit_unpaid" value="unpaid" t-att-checked="dossier.deposit_status == 'unpaid'"/>
+                                                    <label class="form-check-label" for="deposit_unpaid">Versement du dépôt</label>
                                                 </div>
-
                                             </div>
                                             <div class="alert alert-secondary mt-3">
                                                 <strong>Total du dépôt : </strong>
@@ -653,7 +659,7 @@ Annuler
     </div>
 
     <script type="text/javascript">
-//                                                                                                                                                                                                                                                                                                                <![CDATA[
+//                                                                                                                                                                                                                                                                                                                                        <![CDATA[
 document.addEventListener('DOMContentLoaded', function () {
     function initForm() {
         // ---- Représentant légal ----
@@ -790,7 +796,7 @@ function updateCotisation() {
 function updateDepot() {
     var checked = document.querySelector('input[name="deposit_status"]:checked');
     var val = checked ? checked.value : null;
-    var montant = (val === 'pending') ? 1000 : 0;
+    var montant = (val === 'unpaid') ? 1000 : 0;
     var el = document.getElementById('deposit_amount');
     if (el) el.innerText = montant.toFixed(2);
 }
