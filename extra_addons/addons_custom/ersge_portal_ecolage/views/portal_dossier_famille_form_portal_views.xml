@@ -1001,37 +1001,37 @@ Ajouter un élève
                                                                 <div class="row">
                                                                     <div class="col-md-6">
                                                                         <strong>Revenus Madame :</strong>
-                                                                        <span t-out="dossier.total_revenus_madame or 0.00"/>
+                                                                        <span id="total_revenus_madame_span" t-out="dossier.total_revenus_madame or 0.00"/>
  CHF
                                                                     </div>
                                                                     <div class="col-md-6">
                                                                         <strong>Revenus Monsieur :</strong>
-                                                                        <span t-out="dossier.total_revenus_monsieur or 0.00"/>
+                                                                        <span id="total_revenus_monsieur_span" t-out="dossier.total_revenus_monsieur or 0.00"/>
  CHF
                                                                     </div>
                                                                     <div class="col-md-6">
                                                                         <strong>Total revenus :</strong>
-                                                                        <span t-out="dossier.total_revenus or 0.00"/>
+                                                                        <span id="total_revenus_span" t-out="dossier.total_revenus or 0.00"/>
  CHF
                                                                     </div>
                                                                     <div class="col-md-6">
                                                                         <strong>Charges Madame :</strong>
-                                                                        <span t-out="dossier.total_charges_madame or 0.00"/>
+                                                                        <span id="total_charges_madame_span" t-out="dossier.total_charges_madame or 0.00"/>
  CHF
                                                                     </div>
                                                                     <div class="col-md-6">
                                                                         <strong>Charges Monsieur :</strong>
-                                                                        <span t-out="dossier.total_charges_monsieur or 0.00"/>
+                                                                        <span id="total_charges_monsieur_span" t-out="dossier.total_charges_monsieur or 0.00"/>
  CHF
                                                                     </div>
                                                                     <div class="col-md-6">
                                                                         <strong>Total charges :</strong>
-                                                                        <span t-out="dossier.total_charges or 0.00"/>
+                                                                        <span id="total_charges_span" t-out="dossier.total_charges or 0.00"/>
  CHF
                                                                     </div>
                                                                     <div class="col-md-6">
                                                                         <strong>Solde :</strong>
-                                                                        <span t-out="dossier.solde or 0.00"/>
+                                                                        <span id="solde_span" t-out="dossier.solde or 0.00"/>
  CHF
                                                                     </div>
                                                                 </div>
@@ -1100,7 +1100,7 @@ Annuler
     </div>
 
     <script type="text/javascript">
-//                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        <![CDATA[
+//                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                <![CDATA[
 document.addEventListener('DOMContentLoaded', function () {
     function initForm() {
         // ---- Représentant légal ----
@@ -1331,6 +1331,80 @@ document.querySelectorAll('input[name="additional_reduction_request"]').forEach(
     r.addEventListener('change', toggleAdditionalReduction);
 });
 toggleAdditionalReduction();
+
+// ---- Calcul automatique du budget en mode en ligne (version stable) ----
+(function() {
+    function updateBudgetTotals() {
+        var revenusMadame = 0, revenusMonsieur = 0;
+        var chargesMadame = 0, chargesMonsieur = 0;
+
+        // Revenus
+        var revenusHeader = document.querySelector('#block_budget_online .text-success');
+        if (revenusHeader) {
+            var tbody = revenusHeader.closest('.mb-4').querySelector('table tbody');
+            if (tbody) {
+                tbody.querySelectorAll('tr').forEach(function(row) {
+                    var madame = row.querySelector('input[name^="montant_madame_"]');
+                    var monsieur = row.querySelector('input[name^="montant_monsieur_"]');
+                    if (madame && monsieur) {
+                        revenusMadame += parseFloat(madame.value) || 0;
+                        revenusMonsieur += parseFloat(monsieur.value) || 0;
+                    }
+                });
+            }
+        }
+
+        // Charges
+        var chargesHeader = document.querySelector('#block_budget_online .text-danger');
+        if (chargesHeader) {
+            var tbody = chargesHeader.closest('.mb-4').querySelector('table tbody');
+            if (tbody) {
+                tbody.querySelectorAll('tr').forEach(function(row) {
+                    var madame = row.querySelector('input[name^="montant_madame_"]');
+                    var monsieur = row.querySelector('input[name^="montant_monsieur_"]');
+                    if (madame && monsieur) {
+                        chargesMadame += parseFloat(madame.value) || 0;
+                        chargesMonsieur += parseFloat(monsieur.value) || 0;
+                    }
+                });
+            }
+        }
+
+        var totalRevenus = revenusMadame + revenusMonsieur;
+        var totalCharges = chargesMadame + chargesMonsieur;
+        var solde = totalRevenus - totalCharges;
+
+        var setSpan = function(id, val) { 
+            var el = document.getElementById(id); 
+            if (el) el.innerText = val.toFixed(2); 
+        };
+        setSpan('total_revenus_madame_span', revenusMadame);
+        setSpan('total_revenus_monsieur_span', revenusMonsieur);
+        setSpan('total_revenus_span', totalRevenus);
+        setSpan('total_charges_madame_span', chargesMadame);
+        setSpan('total_charges_monsieur_span', chargesMonsieur);
+        setSpan('total_charges_span', totalCharges);
+        setSpan('solde_span', solde);
+    }
+
+    // Attendre que le bloc budget soit chargé, puis attacher les événements
+    function attachEvents() {
+        var inputs = document.querySelectorAll('#block_budget_online input[type="number"]');
+        inputs.forEach(function(input) {
+            input.addEventListener('input', updateBudgetTotals);
+        });
+        updateBudgetTotals();
+    }
+
+    // Vérifier périodiquement si le bloc est présent (car affichage conditionnel)
+    var checkInterval = setInterval(function() {
+        if (document.getElementById('block_budget_online')) {
+            clearInterval(checkInterval);
+            attachEvents();
+        }
+    }, 100);
+})();
+
 //]]>
     </script>
 </t>
