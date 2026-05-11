@@ -1173,7 +1173,7 @@ Ajouter un élève
                                                         <label class="form-label fw-semibold">Prestations souhaitées</label>
                                                         <div class="d-flex flex-wrap gap-2">
                                                             <t t-foreach="after_school_prestations" t-as="prestation">
-                                                                <div class="form-check">
+                                                                <div class="form-check" t-att-data-applicable="prestation.applicable_to">
                                                                     <input class="form-check-input" type="checkbox" t-att-name="'prestation_' + str(student_line.id) + '_' + str(prestation.id)" value="1" t-att-checked="after_line and prestation.id in after_line.prestation_ids.ids"/>
                                                                     <label class="form-check-label">
                                                                         <t t-out="prestation.name"/>
@@ -1612,6 +1612,27 @@ function initAfterSchoolOptions() {
         cb.removeEventListener('change', toggle);
         cb.addEventListener('change', toggle);
         toggle(); // initialisation
+
+        // Filtrer les prestations selon le type d'accueil sélectionné
+function filterPrestationsByAccueilType() {
+    document.querySelectorAll('.after-school-options').forEach(function(optionsDiv) {
+        // Trouver le type d'accueil sélectionné (radio) dans ce bloc
+        var selectedRadio = optionsDiv.querySelector('input[name^="accueil_type_"]:checked');
+        if (!selectedRadio) return;
+        var accueilValue = selectedRadio.value; // 'jardin' ou 'classe'
+
+        // Parcourir toutes les prestations (div.form-check) dans ce bloc
+        var prestations = optionsDiv.querySelectorAll('.form-check');
+        prestations.forEach(function(prestaDiv) {
+            var applicable = prestaDiv.getAttribute('data-applicable');
+            if (applicable === 'both' || applicable === accueilValue) {
+                prestaDiv.style.display = '';   // visible
+            } else {
+                prestaDiv.style.display = 'none';
+            }
+        });
+    });
+}
     });
 }
 initAfterSchoolOptions();

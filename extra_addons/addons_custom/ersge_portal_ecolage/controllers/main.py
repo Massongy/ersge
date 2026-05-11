@@ -500,6 +500,8 @@ class PortalEcolage(http.Controller):
 
             countries = request.env['res.country'].sudo().search([])
             forfaits = request.env['ersge.forfait'].sudo().search([('active', '=', True)])
+            after_school_prestations = request.env['ersge.after.school.prestation'].sudo().search([('active', '=', True)])
+
             return request.render('ersge_portal_ecolage.portal_dossier_form_complete', {
                 'dossier': dossier,
                 'prefill_parent1': prefill_parent1,
@@ -508,6 +510,7 @@ class PortalEcolage(http.Controller):
                 'csrf_token': request.csrf_token(),
                 'countries': countries,
                 'forfaits': forfaits,
+                'after_school_prestations': after_school_prestations, 
             })
 
         except AccessError:
