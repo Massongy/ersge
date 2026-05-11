@@ -1587,7 +1587,7 @@ toggleAdditionalReduction();
         }
     }, 100);
 })();
-// ---- Parascolaire : affichage conditionnel ----
+// ---- Parascolaire : affichage du bloc global (Oui/Non) ----
 function toggleAfterSchool() {
     var checked = document.querySelector('input[name="after_school_request"]:checked');
     var block = document.getElementById('block_after_school_yes');
@@ -1600,85 +1600,21 @@ document.querySelectorAll('input[name="after_school_request"]').forEach(function
 });
 toggleAfterSchool();
 
-// ---- Calcul du montant mensuel parascolaire par élève ----
-// Cette fonction suppose que les prestations sont passées dans le template
-// et que chaque checkbox a un attribut data-montant (ex: data-montant="XX")
-// Si ce n'est pas le cas, on peut récupérer le prix via un appel AJAX ou l'injecter.
-
-function updateAfterSchoolAmount(lineElement) {
-    // Récupérer l'ID de la ligne (stocké dans un attribut data-line-id ou dans un hidden)
-    var lineId = lineElement.closest('[data-line-id]')?.getAttribute('data-line-id');
-    if (!lineId) {
-        // Essayer de trouver un input hidden nommé after_school_line_id_XXX
-        var hidden = lineElement.querySelector('input[name^="after_school_line_id_"]');
-        if (hidden) {
-            lineId = hidden.value;
+// ---- Affichage conditionnel des options par élève (case à cocher individuelle) ----
+function initAfterSchoolOptions() {
+    document.querySelectorAll('.after-school-toggle').forEach(function(cb) {
+        function toggle() {
+            var optionsDiv = cb.closest('.card-body').querySelector('.after-school-options');
+            if (optionsDiv) {
+                optionsDiv.style.display = cb.checked ? 'block' : 'none';
+            }
         }
-    }
-    if (!lineId) return;
-
-    // Déterminer le type d'accueil (jardin ou classe)
-    var accueilRadios = lineElement.querySelectorAll('input[name^="accueil_type_"]');
-    var accueilType = null;
-    accueilRadios.forEach(function(radio) {
-        if (radio.checked) accueilType = radio.value;
-    });
-
-    // Récupérer toutes les prestations cochées pour cette ligne
-    var prestationCheckboxes = lineElement.querySelectorAll('input[name^="prestation_' + lineId + '_"]:checked');
-    var totalMontant = 0;
-
-    // Ajouter le tarif de base selon le type d'accueil (à adapter selon votre grille tarifaire)
-    // Exemple : jardin = 200 CHF, classe = 250 CHF
-    if (accueilType === 'jardin') {
-        totalMontant += 200;  // valeur par défaut, à modifier
-    } else if (accueilType === 'classe') {
-        totalMontant += 250;  // valeur par défaut, à modifier
-    }
-
-    // Ajouter le montant de chaque prestation
-    prestationCheckboxes.forEach(function(cb) {
-        var montant = cb.getAttribute('data-montant');
-        if (montant) totalMontant += parseFloat(montant);
-    });
-
-    // Mettre à jour le champ readonly "montant_mensuel"
-    var montantField = lineElement.querySelector('.montant-mensuel, input[readonly]');
-    if (montantField) montantField.value = totalMontant.toFixed(2);
-}
-
-// Attacher les événements sur chaque ligne parascolaire (à l'initialisation et après mutations)
-function attachAfterSchoolEvents() {
-    var lines = document.querySelectorAll('#block_after_school_yes .card[data-line-id]');
-    lines.forEach(function(line) {
-        // Événements pour les radios du type d'accueil
-        var accueilRadios = line.querySelectorAll('input[name^="accueil_type_"]');
-        accueilRadios.forEach(function(radio) {
-            radio.removeEventListener('change', function() { updateAfterSchoolAmount(line); });
-            radio.addEventListener('change', function() { updateAfterSchoolAmount(line); });
-        });
-        // Événements pour les checkboxes de prestations
-        var prestaCheckboxes = line.querySelectorAll('input[name^="prestation_"]');
-        prestaCheckboxes.forEach(function(cb) {
-            cb.removeEventListener('change', function() { updateAfterSchoolAmount(line); });
-            cb.addEventListener('change', function() { updateAfterSchoolAmount(line); });
-        });
-        // Calcul initial
-        updateAfterSchoolAmount(line);
+        cb.removeEventListener('change', toggle);
+        cb.addEventListener('change', toggle);
+        toggle(); // initialisation
     });
 }
-
-// MutationObserver pour capturer les lignes ajoutées dynamiquement (si l'utilisateur ajoute un élève plus tard)
-var afterSchoolObserver = new MutationObserver(function(mutations) {
-    attachAfterSchoolEvents();
-});
-var container = document.getElementById('block_after_school_yes');
-if (container) {
-    afterSchoolObserver.observe(container, { childList: true, subtree: true });
-}
-
-// Appel initial
-attachAfterSchoolEvents();
+initAfterSchoolOptions();
 //]]>
 </script>
 </t>
