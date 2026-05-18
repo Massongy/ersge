@@ -1484,7 +1484,9 @@ Ajouter un élève
                                 </div>
                                 <div class="col-12">
                                     <label class="form-label fw-semibold">Commentaires</label>
-                                    <textarea class="form-control" name="comments" rows="3" t-att-value="dossier.comments or ''"></textarea>
+                                    <textarea class="form-control" name="comments" rows="3">
+                                        <t t-out="dossier.comments or ''"/>
+                                    </textarea>
                                 </div>
                             </div>
                         </div>
