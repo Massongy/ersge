@@ -205,6 +205,7 @@ class DossierFamille(models.Model):
     other_street = fields.Char(string="Rue autre représentant")
     other_zip = fields.Char(string="NPA autre représentant")
     other_city = fields.Char(string="Ville autre représentant")
+    other_country_id = fields.Many2one('res.country', string="Pays")
     other_profession = fields.Char(string="Profession autre représentant")
     other_employeur = fields.Char(string="Employeur autre représentant")
 

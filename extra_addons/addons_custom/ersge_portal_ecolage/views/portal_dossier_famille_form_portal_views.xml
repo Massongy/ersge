@@ -160,6 +160,18 @@
                                                         <label class="form-label fw-semibold">Ville</label>
                                                         <input type="text" class="form-control" name="other_city" t-att-value="dossier.other_city or prefill_tutor.get('city', '')"/>
                                                     </div>
+
+                                                    <div class="col-md-6">
+                                                        <label class="form-label fw-semibold">Pays</label>
+                                                        <select class="form-select" name="other_country_id">
+                                                            <option value="">-- Sélectionner un pays --</option>
+                                                            <t t-foreach="countries" t-as="country">
+                                                                <option t-att-value="country.id" t-att-selected="dossier.other_country_id.id == country.id">
+                                                                    <t t-out="country.name"/>
+                                                                </option>
+                                                            </t>
+                                                        </select>
+                                                    </div>
                                                     <div class="col-md-6">
                                                         <label class="form-label fw-semibold">Profession</label>
                                                         <input type="text" class="form-control" name="other_profession" t-att-value="dossier.other_profession or ''"/>
@@ -216,6 +228,17 @@
                                                     <div class="col-md-8">
                                                         <label class="form-label fw-semibold">Ville</label>
                                                         <input type="text" class="form-control" name="parent1_city" t-att-value="dossier.parent1_city or prefill_parent1.get('city', '')"/>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <label class="form-label fw-semibold">Pays</label>
+                                                        <select class="form-select" name="parent1_country_id">
+                                                            <option value="">-- Sélectionner un pays --</option>
+                                                            <t t-foreach="countries" t-as="country">
+                                                                <option t-att-value="country.id" t-att-selected="dossier.parent1_country_id.id == country.id">
+                                                                    <t t-out="country.name"/>
+                                                                </option>
+                                                            </t>
+                                                        </select>
                                                     </div>
                                                     <div class="col-md-6">
                                                         <label class="form-label fw-semibold">Profession</label>
@@ -286,6 +309,18 @@
                                                                 <input type="text" class="form-control" name="parent2_city" t-att-value="dossier.parent2_city or prefill_parent2.get('city', '')"/>
                                                             </div>
                                                         </div>
+                                                    </div>
+
+                                                    <div class="col-md-6">
+                                                        <label class="form-label fw-semibold">Pays</label>
+                                                        <select class="form-select" name="parent2_country_id">
+                                                            <option value="">-- Sélectionner un pays --</option>
+                                                            <t t-foreach="countries" t-as="country">
+                                                                <option t-att-value="country.id" t-att-selected="dossier.parent2_country_id.id == country.id">
+                                                                    <t t-out="country.name"/>
+                                                                </option>
+                                                            </t>
+                                                        </select>
                                                     </div>
                                                     <div class="col-md-6">
                                                         <label class="form-label fw-semibold">Profession</label>

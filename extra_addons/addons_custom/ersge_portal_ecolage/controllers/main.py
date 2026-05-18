@@ -291,7 +291,7 @@ class PortalEcolage(http.Controller):
                     })
                     dossier.sudo().write({'budget_attachment': attachment.id})
 
-                # 3. Parent 1 (inchangé)
+                # 3. Parent 1
                 parent1_vals = {
                     'firstname': params.get('parent1_firstname', '').strip(),
                     'lastname': params.get('parent1_lastname', '').strip(),
@@ -310,6 +310,9 @@ class PortalEcolage(http.Controller):
                 }
                 fullname = f"{parent1_vals['firstname']} {parent1_vals['lastname']}".strip()
                 parent1_vals['name'] = fullname if fullname else parent1_vals.get('email', 'Parent 1')
+                if 'parent1_country_id' in params and params.get('parent1_country_id'):
+                    parent1_vals['country_id'] = int(params.get('parent1_country_id'))
+
                 if dossier.parent1_id:
                     dossier.parent1_id.sudo().write(parent1_vals)
                 else:
@@ -359,6 +362,9 @@ class PortalEcolage(http.Controller):
                             'zip': params.get('parent2_zip', ''),
                             'city': params.get('parent2_city', ''),
                         })
+                    if 'parent2_country_id' in params and params.get('parent2_country_id'):
+                        parent2_vals['country_id'] = int(params.get('parent2_country_id'))
+
                     if dossier.parent2_id:
                         dossier.parent2_id.sudo().write(parent2_vals)
                     else:
@@ -370,9 +376,16 @@ class PortalEcolage(http.Controller):
                     'other_firstname', 'other_lastname', 'other_email',
                     'other_phone', 'other_phone_fixed', 'other_phone_pro',
                     'other_street', 'other_zip', 'other_city',
-                    'other_profession', 'other_employeur'
+                    'other_profession', 'other_employeur', 'other_country_id'
                 ]
-                other_vals = {k: params.get(k, '').strip() for k in other_fields if params.get(k) is not None}
+                other_vals = {}
+                for field in other_fields:
+                    if field in params:
+                        val = params.get(field)
+                        if field == 'other_country_id':
+                            other_vals[field] = int(val) if val else False
+                        else:
+                            other_vals[field] = val.strip() if isinstance(val, str) else val
                 if other_vals:
                     dossier.sudo().write(other_vals)
 
@@ -464,7 +477,7 @@ class PortalEcolage(http.Controller):
                 else:
                     dossier.sudo().write({'employer_id': False})
 
-                # 11. Parascolaire (avec logs détaillés)
+                # 11. Parascolaire
                 _logger.warning("========== SAUVEGARDE PARASCOLAIRE ==========")
                 existing_after_lines = dossier.after_school_line_ids
                 _logger.warning("Lignes parascolaires existantes : %s", existing_after_lines.ids)
@@ -480,7 +493,6 @@ class PortalEcolage(http.Controller):
                         accueil_type = params.get(f'accueil_type_{student_line.id}')
                         _logger.warning("   accueil_type = %s", accueil_type)
 
-                        # Récupérer les prestations cochées
                         prestation_ids = []
                         prestations = request.env['ersge.after.school.prestation'].sudo().search([])
                         for prestation in prestations:
