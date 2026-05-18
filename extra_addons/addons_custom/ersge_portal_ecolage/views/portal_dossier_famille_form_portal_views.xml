@@ -1646,6 +1646,9 @@ function initAfterSchoolForStudent(studentLineId) {
         });
     });
 
+    filterPrestationsByAccueilType(optionsDiv);  // Applique le filtre dès le chargement
+    updateAfterSchoolMontant(studentLineId);     // Calcule le montant initial
+
     // Calcul initial
     updateAfterSchoolMontant(studentLineId);
 }
@@ -1664,17 +1667,30 @@ document.querySelectorAll('input[name="after_school_request"]').forEach(function
 toggleAfterSchool();
 
 // ---- Parascolaire : filtrage des prestations selon le type d'accueil (avec recalcul automatique) ----
+// ---- Parascolaire : filtrage des prestations selon le type d'accueil (avec recalcul automatique) ----
 function filterPrestationsByAccueilType(optionsDiv) {
     var selectedRadio = optionsDiv.querySelector('input[name^="accueil_type_"]:checked');
+    var prestationItems = optionsDiv.querySelectorAll('.prestation-item');
+    
     if (!selectedRadio) {
-        optionsDiv.querySelectorAll('.prestation-item').forEach(function(prestaDiv) {
-            prestaDiv.style.display = '';
+        // Aucun type sélectionné : on masque TOUTES les prestations
+        prestationItems.forEach(function(prestaDiv) {
+            prestaDiv.style.display = 'none';
+            // Décoche la case si elle était cochée
+            var checkbox = prestaDiv.querySelector('input[type="checkbox"]');
+            if (checkbox && checkbox.checked) {
+                checkbox.checked = false;
+            }
         });
+        // Met à jour le montant à 0
+        var studentLineId = optionsDiv.getAttribute('data-student-line-id');
+        if (studentLineId) updateAfterSchoolMontant(studentLineId);
         return;
     }
+    
     var accueilValue = selectedRadio.value;
     var needUpdate = false;
-    optionsDiv.querySelectorAll('.prestation-item').forEach(function(prestaDiv) {
+    prestationItems.forEach(function(prestaDiv) {
         var applicable = (prestaDiv.getAttribute('data-applicable') || 'both').toLowerCase().trim();
         var isBoth = (applicable === 'both' || applicable === '' || applicable === 'false');
         var visible = isBoth || (applicable === accueilValue);
@@ -1692,7 +1708,6 @@ function filterPrestationsByAccueilType(optionsDiv) {
         if (studentLineId) updateAfterSchoolMontant(studentLineId);
     }
 }
-
 // ---- Affichage conditionnel des options par élève + initialisation des écouteurs montant ----
 function initAfterSchoolOptions() {
     // Toggle show/hide du bloc options par élève
