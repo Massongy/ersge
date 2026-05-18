@@ -636,7 +636,7 @@ Ajouter un élève
                                 <div class="card mb-4">
                                     <div class="card-header fw-semibold bg-light">
                                         <i class="fa fa-scissors me-2"/>
-                    Réductions
+                    Demande de réduction
                                     </div>
                                     <div class="card-body">
                                         <label class="form-label fw-semibold">
@@ -685,7 +685,7 @@ Ajouter un élève
                                                     </div>
                                                 </div>
                                                 <div class="col-12">
-                                                    <label class="form-label fw-semibold">Total mensuel après ces rabais (CHF)</label>
+                                                    <label class="form-label fw-semibold">Total mensuel après ce rabais nombre d'enfants (CHF)</label>
                                                     <input type="text" class="form-control bg-light" readonly="readonly" t-att-value="dossier.monthly_fee_after_children"/>
                                                     <div class="form-text text-muted">Zone non modifiable</div>
                                                 </div>
@@ -729,7 +729,7 @@ Ajouter un élève
                                                     </div>
                                                 </div>
                                                 <div class="col-12">
-                                                    <label class="form-label fw-semibold">Total mensuel après ces rabais (CHF)</label>
+                                                    <label class="form-label fw-semibold">Total mensuel après ce rabais ancienneté (CHF)</label>
                                                     <input type="text" class="form-control bg-light" readonly="readonly" t-att-value="dossier.monthly_fee_after_seniority"/>
                                                     <div class="form-text text-muted">Zone non modifiable</div>
                                                 </div>
@@ -1372,7 +1372,6 @@ Ajouter un élève
             </div>
         </div>
 
-        <!-- ==================== Section 9 : Récapitulatif de mon engagement financier ==================== -->
 
         <!-- ==================== Section 9 : Récapitulatif de mon engagement financier ==================== -->
         <div class="accordion-item border mb-3 rounded shadow-sm">

@@ -229,7 +229,9 @@ class PortalEcolage(http.Controller):
                 params = request.params
                 form = request.httprequest.form
 
-                # 1. Champs simples du dossier (existants)
+                _logger.warning("========== DEBUT POST DOSSIER %s ==========", dossier.id)
+
+                # 1. Champs simples du dossier
                 simple_fields = [
                     'legal_representation', 'legal_representation_other', 'deposit_status',
                     'employer_assistance', 'send_invoice_to_employer', 'same_address_as_parent1',
@@ -238,38 +240,43 @@ class PortalEcolage(http.Controller):
                     'contract_accepted', 'convention_accepted', 'procedures_accepted', 'terms_accepted',
                     'lpd_consent', 'explanatory_letter_text', 'explanatory_letter_mode',
                     'budget_method',
+                    'apply_children_discount', 'apply_seniority_discount', 'seniority_years',
                 ]
-                dossier_vals = {k: params.get(k) for k in simple_fields if params.get(k) is not None}
+                dossier_vals = {}
+                for k in simple_fields:
+                    if k in params:
+                        val = params.get(k)
+                        if k in ('send_invoice_to_employer', 'same_address_as_parent1', 'reduction_requested',
+                                'additional_reduction_request', 'contract_accepted', 'convention_accepted',
+                                'procedures_accepted', 'terms_accepted', 'lpd_consent',
+                                'apply_children_discount', 'apply_seniority_discount'):
+                            dossier_vals[k] = val == '1'
+                        else:
+                            dossier_vals[k] = val
 
-                # === GESTION DES NOUVEAUX CHAMPS (sections 7,8,9) ===
-                # Sélections
+                # Nouveaux champs sections 7-9
                 if params.get('solidarity_request') in ('yes', 'no'):
                     dossier_vals['solidarity_request'] = params.get('solidarity_request')
                 if params.get('sponsorship_request') in ('yes', 'no'):
                     dossier_vals['sponsorship_request'] = params.get('sponsorship_request')
                 if params.get('payment_terms') in ('monthly', 'annually'):
                     dossier_vals['payment_terms'] = params.get('payment_terms')
-
-                # Booléens (checkbox envoient '1' ou None)
                 bool_fields = ['apply_solidarity_increase', 'address_book_optin', 'multi_billing_request']
                 for field in bool_fields:
                     if field in params:
                         dossier_vals[field] = params.get(field) == '1'
-
-                # Float
                 if params.get('solidarity_percentage'):
                     try:
                         dossier_vals['solidarity_percentage'] = float(params.get('solidarity_percentage'))
                     except ValueError:
                         pass
-
-                # Textes
                 if 'comments' in params:
                     dossier_vals['comments'] = params.get('comments')
                 if 'signature_text' in params:
                     dossier_vals['signature_text'] = params.get('signature_text')
 
                 if dossier_vals:
+                    _logger.warning("Écriture dossier_vals: %s", dossier_vals)
                     dossier.sudo().write(dossier_vals)
 
                 # 2. Fichier budget
@@ -284,7 +291,7 @@ class PortalEcolage(http.Controller):
                     })
                     dossier.sudo().write({'budget_attachment': attachment.id})
 
-                # 3. Parent 1
+                # 3. Parent 1 (inchangé)
                 parent1_vals = {
                     'firstname': params.get('parent1_firstname', '').strip(),
                     'lastname': params.get('parent1_lastname', '').strip(),
@@ -303,7 +310,6 @@ class PortalEcolage(http.Controller):
                 }
                 fullname = f"{parent1_vals['firstname']} {parent1_vals['lastname']}".strip()
                 parent1_vals['name'] = fullname if fullname else parent1_vals.get('email', 'Parent 1')
-
                 if dossier.parent1_id:
                     dossier.parent1_id.sudo().write(parent1_vals)
                 else:
@@ -370,7 +376,7 @@ class PortalEcolage(http.Controller):
                 if other_vals:
                     dossier.sudo().write(other_vals)
 
-                # 6. Élèves existants
+                # 6. Élèves existants (y compris forfaits)
                 for key in list(params.keys()):
                     if key.startswith('student_line_id_'):
                         line_id = int(params.get(key))
@@ -385,10 +391,10 @@ class PortalEcolage(http.Controller):
                             }
                             line.student_id.sudo().write(student_vals)
                             forfait_key = f'forfait_id_{line_id}'
-                            if forfait_key in params and params.get(forfait_key):
-                                line.sudo().write({'forfait_id': int(params.get(forfait_key))})
-                            elif forfait_key in params:
-                                line.sudo().write({'forfait_id': False})
+                            if forfait_key in params:
+                                forfait_val = params.get(forfait_key)
+                                line.sudo().write({'forfait_id': int(forfait_val) if forfait_val else False})
+                                _logger.warning("Forfait ligne %s: %s", line_id, forfait_val)
 
                 # 7. Suppression d'élèves
                 for key in list(params.keys()):
@@ -397,6 +403,7 @@ class PortalEcolage(http.Controller):
                         line = request.env['ersge.dossier.student.line'].sudo().browse(line_id)
                         if line.exists() and line.dossier_id.id == dossier.id:
                             line.unlink()
+                            _logger.warning("Ligne élève supprimée: %s", line_id)
 
                 # 8. Ajout de nouveaux élèves
                 new_firstnames = form.getlist('new_student_firstname[]')
@@ -418,6 +425,7 @@ class PortalEcolage(http.Controller):
                             'dossier_id': dossier.id,
                             'student_id': student.id,
                         })
+                        _logger.warning("Nouvel élève créé: %s %s", new_firstnames[i], new_lastnames[i])
 
                 # 9. Budget en ligne
                 if params.get('budget_method') == 'online':
@@ -433,6 +441,7 @@ class PortalEcolage(http.Controller):
                                     'montant_madame': montant_madame,
                                     'montant_monsieur': montant_monsieur,
                                 })
+                    _logger.warning("Budget en ligne sauvegardé")
 
                 # 10. Employeur
                 if params.get('employer_assistance') == 'yes' and params.get('send_invoice_to_employer') == '1':
@@ -455,9 +464,56 @@ class PortalEcolage(http.Controller):
                 else:
                     dossier.sudo().write({'employer_id': False})
 
+                # 11. Parascolaire (avec logs détaillés)
+                _logger.warning("========== SAUVEGARDE PARASCOLAIRE ==========")
+                existing_after_lines = dossier.after_school_line_ids
+                _logger.warning("Lignes parascolaires existantes : %s", existing_after_lines.ids)
+
+                for student_line in dossier.student_line_ids:
+                    selected_key = f'after_school_selected_{student_line.id}'
+                    selected = params.get(selected_key) == '1'
+                    _logger.warning("Élève line %s (student_id=%s) - selected_key=%s - selected=%s",
+                                    student_line.id, student_line.student_id.id, selected_key, selected)
+
+                    after_line = existing_after_lines.filtered(lambda l: l.student_id.id == student_line.student_id.id)
+                    if selected:
+                        accueil_type = params.get(f'accueil_type_{student_line.id}')
+                        _logger.warning("   accueil_type = %s", accueil_type)
+
+                        # Récupérer les prestations cochées
+                        prestation_ids = []
+                        prestations = request.env['ersge.after.school.prestation'].sudo().search([])
+                        for prestation in prestations:
+                            prestation_key = f'prestation_{student_line.id}_{prestation.id}'
+                            if params.get(prestation_key) == '1':
+                                prestation_ids.append(prestation.id)
+                        _logger.warning("   prestations sélectionnées (ids) : %s", prestation_ids)
+
+                        if after_line:
+                            after_line.sudo().write({
+                                'selected': True,
+                                'accueil_type': accueil_type,
+                                'prestation_ids': [(6, 0, prestation_ids)],
+                            })
+                            _logger.warning("   Mise à jour ligne existante %s", after_line.id)
+                        else:
+                            new_line = request.env['ersge.after.school.line'].sudo().create({
+                                'dossier_id': dossier.id,
+                                'student_id': student_line.student_id.id,
+                                'selected': True,
+                                'accueil_type': accueil_type,
+                                'prestation_ids': [(6, 0, prestation_ids)],
+                            })
+                            _logger.warning("   Création nouvelle ligne %s", new_line.id)
+                    else:
+                        if after_line:
+                            after_line.sudo().unlink()
+                            _logger.warning("   Suppression ligne %s", after_line.id)
+
+                _logger.warning("========== FIN POST ==========")
                 return request.redirect('/my/ecolage?success=1')
 
-            # === GET : affichage du formulaire ===
+            # ==================== GET ====================
             prefill_firstname = partner.firstname or ''
             prefill_lastname = partner.lastname or partner.name or ''
 
