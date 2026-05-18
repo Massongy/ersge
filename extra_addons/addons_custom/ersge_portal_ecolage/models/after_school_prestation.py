@@ -38,12 +38,12 @@ class AfterSchoolPrestation(models.Model):
     )
 
     applicable_to = fields.Selection(
-        [
-            ("jardin", "Jardin uniquement"),
-            ("classe", "Classe uniquement"),
-            ("both", "Les deux"),
-        ],
-        string="Applicable à",
-        required=True,
-        default="both",
-    )
+    [
+        ("jardins_enfants", "Jardins d'Enfants (2-3 ans)"),
+        ("jardin", "Jardin d'Accueil (3-6 ans)"),
+        ("classe", "Classe d'Accueil (6-12 ans)"),
+    ],
+    string="Applicable à",
+    required=True,
+    default="jardin",
+)

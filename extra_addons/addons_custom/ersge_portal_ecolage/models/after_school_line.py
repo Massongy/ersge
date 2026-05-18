@@ -21,11 +21,14 @@ class AfterSchoolLine(models.Model):
     selected = fields.Boolean(string="Inscrire", default=False)
     accueil_type = fields.Selection(
         [
+            ("jardins_enfants", "Jardins d'Enfants (2-3 ans)"),
             ("jardin", "Jardin d'Accueil (3-6 ans)"),
             ("classe", "Classe d'Accueil (6-12 ans)"),
         ],
         required=False,
     )
+
+    
 
     # Relation dynamique vers les prestations (définies en back-office)
     prestation_ids = fields.Many2many(
@@ -51,7 +54,7 @@ class AfterSchoolLine(models.Model):
     def _compute_montant_mensuel(self):
         for rec in self:
             total = 0.0
-            if rec.accueil_type == "jardin":
+            if rec.accueil_type == "jardin" or rec.accueil_type == "jardins_enfants":
                 total = sum(rec.prestation_ids.mapped("prix_jardin"))
             else:
                 total = sum(rec.prestation_ids.mapped("prix_classe"))

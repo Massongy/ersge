@@ -1127,11 +1127,10 @@ Ajouter un élève
                         <div class="card mb-4">
                             <div class="card-header fw-semibold bg-light">
                                 <i class="fa fa-users me-2"/>
-                        Inscriptions par élève
+        Inscriptions par élève
                             </div>
                             <div class="card-body">
                                 <t t-foreach="dossier.student_line_ids" t-as="student_line">
-                                    <!-- Chercher si une ligne after_school existe déjà pour cet élève -->
                                     <t t-set="after_line" t-value="dossier.after_school_line_ids.filtered(lambda l: l.student_id.id == student_line.student_id.id)"/>
                                     <t t-set="has_after" t-value="bool(after_line)"/>
 
@@ -1146,17 +1145,21 @@ Ajouter un élève
                                             <div class="form-check form-switch mb-3">
                                                 <input class="form-check-input after-school-toggle" type="checkbox" role="switch" t-att-name="'after_school_selected_' + str(student_line.id)" value="1" t-att-checked="has_after"/>
                                                 <label class="form-check-label fw-semibold">
-                                            Inscrire cet élève au parascolaire
+                            Inscrire cet élève au parascolaire
                                                 </label>
                                             </div>
 
-                                            <!-- Bloc des options (affiché uniquement si la case est cochée) -->
+                                            <!-- Bloc des options -->
                                             <div class="after-school-options" t-att-style="'display:' + ('block' if has_after else 'none')">
                                                 <div class="row g-3 mt-2">
                                                     <!-- Type d'accueil -->
                                                     <div class="col-12">
                                                         <label class="form-label fw-semibold">Type d'accueil</label>
-                                                        <div class="d-flex gap-3">
+                                                        <div class="d-flex flex-column gap-2">
+                                                            <div class="form-check">
+                                                                <input class="form-check-input" type="radio" t-att-name="'accueil_type_' + str(student_line.id)" value="jardins_enfants" t-att-checked="after_line and after_line.accueil_type == 'jardins_enfants'"/>
+                                                                <label class="form-check-label">Jardins d'Enfants (2‑3 ans)</label>
+                                                            </div>
                                                             <div class="form-check">
                                                                 <input class="form-check-input" type="radio" t-att-name="'accueil_type_' + str(student_line.id)" value="jardin" t-att-checked="after_line and after_line.accueil_type == 'jardin'"/>
                                                                 <label class="form-check-label">Jardin d'accueil (3‑6 ans)</label>
@@ -1173,8 +1176,8 @@ Ajouter un élève
                                                         <label class="form-label fw-semibold">Prestations souhaitées</label>
                                                         <div class="d-flex flex-wrap gap-2">
                                                             <t t-foreach="after_school_prestations" t-as="prestation">
-                                                                <div class="form-check" t-att-data-applicable="prestation.applicable_to">
-                                                                    <input class="form-check-input" type="checkbox" t-att-name="'prestation_' + str(student_line.id) + '_' + str(prestation.id)" value="1" t-att-checked="after_line and prestation.id in after_line.prestation_ids.ids"/>
+                                                                <div class="form-check prestation-item" t-att-data-applicable="prestation.applicable_to or 'jardins_enfants'">
+                                                                    <input class="form-check-input prestation-checkbox" type="checkbox" t-att-name="'prestation_' + str(student_line.id) + '_' + str(prestation.id)" t-att-data-prix-jardin="prestation.prix_jardin" t-att-data-prix-classe="prestation.prix_classe" value="1" t-att-checked="after_line and prestation.id in after_line.prestation_ids.ids"/>
                                                                     <label class="form-check-label">
                                                                         <t t-out="prestation.name"/>
                                                                     </label>
@@ -1183,10 +1186,10 @@ Ajouter un élève
                                                         </div>
                                                     </div>
 
-                                                    <!-- Montant mensuel (affiché à titre indicatif) -->
+                                                    <!-- Montant mensuel -->
                                                     <div class="col-md-4">
                                                         <label class="form-label fw-semibold">Montant mensuel (CHF)</label>
-                                                        <input type="text" class="form-control bg-light" readonly="readonly" t-att-value="after_line and after_line.montant_mensuel or '0.00'"/>
+                                                        <input type="text" class="form-control bg-light after-school-montant" readonly="readonly" t-att-data-student-line-id="student_line.id" t-att-value="after_line and after_line.montant_mensuel or '0.00'"/>
                                                     </div>
                                                 </div>
                                             </div>
@@ -1194,7 +1197,7 @@ Ajouter un élève
                                     </div>
                                 </t>
                                 <div t-if="not dossier.student_line_ids" class="alert alert-info">
-                            Aucun élève inscrit. Veuillez d'abord renseigner la section "Élèves".
+            Aucun élève inscrit. Veuillez d'abord renseigner la section "Élèves".
                                 </div>
                             </div>
                         </div>
@@ -1283,7 +1286,7 @@ Annuler
 </div>
 
 <script type="text/javascript">
-//                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        <![CDATA[
+//<![CDATA[
 document.addEventListener('DOMContentLoaded', function () {
     function initForm() {
         // ---- Représentant légal ----
@@ -1587,6 +1590,66 @@ toggleAdditionalReduction();
         }
     }, 100);
 })();
+
+// ==================== PARASCOLAIRE : mise à jour dynamique du montant ====================
+
+// Met à jour le montant affiché pour un élève donné
+function updateAfterSchoolMontant(studentLineId) {
+    var optionsDiv = document.querySelector('.after-school-options[data-student-line-id="' + studentLineId + '"]');
+    if (!optionsDiv) return;
+
+    var selectedRadio = optionsDiv.querySelector('input[name^="accueil_type_"]:checked');
+    if (!selectedRadio) {
+        setMontant(studentLineId, 0);
+        return;
+    }
+    var accueilValue = selectedRadio.value;
+    var useJardinPrix = (accueilValue === 'jardin' || accueilValue === 'jardins_enfants');
+
+    var total = 0;
+    var checkboxes = optionsDiv.querySelectorAll('.prestation-checkbox:checked');
+    checkboxes.forEach(function(cb) {
+        var prix = useJardinPrix ? cb.getAttribute('data-prix-jardin') : cb.getAttribute('data-prix-classe');
+        var val = parseFloat(prix);
+        if (!isNaN(val)) total += val;
+    });
+    setMontant(studentLineId, total);
+}
+
+// Affiche le montant dans le champ correspondant
+function setMontant(studentLineId, montant) {
+    var montantInput = document.querySelector('.after-school-montant[data-student-line-id="' + studentLineId + '"]');
+    if (montantInput) {
+        montantInput.value = montant.toFixed(2);
+    }
+}
+
+// Initialise les écouteurs pour un élève spécifique
+function initAfterSchoolForStudent(studentLineId) {
+    var optionsDiv = document.querySelector('.after-school-options[data-student-line-id="' + studentLineId + '"]');
+    if (!optionsDiv) return;
+
+    // Écouteurs sur les radios du type d'accueil
+    var accueilRadios = optionsDiv.querySelectorAll('input[name^="accueil_type_' + studentLineId + '"]');
+    accueilRadios.forEach(function(radio) {
+        radio.addEventListener('change', function() {
+            filterPrestationsByAccueilType(optionsDiv);
+            updateAfterSchoolMontant(studentLineId);
+        });
+    });
+
+    // Écouteurs sur les cases à cocher des prestations
+    var checkboxes = optionsDiv.querySelectorAll('.prestation-checkbox');
+    checkboxes.forEach(function(cb) {
+        cb.addEventListener('change', function() {
+            updateAfterSchoolMontant(studentLineId);
+        });
+    });
+
+    // Calcul initial
+    updateAfterSchoolMontant(studentLineId);
+}
+
 // ---- Parascolaire : affichage du bloc global (Oui/Non) ----
 function toggleAfterSchool() {
     var checked = document.querySelector('input[name="after_school_request"]:checked');
@@ -1600,8 +1663,39 @@ document.querySelectorAll('input[name="after_school_request"]').forEach(function
 });
 toggleAfterSchool();
 
-// ---- Affichage conditionnel des options par élève (case à cocher individuelle) ----
+// ---- Parascolaire : filtrage des prestations selon le type d'accueil (avec recalcul automatique) ----
+function filterPrestationsByAccueilType(optionsDiv) {
+    var selectedRadio = optionsDiv.querySelector('input[name^="accueil_type_"]:checked');
+    if (!selectedRadio) {
+        optionsDiv.querySelectorAll('.prestation-item').forEach(function(prestaDiv) {
+            prestaDiv.style.display = '';
+        });
+        return;
+    }
+    var accueilValue = selectedRadio.value;
+    var needUpdate = false;
+    optionsDiv.querySelectorAll('.prestation-item').forEach(function(prestaDiv) {
+        var applicable = (prestaDiv.getAttribute('data-applicable') || 'both').toLowerCase().trim();
+        var isBoth = (applicable === 'both' || applicable === '' || applicable === 'false');
+        var visible = isBoth || (applicable === accueilValue);
+        prestaDiv.style.display = visible ? '' : 'none';
+        if (!visible) {
+            var checkbox = prestaDiv.querySelector('input[type="checkbox"]');
+            if (checkbox && checkbox.checked) {
+                checkbox.checked = false;
+                needUpdate = true;
+            }
+        }
+    });
+    if (needUpdate) {
+        var studentLineId = optionsDiv.getAttribute('data-student-line-id');
+        if (studentLineId) updateAfterSchoolMontant(studentLineId);
+    }
+}
+
+// ---- Affichage conditionnel des options par élève + initialisation des écouteurs montant ----
 function initAfterSchoolOptions() {
+    // Toggle show/hide du bloc options par élève
     document.querySelectorAll('.after-school-toggle').forEach(function(cb) {
         function toggle() {
             var optionsDiv = cb.closest('.card-body').querySelector('.after-school-options');
@@ -1611,31 +1705,28 @@ function initAfterSchoolOptions() {
         }
         cb.removeEventListener('change', toggle);
         cb.addEventListener('change', toggle);
-        toggle(); // initialisation
-
-        // Filtrer les prestations selon le type d'accueil sélectionné
-function filterPrestationsByAccueilType() {
-    document.querySelectorAll('.after-school-options').forEach(function(optionsDiv) {
-        // Trouver le type d'accueil sélectionné (radio) dans ce bloc
-        var selectedRadio = optionsDiv.querySelector('input[name^="accueil_type_"]:checked');
-        if (!selectedRadio) return;
-        var accueilValue = selectedRadio.value; // 'jardin' ou 'classe'
-
-        // Parcourir toutes les prestations (div.form-check) dans ce bloc
-        var prestations = optionsDiv.querySelectorAll('.form-check');
-        prestations.forEach(function(prestaDiv) {
-            var applicable = prestaDiv.getAttribute('data-applicable');
-            if (applicable === 'both' || applicable === accueilValue) {
-                prestaDiv.style.display = '';   // visible
-            } else {
-                prestaDiv.style.display = 'none';
-            }
-        });
+        toggle();
     });
-}
+
+    // Parcourir chaque bloc d'options pour y associer l'ID de la ligne élève
+    document.querySelectorAll('.after-school-options').forEach(function(optionsDiv) {
+        // Déduire l'ID depuis le nom d'un radio ou depuis un attribut existant
+        var studentLineId = optionsDiv.getAttribute('data-student-line-id');
+        if (!studentLineId) {
+            var radio = optionsDiv.querySelector('input[name^="accueil_type_"]');
+            if (radio) {
+                var match = radio.name.match(/accueil_type_(\d+)/);
+                if (match) studentLineId = match[1];
+            }
+        }
+        if (studentLineId) {
+            optionsDiv.setAttribute('data-student-line-id', studentLineId);
+            initAfterSchoolForStudent(studentLineId);
+        }
     });
 }
 initAfterSchoolOptions();
+
 //]]>
 </script>
 </t>
