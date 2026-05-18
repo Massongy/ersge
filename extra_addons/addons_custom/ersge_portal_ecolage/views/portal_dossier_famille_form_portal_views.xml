@@ -1373,6 +1373,8 @@ Ajouter un élève
         </div>
 
         <!-- ==================== Section 9 : Récapitulatif de mon engagement financier ==================== -->
+
+        <!-- ==================== Section 9 : Récapitulatif de mon engagement financier ==================== -->
         <div class="accordion-item border mb-3 rounded shadow-sm">
             <h2 class="accordion-header" id="headingRecap">
                 <button class="accordion-button collapsed rounded" type="button" data-bs-toggle="collapse" data-bs-target="#collapseRecap" aria-expanded="false" aria-controls="collapseRecap">
@@ -1389,15 +1391,15 @@ Ajouter un élève
                             <div class="row g-3">
                                 <div class="col-md-6">
                                     <label class="form-label fw-semibold">Total mensuel écolage (CHF)</label>
-                                    <input type="text" class="form-control bg-light" readonly="readonly" t-att-value="dossier.total_monthly_tuition or 0"/>
+                                    <input type="text" class="form-control bg-light" readonly="readonly" id="recap_monthly_tuition" t-att-value="dossier.total_monthly_tuition or 0"/>
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label fw-semibold">Total mensuel parascolaire (CHF)</label>
-                                    <input type="text" class="form-control bg-light" readonly="readonly" t-att-value="dossier.total_monthly_after_school or 0"/>
+                                    <input type="text" class="form-control bg-light" readonly="readonly" id="recap_monthly_after_school" t-att-value="dossier.total_monthly_after_school or 0"/>
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label fw-semibold">TOTAL MENSUEL (CHF)</label>
-                                    <input type="text" class="form-control bg-light" readonly="readonly" t-att-value="dossier.total_monthly or 0"/>
+                                    <input type="text" class="form-control bg-light" readonly="readonly" id="recap_total_monthly" t-att-value="dossier.total_monthly or 0"/>
                                     <div class="form-text text-muted">Écolage + Parascolaire</div>
                                 </div>
                             </div>
@@ -1411,30 +1413,30 @@ Ajouter un élève
                             <div class="row g-3">
                                 <div class="col-md-6">
                                     <label class="form-label fw-semibold">Total écolage x 12 mois (CHF)</label>
-                                    <input type="text" class="form-control bg-light" readonly="readonly" t-att-value="dossier.total_annual_tuition or 0"/>
+                                    <input type="text" class="form-control bg-light" readonly="readonly" id="recap_annual_tuition" t-att-value="dossier.total_annual_tuition or 0"/>
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label fw-semibold">Total parascolaire x 12 mois (CHF)</label>
-                                    <input type="text" class="form-control bg-light" readonly="readonly" t-att-value="dossier.total_annual_after_school or 0"/>
+                                    <input type="text" class="form-control bg-light" readonly="readonly" id="recap_annual_after_school" t-att-value="dossier.total_annual_after_school or 0"/>
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label fw-semibold">Total cotisation annuelle (CHF)</label>
-                                    <input type="text" class="form-control bg-light" readonly="readonly" t-att-value="dossier.membership_fee_amount or 0"/>
+                                    <input type="text" class="form-control bg-light" readonly="readonly" id="recap_annual_membership" t-att-value="dossier.membership_fee_amount or 0"/>
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label fw-semibold">Total dépôt (CHF)</label>
-                                    <input type="text" class="form-control bg-light" readonly="readonly" t-att-value="dossier.deposit_amount or 0"/>
+                                    <input type="text" class="form-control bg-light" readonly="readonly" id="recap_deposit" t-att-value="dossier.deposit_amount or 0"/>
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label fw-semibold">TOTAL ANNUEL (CHF)</label>
-                                    <input type="text" class="form-control bg-light" readonly="readonly" t-att-value="dossier.total_annual + dossier.membership_fee_amount + dossier.deposit_amount"/>
+                                    <input type="text" class="form-control bg-light" readonly="readonly" id="recap_total_annual" t-att-value="dossier.total_annual + dossier.membership_fee_amount + dossier.deposit_amount"/>
                                     <div class="form-text text-muted">Écolage + Parascolaire + Cotisation + Dépôt</div>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Parrainage et facturation -->
+                    <!-- Parrainage et facturation (inchangé) -->
                     <div class="card mb-4">
                         <div class="card-header fw-semibold bg-light">Parrainage &amp; Facturation</div>
                         <div class="card-body">
@@ -1502,7 +1504,7 @@ Ajouter un élève
                             <div class="mb-3">
                                 <label class="form-label fw-semibold">Signature des parents ou du/des représentant/s légal/aux <span class="text-danger">*</span>
                                 </label>
-                                <input type="text" class="form-control" name="signature_text" t-att-value="dossier.signature_text or ''" placeholder="Nom et prénom du signataire"/>
+                                <input type="text" class="form-control" name="signature_text" id="signature_text" t-att-value="dossier.signature_text or ''" placeholder="Nom et prénom du signataire"/>
                             </div>
                         </div>
                     </div>
@@ -2020,7 +2022,136 @@ toggleAfterSchool();
 document.addEventListener('DOMContentLoaded', function() {
     initAfterSchoolOptions();
 });
+// ==================== SOLIDARITÉ & RÉCAPITULATIFS DYNAMIQUES ====================
 
+// Met à jour le montant total avec solidarité
+function updateSolidarityTotal() {
+    var solidarityYes = document.querySelector('input[name="solidarity_request"]:checked');
+    var blockSolidarity = document.getElementById('block_solidarity_yes');
+    if (blockSolidarity) {
+        blockSolidarity.style.display = (solidarityYes && solidarityYes.value === 'yes') ? 'block' : 'none';
+    }
+    
+    var applyIncrease = document.getElementById('apply_solidarity_increase');
+    var percentInput = document.getElementById('solidarity_percentage');
+    var totalSolidarityField = document.getElementById('solidarity_total_amount');
+    
+    if (!totalSolidarityField) return;
+    
+    var isChecked = applyIncrease && applyIncrease.checked;
+    var percent = percentInput ? parseFloat(percentInput.value) || 0 : 0;
+    
+    // Récupérer le total mensuel (écolage après réduction + parascolaire) depuis les champs récapitulatifs
+    var monthlyTuition = parseFloat(document.querySelector('input[name="total_monthly_tuition_display"]') ? document.querySelector('input[name="total_monthly_tuition_display"]').value : 0);
+    // Alternative : lire depuis les spans ou inputs readonly
+    var tuitionField = document.querySelector('.after-school-montant') ? 
+        Array.from(document.querySelectorAll('.after-school-montant')).reduce((sum, inp) => sum + (parseFloat(inp.value) || 0), 0) : 0;
+    
+    // Pour simplifier, on utilise les champs de récapitulatif (s'ils existent)
+    var monthlyEcolage = parseFloat(document.getElementById('recap_monthly_tuition') ? document.getElementById('recap_monthly_tuition').value : 0);
+    var monthlyParascolaire = parseFloat(document.getElementById('recap_monthly_after_school') ? document.getElementById('recap_monthly_after_school').value : 0);
+    var baseMonthly = monthlyEcolage + monthlyParascolaire;
+    
+    var total = baseMonthly;
+    if (isChecked && percent > 0) {
+        total = baseMonthly * (1 + percent / 100);
+    }
+    totalSolidarityField.value = total.toFixed(2);
+    
+    // Mettre à jour le total global (si besoin)
+    updateRecapTotals();
+}
+
+// Met à jour tous les champs du récapitulatif (total mensuel, annuel, etc.)
+function updateRecapTotals() {
+    // Récupérer les valeurs depuis les champs calculés existants (readonly)
+    var tuitionMonthly = parseFloat(document.querySelector('input[readonly][value*="total_monthly_tuition"]') ? 
+        document.querySelector('input[readonly][value*="total_monthly_tuition"]').value : 0);
+    // Alternative plus précise : récupérer via les IDs des champs de récapitulatif que nous avons créés
+    var ecolageMonthly = 0;
+    var afterMonthly = 0;
+    document.querySelectorAll('.after-school-montant').forEach(function(input) {
+        var optionsDiv = input.closest('.after-school-options');
+        if (optionsDiv && optionsDiv.style.display !== 'none') {
+            afterMonthly += parseFloat(input.value) || 0;
+        }
+    });
+    // L'écolage mensuel après réduction est dans monthly_fee_after_requested (champ readonly)
+    var ecolageField = document.querySelector('input[name="monthly_fee_after_requested"]');
+    if (ecolageField) {
+        ecolageMonthly = parseFloat(ecolageField.value) || 0;
+    } else {
+        // Fallback : sommer les forfaits
+        document.querySelectorAll('.montant-mensuel').forEach(function(input) {
+            ecolageMonthly += parseFloat(input.value) || 0;
+        });
+    }
+    
+    var totalMonthly = ecolageMonthly + afterMonthly;
+    var annualTuition = ecolageMonthly * 12;
+    var annualAfter = afterMonthly * 12;
+    var membership = parseFloat(document.getElementById('membership_fee_amount') ? document.getElementById('membership_fee_amount').innerText : 0);
+    var deposit = parseFloat(document.getElementById('deposit_amount') ? document.getElementById('deposit_amount').innerText : 0);
+    var totalAnnual = annualTuition + annualAfter + membership + deposit;
+    
+    // Mettre à jour les champs du récapitulatif
+    var recapMonthlyTuition = document.getElementById('recap_monthly_tuition');
+    var recapMonthlyAfter = document.getElementById('recap_monthly_after_school');
+    var recapTotalMonthly = document.getElementById('recap_total_monthly');
+    var recapAnnualTuition = document.getElementById('recap_annual_tuition');
+    var recapAnnualAfter = document.getElementById('recap_annual_after_school');
+    var recapAnnualMembership = document.getElementById('recap_annual_membership');
+    var recapDeposit = document.getElementById('recap_deposit');
+    var recapTotalAnnual = document.getElementById('recap_total_annual');
+    
+    if (recapMonthlyTuition) recapMonthlyTuition.value = ecolageMonthly.toFixed(2);
+    if (recapMonthlyAfter) recapMonthlyAfter.value = afterMonthly.toFixed(2);
+    if (recapTotalMonthly) recapTotalMonthly.value = totalMonthly.toFixed(2);
+    if (recapAnnualTuition) recapAnnualTuition.value = annualTuition.toFixed(2);
+    if (recapAnnualAfter) recapAnnualAfter.value = annualAfter.toFixed(2);
+    if (recapAnnualMembership) recapAnnualMembership.value = membership.toFixed(2);
+    if (recapDeposit) recapDeposit.value = deposit.toFixed(2);
+    if (recapTotalAnnual) recapTotalAnnual.value = totalAnnual.toFixed(2);
+    
+    // Mettre à jour le champ solidarity_total_amount (pour le recalcul)
+    updateSolidarityTotal();
+}
+
+// Attacher les événements pour la solidarité
+function initSolidarityEvents() {
+    var radiosSolidarity = document.querySelectorAll('input[name="solidarity_request"]');
+    radiosSolidarity.forEach(function(radio) {
+        radio.addEventListener('change', function() {
+            updateSolidarityTotal();
+            updateRecapTotals();
+        });
+    });
+    
+    var chkApply = document.getElementById('apply_solidarity_increase');
+    if (chkApply) {
+        chkApply.addEventListener('change', function() {
+            updateSolidarityTotal();
+            updateRecapTotals();
+        });
+    }
+    
+    var percentInput = document.getElementById('solidarity_percentage');
+    if (percentInput) {
+        percentInput.addEventListener('input', function() {
+            updateSolidarityTotal();
+            updateRecapTotals();
+        });
+    }
+    
+    // Initialisation
+    updateSolidarityTotal();
+    updateRecapTotals();
+}
+
+// Appeler cette fonction après le chargement du DOM
+document.addEventListener('DOMContentLoaded', function() {
+    initSolidarityEvents();
+});
 //]]>
 </script>
 </t>
