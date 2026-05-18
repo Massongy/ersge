@@ -1202,6 +1202,12 @@ Ajouter un élève
                             </div>
                         </div>
 
+                        <!-- Total mensuel parascolaire global -->
+                        <div class="alert alert-info mt-3">
+                            <strong>Total mensuel parascolaire :</strong>
+                            <span id="after_school_total_amount">0.00</span> CHF
+                        </div>
+
                         <!-- Descriptif JARDIN D'ACCUEIL -->
                         <div class="card mb-4">
                             <div class="card-header fw-semibold bg-light">
@@ -1593,7 +1599,30 @@ toggleAdditionalReduction();
 
 // ==================== PARASCOLAIRE : mise à jour dynamique du montant ====================
 
-// Met à jour le montant affiché pour un élève donné
+// ---- Met à jour le total global parascolaire ----
+function updateAfterSchoolTotal() {
+    var total = 0;
+    document.querySelectorAll('.after-school-montant').forEach(function(input) {
+        var optionsDiv = input.closest('.after-school-options');
+        // On ne prend que les blocs d'options visibles (élève inscrit)
+        if (optionsDiv && optionsDiv.style.display !== 'none') {
+            var val = parseFloat(input.value);
+            if (!isNaN(val)) total += val;
+        }
+    });
+    var totalSpan = document.getElementById('after_school_total_amount');
+    if (totalSpan) totalSpan.innerText = total.toFixed(2);
+}
+
+// ---- Affiche le montant dans le champ d'un élève ----
+function setMontant(studentLineId, montant) {
+    var montantInput = document.querySelector('.after-school-montant[data-student-line-id="' + studentLineId + '"]');
+    if (montantInput) {
+        montantInput.value = montant.toFixed(2);
+    }
+}
+
+// ---- Met à jour le montant affiché pour un élève donné ----
 function updateAfterSchoolMontant(studentLineId) {
     var optionsDiv = document.querySelector('.after-school-options[data-student-line-id="' + studentLineId + '"]');
     if (!optionsDiv) return;
@@ -1601,6 +1630,7 @@ function updateAfterSchoolMontant(studentLineId) {
     var selectedRadio = optionsDiv.querySelector('input[name^="accueil_type_"]:checked');
     if (!selectedRadio) {
         setMontant(studentLineId, 0);
+        updateAfterSchoolTotal();
         return;
     }
     var accueilValue = selectedRadio.value;
@@ -1614,60 +1644,20 @@ function updateAfterSchoolMontant(studentLineId) {
         if (!isNaN(val)) total += val;
     });
     setMontant(studentLineId, total);
+    updateAfterSchoolTotal();
 }
 
-// Affiche le montant dans le champ correspondant
-function setMontant(studentLineId, montant) {
-    var montantInput = document.querySelector('.after-school-montant[data-student-line-id="' + studentLineId + '"]');
-    if (montantInput) {
-        montantInput.value = montant.toFixed(2);
-    }
-}
-
-// Initialise les écouteurs pour un élève spécifique
-function initAfterSchoolForStudent(studentLineId) {
-    var optionsDiv = document.querySelector('.after-school-options[data-student-line-id="' + studentLineId + '"]');
-    if (!optionsDiv) return;
-
-    // Écouteurs sur les radios du type d'accueil
-    var accueilRadios = optionsDiv.querySelectorAll('input[name^="accueil_type_' + studentLineId + '"]');
-    accueilRadios.forEach(function(radio) {
-        radio.addEventListener('change', function() {
-            filterPrestationsByAccueilType(optionsDiv);
+// ---- Met à jour tous les montants (réinitialisation globale) ----
+function updateAllAfterSchoolTotals() {
+    document.querySelectorAll('.after-school-options').forEach(function(optionsDiv) {
+        var studentLineId = optionsDiv.getAttribute('data-student-line-id');
+        if (studentLineId) {
             updateAfterSchoolMontant(studentLineId);
-        });
+        }
     });
-
-    // Écouteurs sur les cases à cocher des prestations
-    var checkboxes = optionsDiv.querySelectorAll('.prestation-checkbox');
-    checkboxes.forEach(function(cb) {
-        cb.addEventListener('change', function() {
-            updateAfterSchoolMontant(studentLineId);
-        });
-    });
-
-    filterPrestationsByAccueilType(optionsDiv);  // Applique le filtre dès le chargement
-    updateAfterSchoolMontant(studentLineId);     // Calcule le montant initial
-
-    // Calcul initial
-    updateAfterSchoolMontant(studentLineId);
 }
 
-// ---- Parascolaire : affichage du bloc global (Oui/Non) ----
-function toggleAfterSchool() {
-    var checked = document.querySelector('input[name="after_school_request"]:checked');
-    var block = document.getElementById('block_after_school_yes');
-    if (block) {
-        block.style.display = (checked && checked.value === 'yes') ? 'block' : 'none';
-    }
-}
-document.querySelectorAll('input[name="after_school_request"]').forEach(function(r) {
-    r.addEventListener('change', toggleAfterSchool);
-});
-toggleAfterSchool();
-
-// ---- Parascolaire : filtrage des prestations selon le type d'accueil (avec recalcul automatique) ----
-// ---- Parascolaire : filtrage des prestations selon le type d'accueil (avec recalcul automatique) ----
+// ---- Filtrage des prestations selon le type d'accueil ----
 function filterPrestationsByAccueilType(optionsDiv) {
     var selectedRadio = optionsDiv.querySelector('input[name^="accueil_type_"]:checked');
     var prestationItems = optionsDiv.querySelectorAll('.prestation-item');
@@ -1676,13 +1666,11 @@ function filterPrestationsByAccueilType(optionsDiv) {
         // Aucun type sélectionné : on masque TOUTES les prestations
         prestationItems.forEach(function(prestaDiv) {
             prestaDiv.style.display = 'none';
-            // Décoche la case si elle était cochée
             var checkbox = prestaDiv.querySelector('input[type="checkbox"]');
             if (checkbox && checkbox.checked) {
                 checkbox.checked = false;
             }
         });
-        // Met à jour le montant à 0
         var studentLineId = optionsDiv.getAttribute('data-student-line-id');
         if (studentLineId) updateAfterSchoolMontant(studentLineId);
         return;
@@ -1708,14 +1696,43 @@ function filterPrestationsByAccueilType(optionsDiv) {
         if (studentLineId) updateAfterSchoolMontant(studentLineId);
     }
 }
-// ---- Affichage conditionnel des options par élève + initialisation des écouteurs montant ----
+
+// ---- Initialisation des écouteurs pour un élève spécifique ----
+function initAfterSchoolForStudent(studentLineId) {
+    var optionsDiv = document.querySelector('.after-school-options[data-student-line-id="' + studentLineId + '"]');
+    if (!optionsDiv) return;
+
+    // Écouteurs sur les radios du type d'accueil
+    var accueilRadios = optionsDiv.querySelectorAll('input[name^="accueil_type_' + studentLineId + '"]');
+    accueilRadios.forEach(function(radio) {
+        radio.addEventListener('change', function() {
+            filterPrestationsByAccueilType(optionsDiv);
+            updateAfterSchoolMontant(studentLineId);
+        });
+    });
+
+    // Écouteurs sur les cases à cocher des prestations
+    var checkboxes = optionsDiv.querySelectorAll('.prestation-checkbox');
+    checkboxes.forEach(function(cb) {
+        cb.addEventListener('change', function() {
+            updateAfterSchoolMontant(studentLineId);
+        });
+    });
+
+    // Application initiale du filtre et du montant
+    filterPrestationsByAccueilType(optionsDiv);
+    updateAfterSchoolMontant(studentLineId);
+}
+
+// ---- Initialisation globale du bloc parascolaire ----
 function initAfterSchoolOptions() {
-    // Toggle show/hide du bloc options par élève
+    // Gestion du toggle (afficher/masquer les options d'un élève)
     document.querySelectorAll('.after-school-toggle').forEach(function(cb) {
         function toggle() {
             var optionsDiv = cb.closest('.card-body').querySelector('.after-school-options');
             if (optionsDiv) {
                 optionsDiv.style.display = cb.checked ? 'block' : 'none';
+                updateAfterSchoolTotal(); // Recalcul du total
             }
         }
         cb.removeEventListener('change', toggle);
@@ -1723,9 +1740,8 @@ function initAfterSchoolOptions() {
         toggle();
     });
 
-    // Parcourir chaque bloc d'options pour y associer l'ID de la ligne élève
+    // Parcourir chaque bloc d'options pour attribuer l'ID et initialiser les écouteurs
     document.querySelectorAll('.after-school-options').forEach(function(optionsDiv) {
-        // Déduire l'ID depuis le nom d'un radio ou depuis un attribut existant
         var studentLineId = optionsDiv.getAttribute('data-student-line-id');
         if (!studentLineId) {
             var radio = optionsDiv.querySelector('input[name^="accueil_type_"]');
@@ -1739,8 +1755,33 @@ function initAfterSchoolOptions() {
             initAfterSchoolForStudent(studentLineId);
         }
     });
+
+    // Mise à jour finale des totaux
+    updateAllAfterSchoolTotals();
 }
-initAfterSchoolOptions();
+
+// ---- Affichage du bloc global Oui/Non ----
+function toggleAfterSchool() {
+    var checked = document.querySelector('input[name="after_school_request"]:checked');
+    var block = document.getElementById('block_after_school_yes');
+    if (block) {
+        block.style.display = (checked && checked.value === 'yes') ? 'block' : 'none';
+        if (block.style.display === 'block') {
+            updateAllAfterSchoolTotals();
+        }
+    }
+}
+
+// Attachement des écouteurs pour le bloc global
+document.querySelectorAll('input[name="after_school_request"]').forEach(function(r) {
+    r.addEventListener('change', toggleAfterSchool);
+});
+toggleAfterSchool();
+
+// Lancer l'initialisation une fois le DOM chargé
+document.addEventListener('DOMContentLoaded', function() {
+    initAfterSchoolOptions();
+});
 
 //]]>
 </script>
