@@ -505,6 +505,13 @@ class DossierFamille(models.Model):
         compute="_compute_budget_totals",
         store=True,
     )
+
+     # Solidarité 
+    apply_solidarity_increase = fields.Boolean(string="Appliquer augmentation solidaire", default=False)
+    solidarity_total_amount = fields.Monetary(string="Montant total avec solidarité", compute="_compute_solidarity_total", store=True, currency_field="currency_id")
+
+    # Signature texte (pour le formulaire)
+    signature_text = fields.Char(string="Signature (nom et prénom)", default="")
     # Signature & acceptation
     contract_accepted = fields.Boolean()
     convention_accepted = fields.Boolean()
@@ -710,6 +717,16 @@ class DossierFamille(models.Model):
                 ) * 100
             else:
                 record.additional_reduction_income_percentage = 0.0
+
+    @api.depends('total_monthly_tuition', 'total_monthly_after_school', 'apply_solidarity_increase', 'solidarity_percentage', 'monthly_fee_after_requested', 'reduction_requested')
+    def _compute_solidarity_total(self):
+        for rec in self:
+            if rec.apply_solidarity_increase and rec.solidarity_percentage:
+                # Base = total mensuel après réduction (écolage) + parascolaire
+                base = (rec.monthly_fee_after_requested if rec.reduction_requested else rec.total_monthly_tuition) + rec.total_monthly_after_school
+                rec.solidarity_total_amount = base * (1 + rec.solidarity_percentage / 100.0)
+            else:
+                rec.solidarity_total_amount = 0.0
 
     # -------------------------------------------------------------------------
     # Constraints

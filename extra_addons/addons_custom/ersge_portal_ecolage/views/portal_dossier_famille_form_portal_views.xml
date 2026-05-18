@@ -1271,6 +1271,244 @@ Ajouter un élève
         </div>        <!-- fin accordion-item -->
         <!-- ==================== Fin Section 6 : Parascolaire ==================== -->
 
+
+        <!-- ==================== Section 7 : Solidarité ==================== -->
+        <div class="accordion-item border mb-3 rounded shadow-sm">
+            <h2 class="accordion-header" id="headingSolidarity">
+                <button class="accordion-button collapsed rounded" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolidarity" aria-expanded="false" aria-controls="collapseSolidarity">
+                    <i class="fa fa-handshake-o me-2 text-primary"/>
+                    <strong>Solidarité</strong>
+                </button>
+            </h2>
+            <div id="collapseSolidarity" class="accordion-collapse collapse" aria-labelledby="headingSolidarity">
+                <div class="accordion-body">
+                    <div class="card mb-4">
+                        <div class="card-header fw-semibold bg-light">
+                            <i class="fa fa-heart me-2 text-danger"/>
+                    Solidarité
+                        </div>
+                        <div class="card-body">
+                            <label class="form-label fw-semibold">
+                        Notre situation personnelle (fortune, revenu familial) nous permet d’honorer des écolages supérieurs et nous souhaitons contribuer au fonds de solidarité de l'école.
+                            </label>
+                            <div class="d-flex gap-3 mt-2">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="solidarity_request" id="solidarity_no" value="no" t-att-checked="dossier.solidarity_request == 'no' or not dossier.solidarity_request"/>
+                                    <label class="form-check-label" for="solidarity_no">Non</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="solidarity_request" id="solidarity_yes" value="yes" t-att-checked="dossier.solidarity_request == 'yes'"/>
+                                    <label class="form-check-label" for="solidarity_yes">Oui</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="block_solidarity_yes" t-att-style="'display:' + ('block' if dossier.solidarity_request == 'yes' else 'none')">
+                        <div class="card mb-4">
+                            <div class="card-header fw-semibold bg-light">
+                                <i class="fa fa-money me-2 text-success"/>
+                        Soutenez l'école
+                            </div>
+                            <div class="card-body">
+                                <div class="row g-3">
+                                    <div class="col-12">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" name="apply_solidarity_increase" id="apply_solidarity_increase" value="1" t-att-checked="dossier.apply_solidarity_increase"/>
+                                            <label class="form-check-label fw-semibold" for="apply_solidarity_increase">
+                                        Je souhaite contribuer au fonds de solidarité de l'école
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-semibold">J'augmente mon tarif mensuel en %</label>
+                                        <div class="input-group">
+                                            <input type="number" class="form-control" name="solidarity_percentage" id="solidarity_percentage" min="0" step="0.1" t-att-value="dossier.solidarity_percentage or 0"/>
+                                            <span class="input-group-text">%</span>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-semibold">Total tarif mensuel (CHF)</label>
+                                        <input type="text" class="form-control bg-light" readonly="readonly" id="solidarity_total_amount" t-att-value="dossier.solidarity_total_amount or 0"/>
+                                        <div class="form-text text-muted">Zone non modifiable</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== Section 8 : Échanges entre parents ==================== -->
+        <div class="accordion-item border mb-3 rounded shadow-sm">
+            <h2 class="accordion-header" id="headingParentExchange">
+                <button class="accordion-button collapsed rounded" type="button" data-bs-toggle="collapse" data-bs-target="#collapseParentExchange" aria-expanded="false" aria-controls="collapseParentExchange">
+                    <i class="fa fa-address-card me-2 text-primary"/>
+                    <strong>Échanges entre parents</strong>
+                </button>
+            </h2>
+            <div id="collapseParentExchange" class="accordion-collapse collapse" aria-labelledby="headingParentExchange">
+                <div class="accordion-body">
+                    <div class="card mb-4">
+                        <div class="card-header fw-semibold bg-light">
+                            <i class="fa fa-users me-2"/>
+                    Carnet d'adresse des parents
+                        </div>
+                        <div class="card-body">
+                            <p class="text-muted">
+                        Afin de faciliter les échanges, contacts et liens entre parents et leurs enfants (covoiturage, sorties, événements…), il est pratique que les coordonnées (e-mail, adresse postale, téléphone, prénom des enfants et classe) apparaissent dans le « Carnet d’adresse des parents ».<br/>
+                        Ce carnet est accessible uniquement avec identifiants et mots de passe dans « l’espace parent » du site.
+                            </p>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="address_book_optin" id="address_book_optin" value="1" t-att-checked="dossier.address_book_optin"/>
+                                <label class="form-check-label fw-semibold" for="address_book_optin">
+                            Vous acceptez de figurer dans le carnet d'adresse global des parents
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== Section 9 : Récapitulatif de mon engagement financier ==================== -->
+        <div class="accordion-item border mb-3 rounded shadow-sm">
+            <h2 class="accordion-header" id="headingRecap">
+                <button class="accordion-button collapsed rounded" type="button" data-bs-toggle="collapse" data-bs-target="#collapseRecap" aria-expanded="false" aria-controls="collapseRecap">
+                    <i class="fa fa-calculator me-2 text-primary"/>
+                    <strong>Récapitulatif de mon engagement financier</strong>
+                </button>
+            </h2>
+            <div id="collapseRecap" class="accordion-collapse collapse" aria-labelledby="headingRecap">
+                <div class="accordion-body">
+                    <!-- Totaux mensuels -->
+                    <div class="card mb-4">
+                        <div class="card-header fw-semibold bg-light">TOTAL MENSUEL</div>
+                        <div class="card-body">
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold">Total mensuel écolage (CHF)</label>
+                                    <input type="text" class="form-control bg-light" readonly="readonly" t-att-value="dossier.total_monthly_tuition or 0"/>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold">Total mensuel parascolaire (CHF)</label>
+                                    <input type="text" class="form-control bg-light" readonly="readonly" t-att-value="dossier.total_monthly_after_school or 0"/>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold">TOTAL MENSUEL (CHF)</label>
+                                    <input type="text" class="form-control bg-light" readonly="readonly" t-att-value="dossier.total_monthly or 0"/>
+                                    <div class="form-text text-muted">Écolage + Parascolaire</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Totaux annuels -->
+                    <div class="card mb-4">
+                        <div class="card-header fw-semibold bg-light">TOTAL ANNUEL</div>
+                        <div class="card-body">
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold">Total écolage x 12 mois (CHF)</label>
+                                    <input type="text" class="form-control bg-light" readonly="readonly" t-att-value="dossier.total_annual_tuition or 0"/>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold">Total parascolaire x 12 mois (CHF)</label>
+                                    <input type="text" class="form-control bg-light" readonly="readonly" t-att-value="dossier.total_annual_after_school or 0"/>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold">Total cotisation annuelle (CHF)</label>
+                                    <input type="text" class="form-control bg-light" readonly="readonly" t-att-value="dossier.membership_fee_amount or 0"/>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold">Total dépôt (CHF)</label>
+                                    <input type="text" class="form-control bg-light" readonly="readonly" t-att-value="dossier.deposit_amount or 0"/>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold">TOTAL ANNUEL (CHF)</label>
+                                    <input type="text" class="form-control bg-light" readonly="readonly" t-att-value="dossier.total_annual + dossier.membership_fee_amount + dossier.deposit_amount"/>
+                                    <div class="form-text text-muted">Écolage + Parascolaire + Cotisation + Dépôt</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Parrainage et facturation -->
+                    <div class="card mb-4">
+                        <div class="card-header fw-semibold bg-light">Parrainage &amp; Facturation</div>
+                        <div class="card-body">
+                            <div class="row g-3">
+                                <div class="col-12">
+                                    <label class="form-label fw-semibold">Parrainage : je bénéficie de parrainage (familial/amical/fondation)</label>
+                                    <div class="d-flex gap-3">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio" name="sponsorship_request" id="sponsorship_no" value="no" t-att-checked="dossier.sponsorship_request == 'no' or not dossier.sponsorship_request"/>
+                                            <label class="form-check-label" for="sponsorship_no">Non</label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio" name="sponsorship_request" id="sponsorship_yes" value="yes" t-att-checked="dossier.sponsorship_request == 'yes'"/>
+                                            <label class="form-check-label" for="sponsorship_yes">Oui</label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-12">
+                                    <label class="form-label fw-semibold">Je souhaite que la facturation soit divisée entre plusieurs personnes (hors parrainage)</label>
+                                    <div class="d-flex gap-3">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio" name="multi_billing_request" id="multi_no" value="0" t-att-checked="not dossier.multi_billing_request"/>
+                                            <label class="form-check-label" for="multi_no">Non</label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio" name="multi_billing_request" id="multi_yes" value="1" t-att-checked="dossier.multi_billing_request"/>
+                                            <label class="form-check-label" for="multi_yes">Oui</label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-12">
+                                    <label class="form-label fw-semibold">Le versement se fera : <span class="text-danger">*</span>
+                                    </label>
+                                    <div class="d-flex flex-column gap-2">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio" name="payment_terms" id="payment_monthly" value="monthly" t-att-checked="dossier.payment_terms == 'monthly'"/>
+                                            <label class="form-check-label" for="payment_monthly">Avant le 10 de chaque mois</label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio" name="payment_terms" id="payment_yearly" value="annually" t-att-checked="dossier.payment_terms == 'annually'"/>
+                                            <label class="form-check-label" for="payment_yearly">La totalité avant le 30 septembre, droit à déduction de 2%</label>
+                                        </div>
+                                        <div class="form-text text-muted">La réduction de 2% n’est pas applicable si une "Demande de réduction complémentaire" est sollicitée.</div>
+                                    </div>
+                                </div>
+                                <div class="col-12">
+                                    <label class="form-label fw-semibold">Commentaires</label>
+                                    <textarea class="form-control" name="comments" rows="3" t-att-value="dossier.comments or ''"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Conditions générales et signature -->
+                    <div class="card mb-4">
+                        <div class="card-header fw-semibold bg-light">Conditions générales</div>
+                        <div class="card-body">
+                            <div class="form-check mb-3">
+                                <input class="form-check-input" type="checkbox" name="terms_accepted" id="terms_accepted" value="1" t-att-checked="dossier.terms_accepted"/>
+                                <label class="form-check-label fw-semibold" for="terms_accepted">
+                            J’ai pris connaissance et j'accepte le contrat parent-école, la convention parent-école et les procédures de scolarisation
+                                    <span class="text-danger">*</span>
+                                </label>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">Signature des parents ou du/des représentant/s légal/aux <span class="text-danger">*</span>
+                                </label>
+                                <input type="text" class="form-control" name="signature_text" t-att-value="dossier.signature_text or ''" placeholder="Nom et prénom du signataire"/>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
 </div>
