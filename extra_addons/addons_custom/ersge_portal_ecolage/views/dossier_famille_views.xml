@@ -65,19 +65,19 @@
                                 <field name="parent2_profession" />
                                 <field name="parent2_employeur"/>
                             </group>
-                            <group invisible="legal_representation == 'both' or legal_representation == False">
-                                <field name="parent1_firstname" />
-                                <field name="parent1_lastname" />
-                                <field name="parent1_email" widget="email" />
-                                <field name="parent1_phone" widget="phone" />
-                                <field name="parent1_phone_fixed" widget="phone"/>
-                                <field name="parent1_phone_pro" widget="phone"/>
-                                <field name="parent1_street" />
-                                <field name="parent1_zip" />
-                                <field name="parent1_city" />
-                                <field name="parent1_country_id" />
-                                <field name="parent1_profession"/>
-                                <field name="parent1_employeur"/>
+                            <group string="Autre représentant légal" invisible="legal_representation != 'other'">
+                                <field name="other_firstname"/>
+                                <field name="other_lastname"/>
+                                <field name="other_email"/>
+                                <field name="other_phone" widget="phone"/>
+                                <field name="other_phone_fixed" widget="phone"/>
+                                <field name="other_phone_pro" widget="phone"/>
+                                <field name="other_street"/>
+                                <field name="other_zip"/>
+                                <field name="other_city"/>
+                                <field name="other_country_id"/>
+                                <field name="other_profession"/>
+                                <field name="other_employeur"/>
                             </group>
                             <group string="Dépôt">
                                 <div class="alert alert-info">Toute nouvelle famille doit verser un dépôt de 1000 CHF</div>
