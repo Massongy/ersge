@@ -442,24 +442,55 @@
 
     <page string="Récapitulatif">
         <group string="Mensuel">
-            <label for="total_monthly_tuition"/>
             <field name="total_monthly_tuition"/>
-            <label for="total_monthly_after_school"/>
             <field name="total_monthly_after_school"/>
-            <label for="total_monthly"/>
             <field name="total_monthly"/>
         </group>
         <group string="Annuel">
-            <label for="total_annual_tuition"/>
             <field name="total_annual_tuition"/>
-            <label for="total_annual_after_school"/>
             <field name="total_annual_after_school"/>
-            <label for="membership_fee_amount"/>
             <field name="membership_fee_amount"/>
-            <label for="deposit_amount"/>
             <field name="deposit_amount"/>
-            <label for="total_annual"/>
             <field name="total_annual"/>
+        </group>
+
+        <separator string="Solidarité"/>
+        <group>
+            <field name="solidarity_request" widget="radio" options="{'horizontal': true}"/>
+            <field name="apply_solidarity_increase" invisible="solidarity_request != 'yes'"/>
+            <field name="solidarity_percentage" invisible="solidarity_request != 'yes' or not apply_solidarity_increase"/>
+            <field name="solidarity_total_amount" readonly="1"/>
+        </group>
+
+        <separator string="Carnet d'adresse des parents"/>
+        <group>
+            <field name="address_book_optin" widget="boolean_toggle"/>
+        </group>
+
+        <separator string="Parrainage &amp; Facturation"/>
+        <group>
+            <field name="sponsorship_request" widget="radio" options="{'horizontal': true}"/>
+            <field name="multi_billing_request" widget="radio" options="{'horizontal': true}"/>
+            <field name="payment_terms" widget="radio" options="{'horizontal': true}"/>
+            <field name="comments" placeholder="Commentaires sur le paiement"/>
+        </group>
+
+        <separator string="Conditions générales &amp; signature"/>
+        <group>
+            <field name="terms_accepted" widget="boolean_toggle"/>
+            <field name="contract_accepted" widget="boolean_toggle"/>
+            <field name="convention_accepted" widget="boolean_toggle"/>
+            <field name="procedures_accepted" widget="boolean_toggle"/>
+            <field name="signature_text" placeholder="Nom et prénom du signataire"/>
+        </group>
+
+        <separator string="Réduction complémentaire (éléments clés)"/>
+        <group>
+            <field name="additional_reduction_request" widget="boolean_toggle"/>
+            <field name="gross_annual_income" invisible="not additional_reduction_request"/>
+            <field name="proposed_monthly_amount" invisible="not additional_reduction_request"/>
+            <field name="explanatory_letter_mode" widget="radio" invisible="not additional_reduction_request"/>
+            <field name="explanatory_letter_text" invisible="not additional_reduction_request or explanatory_letter_mode != 'write'"/>
         </group>
     </page>
 
