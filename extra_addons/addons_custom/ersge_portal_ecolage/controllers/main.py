@@ -214,6 +214,7 @@ class PortalEcolage(http.Controller):
             'error': kwargs.get('error'),
         })
 
+
     @http.route('/my/ecolage/edit/<int:dossier_id>', type='http', auth='user', website=True, methods=['GET', 'POST'])
     def edit_dossier(self, dossier_id, **kwargs):
         try:
@@ -253,20 +254,31 @@ class PortalEcolage(http.Controller):
                         })
                         _logger.warning("Nouvel élève créé: %s %s", new_firstnames[i], new_lastnames[i])
 
-                # ========== 2. MISE À JOUR DES ÉLÈVES EXISTANTS (prénoms, noms, forfaits) ==========
+                # ========== 2. MISE À JOUR DES ÉLÈVES EXISTANTS (prénoms, noms, forfaits, droit à l'image) ==========
                 for key in list(params.keys()):
                     if key.startswith('student_line_id_'):
                         line_id = int(params.get(key))
                         line = request.env['ersge.dossier.student.line'].sudo().browse(line_id)
                         if line.exists() and line.dossier_id.id == dossier.id:
+                            # ---- Droit à l'image : checkbox + hidden ----
+                            checkbox_key = f'student_image_rights_{line_id}'
+                            hidden_key = f'student_image_rights_hidden_{line_id}'
+                            if checkbox_key in params:
+                                image_rights = params.get(checkbox_key) == '1'
+                            else:
+                                image_rights = params.get(hidden_key, '0') == '1'
+
                             student_vals = {
                                 'firstname': params.get(f'student_firstname_{line_id}', ''),
                                 'lastname': params.get(f'student_lastname_{line_id}', ''),
                                 'birthdate': params.get(f'student_birthdate_{line_id}') or False,
                                 'gender': params.get(f'student_gender_{line_id}'),
-                                'image_rights': params.get(f'student_image_rights_{line_id}') == '1',
+                                'image_rights': image_rights,
                             }
+                            _logger.warning(f"Élève {line_id} : checkbox présent = {checkbox_key in params}, hidden présent = {hidden_key in params} -> image_rights = {image_rights}")
                             line.student_id.sudo().write(student_vals)
+
+                            # Forfait
                             forfait_key = f'forfait_id_{line_id}'
                             if forfait_key in params:
                                 forfait_val = params.get(forfait_key)
@@ -583,7 +595,10 @@ class PortalEcolage(http.Controller):
             raise
         except Exception as e:
             _logger.exception(f"[edit_dossier] ERREUR: {e}")
-            return request.redirect('/my/ecolage')     
+            return request.redirect('/my/ecolage')
+
+
+
     @http.route('/my/ecolage/delete_student_line', type='json', auth='user', methods=['POST'], csrf=True)
     def delete_student_line(self):
         data = request.get_json_data()

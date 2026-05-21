@@ -446,9 +446,8 @@ Dépôt
                                                         </div>
                                                         <div class="col-md-6 d-flex align-items-end">
                                                             <div class="form-check form-switch">
-                                                                <!-- Champ hidden pour envoyer 0 si décoché -->
-                                                                <input type="hidden" t-att-name="'student_image_rights_' + str(line.id)" value="0"/>
-                                                                <input class="form-check-input" type="checkbox" role="switch" t-att-name="'student_image_rights_' + str(line.id)" t-att-id="'image_rights_' + str(line.id)" value="1" t-att-checked="line.image_rights"/>
+                                                                <input type="hidden" t-att-name="'student_image_rights_hidden_' + str(line.id)" value="0"/>
+                                                                <input class="form-check-input" type="checkbox" role="switch" t-att-name="'student_image_rights_' + str(line.id)" t-att-id="'image_rights_' + str(line.id)" value="1" t-att-checked="line.student_id.image_rights" autocomplete="off"/>
                                                                 <label class="form-check-label fw-semibold" t-att-for="'image_rights_' + str(line.id)">Droit à l'image</label>
                                                             </div>
                                                         </div>
@@ -469,7 +468,7 @@ Ajouter un élève
                                     <!-- Message info + bouton d'enregistrement -->
                                     <div id="new_student_info" class="alert alert-info mt-3" style="display: none;">
                                         <i class="fa fa-info-circle me-2"/>
-                                        <strong>Attention :</strong> Les élèves que vous venez d'ajouter ou supprimés ne seront pris en compte qu'après avoir <strong>enregistré le dossier</strong>.
+                                        <strong>Attention :</strong> Les élèves que vous venez d'ajouter ne seront pris en compte qu'après avoir <strong>enregistré le dossier</strong>.
                                         <button type="button" class="btn btn-sm btn-primary ms-3" id="btn_save_and_reload">Enregistrer maintenant</button>
                                     </div>
 
