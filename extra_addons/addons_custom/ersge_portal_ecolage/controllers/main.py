@@ -231,7 +231,49 @@ class PortalEcolage(http.Controller):
 
                 _logger.warning("========== DEBUT POST DOSSIER %s ==========", dossier.id)
 
-                # 1. Champs simples du dossier
+                # ========== 1. CRÉATION DES NOUVEAUX ÉLÈVES (avant réduction) ==========
+                new_firstnames = form.getlist('new_student_firstname[]')
+                new_lastnames = form.getlist('new_student_lastname[]')
+                new_birthdates = form.getlist('new_student_birthdate[]')
+                new_genders = form.getlist('new_student_gender[]')
+                new_image_rights = form.getlist('new_student_image_rights[]')
+                for i in range(len(new_firstnames)):
+                    if new_firstnames[i] or new_lastnames[i]:
+                        student = request.env['ersge.student'].sudo().create({
+                            'firstname': new_firstnames[i],
+                            'lastname': new_lastnames[i],
+                            'birthdate': new_birthdates[i] or False,
+                            'gender': new_genders[i],
+                            'image_rights': new_image_rights[i] == '1',
+                            'family_id': dossier.family_id.id,
+                        })
+                        request.env['ersge.dossier.student.line'].sudo().create({
+                            'dossier_id': dossier.id,
+                            'student_id': student.id,
+                        })
+                        _logger.warning("Nouvel élève créé: %s %s", new_firstnames[i], new_lastnames[i])
+
+                # ========== 2. MISE À JOUR DES ÉLÈVES EXISTANTS (prénoms, noms, forfaits) ==========
+                for key in list(params.keys()):
+                    if key.startswith('student_line_id_'):
+                        line_id = int(params.get(key))
+                        line = request.env['ersge.dossier.student.line'].sudo().browse(line_id)
+                        if line.exists() and line.dossier_id.id == dossier.id:
+                            student_vals = {
+                                'firstname': params.get(f'student_firstname_{line_id}', ''),
+                                'lastname': params.get(f'student_lastname_{line_id}', ''),
+                                'birthdate': params.get(f'student_birthdate_{line_id}') or False,
+                                'gender': params.get(f'student_gender_{line_id}'),
+                                'image_rights': params.get(f'student_image_rights_{line_id}') == '1',
+                            }
+                            line.student_id.sudo().write(student_vals)
+                            forfait_key = f'forfait_id_{line_id}'
+                            if forfait_key in params:
+                                forfait_val = params.get(forfait_key)
+                                line.sudo().write({'forfait_id': int(forfait_val) if forfait_val else False})
+                                _logger.warning("Forfait ligne %s: %s", line_id, forfait_val)
+
+                # ========== 3. ÉCRITURE DES CHAMPS SIMPLES DU DOSSIER (dont réductions) ==========
                 simple_fields = [
                     'legal_representation', 'legal_representation_other', 'deposit_status',
                     'employer_assistance', 'send_invoice_to_employer', 'same_address_as_parent1',
@@ -279,7 +321,7 @@ class PortalEcolage(http.Controller):
                     _logger.warning("Écriture dossier_vals: %s", dossier_vals)
                     dossier.sudo().write(dossier_vals)
 
-                # 2. Fichier budget
+                # ========== 4. FICHIER BUDGET ==========
                 budget_attachment = request.httprequest.files.get('budget_attachment')
                 if budget_attachment and budget_attachment.filename:
                     attachment = request.env['ir.attachment'].sudo().create({
@@ -291,7 +333,7 @@ class PortalEcolage(http.Controller):
                     })
                     dossier.sudo().write({'budget_attachment': attachment.id})
 
-                # 3. Parent 1
+                # ========== 5. PARENT 1 ==========
                 parent1_vals = {
                     'firstname': params.get('parent1_firstname', '').strip(),
                     'lastname': params.get('parent1_lastname', '').strip(),
@@ -332,7 +374,7 @@ class PortalEcolage(http.Controller):
                             new_parent1 = request.env['res.partner'].sudo().create(parent1_vals)
                             dossier.sudo().write({'parent1_id': new_parent1.id})
 
-                # 4. Parent 2
+                # ========== 6. PARENT 2 ==========
                 if params.get('parent2_firstname') or params.get('parent2_lastname'):
                     parent2_vals = {
                         'firstname': params.get('parent2_firstname', ''),
@@ -371,7 +413,7 @@ class PortalEcolage(http.Controller):
                         new_parent2 = request.env['res.partner'].sudo().create(parent2_vals)
                         dossier.sudo().write({'parent2_id': new_parent2.id})
 
-                # 5. Autre représentant légal
+                # ========== 7. AUTRE REPRÉSENTANT LÉGAL ==========
                 other_fields = [
                     'other_firstname', 'other_lastname', 'other_email',
                     'other_phone', 'other_phone_fixed', 'other_phone_pro',
@@ -389,58 +431,7 @@ class PortalEcolage(http.Controller):
                 if other_vals:
                     dossier.sudo().write(other_vals)
 
-                # 6. Élèves existants (y compris forfaits)
-                for key in list(params.keys()):
-                    if key.startswith('student_line_id_'):
-                        line_id = int(params.get(key))
-                        line = request.env['ersge.dossier.student.line'].sudo().browse(line_id)
-                        if line.exists() and line.dossier_id.id == dossier.id:
-                            student_vals = {
-                                'firstname': params.get(f'student_firstname_{line_id}', ''),
-                                'lastname': params.get(f'student_lastname_{line_id}', ''),
-                                'birthdate': params.get(f'student_birthdate_{line_id}') or False,
-                                'gender': params.get(f'student_gender_{line_id}'),
-                                'image_rights': params.get(f'student_image_rights_{line_id}') == '1',
-                            }
-                            line.student_id.sudo().write(student_vals)
-                            forfait_key = f'forfait_id_{line_id}'
-                            if forfait_key in params:
-                                forfait_val = params.get(forfait_key)
-                                line.sudo().write({'forfait_id': int(forfait_val) if forfait_val else False})
-                                _logger.warning("Forfait ligne %s: %s", line_id, forfait_val)
-
-                # 7. Suppression d'élèves
-                for key in list(params.keys()):
-                    if key.startswith('delete_student_line_'):
-                        line_id = int(key.replace('delete_student_line_', ''))
-                        line = request.env['ersge.dossier.student.line'].sudo().browse(line_id)
-                        if line.exists() and line.dossier_id.id == dossier.id:
-                            line.unlink()
-                            _logger.warning("Ligne élève supprimée: %s", line_id)
-
-                # 8. Ajout de nouveaux élèves
-                new_firstnames = form.getlist('new_student_firstname[]')
-                new_lastnames = form.getlist('new_student_lastname[]')
-                new_birthdates = form.getlist('new_student_birthdate[]')
-                new_genders = form.getlist('new_student_gender[]')
-                new_image_rights = form.getlist('new_student_image_rights[]')
-                for i in range(len(new_firstnames)):
-                    if new_firstnames[i] or new_lastnames[i]:
-                        student = request.env['ersge.student'].sudo().create({
-                            'firstname': new_firstnames[i],
-                            'lastname': new_lastnames[i],
-                            'birthdate': new_birthdates[i] or False,
-                            'gender': new_genders[i],
-                            'image_rights': new_image_rights[i] == '1',
-                            'family_id': dossier.family_id.id,
-                        })
-                        request.env['ersge.dossier.student.line'].sudo().create({
-                            'dossier_id': dossier.id,
-                            'student_id': student.id,
-                        })
-                        _logger.warning("Nouvel élève créé: %s %s", new_firstnames[i], new_lastnames[i])
-
-                # 9. Budget en ligne
+                # ========== 8. BUDGET EN LIGNE ==========
                 if params.get('budget_method') == 'online':
                     for key, value in params.items():
                         if key.startswith('montant_madame_'):
@@ -456,7 +447,7 @@ class PortalEcolage(http.Controller):
                                 })
                     _logger.warning("Budget en ligne sauvegardé")
 
-                # 10. Employeur
+                # ========== 9. EMPLOYEUR ==========
                 if params.get('employer_assistance') == 'yes' and params.get('send_invoice_to_employer') == '1':
                     employer_vals = {
                         'name': params.get('employer_name', ''),
@@ -477,7 +468,7 @@ class PortalEcolage(http.Controller):
                 else:
                     dossier.sudo().write({'employer_id': False})
 
-                # 11. Parascolaire
+                # ========== 10. PARASCOLAIRE ==========
                 _logger.warning("========== SAUVEGARDE PARASCOLAIRE ==========")
                 existing_after_lines = dossier.after_school_line_ids
                 _logger.warning("Lignes parascolaires existantes : %s", existing_after_lines.ids)
@@ -523,6 +514,8 @@ class PortalEcolage(http.Controller):
                             _logger.warning("   Suppression ligne %s", after_line.id)
 
                 _logger.warning("========== FIN POST ==========")
+                if params.get('redirect_to_edit'):
+                    return request.redirect(f'/my/ecolage/edit/{dossier.id}')
                 return request.redirect('/my/ecolage?success=1')
 
             # ==================== GET ====================
@@ -590,4 +583,25 @@ class PortalEcolage(http.Controller):
             raise
         except Exception as e:
             _logger.exception(f"[edit_dossier] ERREUR: {e}")
-            return request.redirect('/my/ecolage')
+            return request.redirect('/my/ecolage')     
+    @http.route('/my/ecolage/delete_student_line', type='json', auth='user', methods=['POST'], csrf=True)
+    def delete_student_line(self):
+        data = request.get_json_data()
+        line_id = data.get('line_id')
+        if not line_id:
+            return {'success': False, 'error': 'ID manquant'}
+        try:
+            line = request.env['ersge.dossier.student.line'].sudo().browse(int(line_id))
+            if not line.exists():
+                return {'success': False, 'error': 'Ligne introuvable'}
+            partner = request.env.user.partner_id
+            dossier = line.dossier_id
+            if partner.family_id and dossier.family_id.id == partner.family_id.id:
+                # AVANT suppression, mettre requested_discount à 0 pour éviter la validation
+                dossier.sudo().write({'requested_discount': 0.0})
+                line.unlink()
+                return {'success': True}
+            else:
+                return {'success': False, 'error': 'Accès non autorisé'}
+        except Exception as e:
+            return {'success': False, 'error': str(e)}
