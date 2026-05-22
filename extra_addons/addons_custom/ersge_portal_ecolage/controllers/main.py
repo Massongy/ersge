@@ -341,6 +341,29 @@ class PortalEcolage(http.Controller):
                     _logger.warning("Écriture dossier_vals: %s", dossier_vals)
                     dossier.sudo().write(dossier_vals)
 
+                # ========== FACTURATION DIVISÉE (MONTANTS) ==========
+                parent1_raw = params.get('parent1_billing_amount', '0')
+                parent2_raw = params.get('parent2_billing_amount', '0')
+                try:
+                    parent1_amount = float(parent1_raw.replace(',', '.'))
+                    parent2_amount = float(parent2_raw.replace(',', '.'))
+                except ValueError:
+                    parent1_amount = 0.0
+                    parent2_amount = 0.0
+                
+                if dossier_vals.get('multi_billing_request', False):
+                    dossier_vals['parent1_billing_amount'] = parent1_amount
+                    dossier_vals['parent2_billing_amount'] = parent2_amount
+                else:
+                    dossier_vals['parent1_billing_amount'] = 0.0
+                    dossier_vals['parent2_billing_amount'] = 0.0
+                
+                # Écriture finale
+                if dossier_vals:
+                    _logger.warning("Écriture dossier_vals (incluant montants) : %s", dossier_vals)
+                    dossier.sudo().write(dossier_vals)
+                
+                
                 # ========== 4. FICHIER BUDGET ==========
                 budget_attachment = request.httprequest.files.get('budget_attachment')
                 if budget_attachment and budget_attachment.filename:
@@ -581,7 +604,6 @@ class PortalEcolage(http.Controller):
                             'country_id': int(new_sp_country_ids[i]) if i < len(new_sp_country_ids) and new_sp_country_ids[i] else False,
                             'amount': float(new_sp_amounts[i]) if i < len(new_sp_amounts) and new_sp_amounts[i] else 0.0,
                         })
-                
                 
                 _logger.warning("========== FIN POST ==========")
                 _logger.warning("URL complète: %s", request.httprequest.url)
