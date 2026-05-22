@@ -2364,12 +2364,30 @@ if (rdInput) {
     }
 
     function toggleAfterSchool() {
-        var block = document.getElementById('block_after_school_yes');
-        if (block) {
-            block.style.display = (getCheckedVal('after_school_request') === 'yes') ? 'block' : 'none';
-            if (block.style.display === 'block') updateAfterSchoolTotal();
-        }
+    var block = document.getElementById('block_after_school_yes');
+    var isYes = (getCheckedVal('after_school_request') === 'yes');
+    if (block) {
+        block.style.display = isYes ? 'block' : 'none';
     }
+    if (!isYes) {
+        // Désinscrire tous les élèves : décocher les toggles et réinitialiser les options
+        document.querySelectorAll('.after-school-toggle').forEach(function(toggle) {
+            if (toggle.checked) {
+                toggle.checked = false;
+                // Déclencher l'événement change pour que l'affichage des options se mette à jour
+                var event = new Event('change', { bubbles: true });
+                toggle.dispatchEvent(event);
+            }
+        });
+        // Recalculer les totaux (ils passeront à 0)
+        updateAfterSchoolTotal();
+        updateRecapTotals();
+    } else {
+        // Si on revient à "Oui", rien de spécial : les toggles sont déjà décochés
+        updateAfterSchoolTotal();
+        updateRecapTotals();
+    }
+}
     document.querySelectorAll('input[name="after_school_request"]').forEach(function(r) { r.addEventListener('change', toggleAfterSchool); });
     toggleAfterSchool();
     initAfterSchoolOptions();
