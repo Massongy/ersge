@@ -316,10 +316,17 @@ class PortalEcolage(http.Controller):
                     dossier_vals['sponsorship_request'] = params.get('sponsorship_request')
                 if params.get('payment_terms') in ('monthly', 'annually'):
                     dossier_vals['payment_terms'] = params.get('payment_terms')
-                bool_fields = ['apply_solidarity_increase', 'address_book_optin', 'multi_billing_request']
+                bool_fields = ['apply_solidarity_increase', 'multi_billing_request']
                 for field in bool_fields:
                     if field in params:
                         dossier_vals[field] = params.get(field) == '1'
+
+                # Traitement spécifique pour les checkboxes avec hidden
+                for field in ['address_book_optin', 'apply_solidarity_increase', 'multi_billing_request']:
+                    values = form.getlist(field)
+                    if values:
+                        dossier_vals[field] = values[-1] == '1'
+                
                 if params.get('solidarity_percentage'):
                     try:
                         dossier_vals['solidarity_percentage'] = float(params.get('solidarity_percentage'))

@@ -1352,6 +1352,7 @@ Carnet d'adresse des parents</div>
                         <p class="text-muted">Afin de faciliter les échanges, contacts et liens entre parents et leurs enfants (covoiturage, sorties, événements…), il est pratique que les coordonnées (e-mail, adresse postale, téléphone, prénom des enfants et classe) apparaissent dans le « Carnet d'adresse des parents ».<br/>
 Ce carnet est accessible uniquement avec identifiants et mots de passe dans « l'espace parent » du site.</p>
                         <div class="form-check">
+                            <input type="hidden" name="address_book_optin" value="0"/>
                             <input class="form-check-input" type="checkbox" name="address_book_optin" id="address_book_optin" value="1" t-att-checked="dossier.address_book_optin"/>
                             <label class="form-check-label fw-semibold" for="address_book_optin">Vous acceptez de figurer dans le carnet d'adresse global des parents</label>
                         </div>
