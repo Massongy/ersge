@@ -1682,18 +1682,18 @@ Ajouter un parrainage
 <!-- Fin accordéon -->
 
 <!-- Boutons -->
-<div class="d-flex gap-2 mt-3">
-    <button type="submit" name="form_action" value="save_and_exit" id="main_save_button" class="btn btn-primary btn-lg">
-        <i class="fa fa-save me-2"/>
-Enregistrer
-    </button>
 
+<div class="d-flex gap-2 mt-3">
+    <button type="submit" name="form_action" value="save_and_exit" class="btn btn-primary btn-lg">
+        <i class="fa fa-save me-2"/>Enregistrer
+    </button>
+    <button type="submit" name="form_action" value="submit_dossier" class="btn btn-success btn-lg">
+        <i class="fa fa-paper-plane me-2"/>Envoyer le dossier
+    </button>
     <a href="/my/ecolage" class="btn btn-outline-secondary btn-lg">
-        <i class="fa fa-arrow-left me-2"/>
-Annuler
+        <i class="fa fa-arrow-left me-2"/>Annuler
     </a>
 </div>
-
 </form>
 </div>
 

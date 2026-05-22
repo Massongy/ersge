@@ -3,6 +3,7 @@ import secrets
 from datetime import datetime, timedelta
 from odoo import http
 from odoo.http import request
+from odoo import fields
 from odoo.exceptions import AccessError
 import logging
 
@@ -226,6 +227,12 @@ class PortalEcolage(http.Controller):
             if not partner.family_id or dossier.family_id.id != partner.family_id.id:
                 raise AccessError("Vous n'avez pas accès à ce dossier.")
 
+             # ========== AJOUTER ICI LE BLOC POUR VÉRIFIER LE STATUT ==========
+            # Si le dossier n'est pas incomplet (déjà soumis, en cours, validé, etc.), on bloque l'édition
+            if dossier.state != 'incomplet':
+                return request.redirect('/my/ecolage?error=already_submitted')
+            # ================================================================
+            
             if request.httprequest.method == 'POST':
                 params = request.params
                 form = request.httprequest.form
@@ -611,6 +618,13 @@ class PortalEcolage(http.Controller):
                 _logger.warning("params redirect: %s", params.get('redirect_to_edit'))
                 if params.get('form_action') == 'save_and_stay':
                     return request.redirect(f'/my/ecolage/edit/{dossier.id}')
+                elif params.get('form_action') == 'submit_dossier':
+                    # Changement d'état du dossier
+                    dossier.sudo().write({
+                        'state': 'soumis',
+                        'date_soumission': fields.Datetime.now(),
+                    })
+                    return request.redirect('/my/ecolage?success=1&submitted=1')
                 return request.redirect('/my/ecolage?success=1')
             
 
