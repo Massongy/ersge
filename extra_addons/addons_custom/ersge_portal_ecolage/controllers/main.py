@@ -527,7 +527,10 @@ class PortalEcolage(http.Controller):
                             _logger.warning("   Suppression ligne %s", after_line.id)
 
                 _logger.warning("========== FIN POST ==========")
-                if params.get('redirect_to_edit'):
+                _logger.warning("URL complète: %s", request.httprequest.url)
+                _logger.warning("args: %s", dict(request.httprequest.args))
+                _logger.warning("params redirect: %s", params.get('redirect_to_edit'))
+                if params.get('form_action') == 'save_and_stay':
                     return request.redirect(f'/my/ecolage/edit/{dossier.id}')
                 return request.redirect('/my/ecolage?success=1')
 

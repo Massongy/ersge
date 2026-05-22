@@ -469,7 +469,9 @@ Ajouter un élève
                                     <div id="new_student_info" class="alert alert-info mt-3" style="display: none;">
                                         <i class="fa fa-info-circle me-2"/>
                                         <strong>Attention :</strong> Les élèves que vous venez d'ajouter ne seront pris en compte qu'après avoir <strong>enregistré le dossier</strong>.
-                                        <button type="button" class="btn btn-sm btn-primary ms-3" id="btn_save_and_reload">Enregistrer maintenant</button>
+                                       <button type="submit" name="form_action" value="save_and_stay" id="btn_save_and_reload" class="btn btn-sm btn-primary ms-3">
+    Enregistrer maintenant
+</button>
                                     </div>
 
                                     <!-- Template nouvel élève (caché) -->
@@ -509,8 +511,7 @@ Nouvel élève</span>
                                                         <div class="form-check form-switch">
                                                             <!-- Hidden input pour garantir la valeur 0 si décoché -->
                                                             <input type="hidden" name="new_student_image_rights[]" value="0"/>
-<input class="form-check-input" type="checkbox" role="switch"
-       name="new_student_image_rights[]" value="1" checked="checked"/>
+                                                            <input class="form-check-input" type="checkbox" role="switch" name="new_student_image_rights[]" value="1" checked="checked"/>
                                                             <label class="form-check-label fw-semibold">Droit à l'image</label>
                                                         </div>
                                                     </div>
@@ -1498,10 +1499,10 @@ Ce carnet est accessible uniquement avec identifiants et mots de passe dans « l
 
 <!-- Boutons -->
 <div class="d-flex gap-2 mt-3">
-    <button type="submit" id="main_save_button" class="btn btn-primary btn-lg">
-        <i class="fa fa-save me-2"/>
-Enregistrer
-    </button>
+    <button type="submit" name="form_action" value="save_and_exit" id="main_save_button" class="btn btn-primary btn-lg">
+    <i class="fa fa-save me-2"/>Enregistrer
+</button>
+
     <a href="/my/ecolage" class="btn btn-outline-secondary btn-lg">
         <i class="fa fa-arrow-left me-2"/>
 Annuler
@@ -1549,23 +1550,7 @@ document.addEventListener('DOMContentLoaded', function () {
         document.querySelector('input[name="dossier_id"]').value : null;
 
     var mainForm = document.querySelector('form');
-    if (mainForm && dossierId) {
-        mainForm.addEventListener('submit', function(e) {
-            // On laisse le submit normal se faire, mais on change l'action
-            // pour que le contrôleur reçoive bien les données et redirige correctement.
-            // Le contrôleur redirige vers /my/ecolage?success=1, on intercepte avec
-            // un champ caché pour signaler qu'on veut rester sur la page d'édition.
-            var redirectInput = document.getElementById('_redirect_to_edit');
-            if (!redirectInput) {
-                redirectInput = document.createElement('input');
-                redirectInput.type = 'hidden';
-                redirectInput.name = 'redirect_to_edit';
-                redirectInput.id = '_redirect_to_edit';
-                redirectInput.value = '1';
-                mainForm.appendChild(redirectInput);
-            }
-        });
-    }
+    
 
     // =====================================================================
     // REPRÉSENTANT LÉGAL
@@ -2237,14 +2222,7 @@ function checkStudentInfoMsg() {
         });
     }
 
-    var saveAndReloadBtn = document.getElementById('btn_save_and_reload');
-    if (saveAndReloadBtn) {
-        saveAndReloadBtn.addEventListener('click', function() {
-            var mainSubmitBtn = document.getElementById('main_save_button');
-            if (mainSubmitBtn) mainSubmitBtn.click();
-            else document.querySelector('form').submit();
-        });
-    }
+   
 
     // =====================================================================
     // INITIALISATION GLOBALE
