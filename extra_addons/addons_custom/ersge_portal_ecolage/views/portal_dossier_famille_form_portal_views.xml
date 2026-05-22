@@ -1631,6 +1631,26 @@ Ajouter un parrainage
                                     <div class="form-text text-muted">La réduction de 2% n'est pas applicable si une "Demande de réduction complémentaire" est sollicitée.</div>
                                 </div>
                             </div>
+
+                            <!-- Bloc total annuel avec déduction 2% (affiché uniquement si option annuelle ET pas de réduction complémentaire) -->
+                            <div id="total_with_discount_block" class="col-12 mt-3" style="display: none;">
+                                <div class="alert alert-success p-3">
+                                    <div class="row align-items-center">
+                                        <div class="col-md-6">
+                                            <strong class="fs-5">TOTAL ANNUEL + DÉDUCTION 2%</strong>
+                                            <br/>
+                                            <span class="text-muted small">Paiement avant le 30 septembre</span>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="input-group">
+                                                <input type="text" class="form-control bg-white fs-4 fw-bold text-success text-end" readonly="readonly" id="recap_total_annual_discounted" value="0.00"/>
+                                                <span class="input-group-text fs-5">CHF</span>
+                                            </div>
+                                            <div class="form-text text-muted text-end">Zone non modifiable</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                             <div class="col-12">
                                 <label class="form-label fw-semibold">Commentaires</label>
                                 <textarea class="form-control" name="comments" rows="3">
@@ -2421,25 +2441,45 @@ function getEcolageBeforeSolidarity() {
     // RÉCAPITULATIFS
     // =====================================================================
     function updateRecapTotals() {
-        var ecolageMonthly = getEcolageAfterDiscount();
-        var afterMonthly = getAfterSchoolTotal();
-        var totalMonthly = ecolageMonthly + afterMonthly;
-        var annualTuition = ecolageMonthly * 12;
-        var annualAfter = afterMonthly * 12;
-        var membership = parseFloat((document.getElementById('membership_fee_amount') || {}).innerText) || 0;
-        var deposit = parseFloat((document.getElementById('deposit_amount') || {}).innerText) || 0;
-        var totalAnnual = annualTuition + annualAfter + membership + deposit;
+    var ecolageMonthly = getEcolageAfterDiscount();
+    var afterMonthly = getAfterSchoolTotal();
+    var totalMonthly = ecolageMonthly + afterMonthly;
+    var annualTuition = ecolageMonthly * 12;
+    var annualAfter = afterMonthly * 12;
+    var membership = parseFloat((document.getElementById('membership_fee_amount') || {}).innerText) || 0;
+    var deposit = parseFloat((document.getElementById('deposit_amount') || {}).innerText) || 0;
+    var totalAnnual = annualTuition + annualAfter + membership + deposit;
 
-        setVal('recap_monthly_tuition', ecolageMonthly);
-        setVal('recap_monthly_after_school', afterMonthly);
-        setVal('recap_total_monthly', totalMonthly);
-        setVal('recap_annual_tuition', annualTuition);
-        setVal('recap_annual_after_school', annualAfter);
-        setVal('recap_annual_membership', membership);
-        setVal('recap_deposit', deposit);
-        setVal('recap_total_annual', totalAnnual);
+    setVal('recap_monthly_tuition', ecolageMonthly);
+    setVal('recap_monthly_after_school', afterMonthly);
+    setVal('recap_total_monthly', totalMonthly);
+    setVal('recap_annual_tuition', annualTuition);
+    setVal('recap_annual_after_school', annualAfter);
+    setVal('recap_annual_membership', membership);
+    setVal('recap_deposit', deposit);
+    setVal('recap_total_annual', totalAnnual);   // total sans réduction
+
+    // Gestion du bloc réduction 2% sur le total annuel complet
+    var paymentTerms = getCheckedVal('payment_terms');
+    var additionalReduction = getCheckedVal('additional_reduction_request');
+    var discountApplicable = (paymentTerms === 'annually' && additionalReduction !== '1');
+    var discountBlock = document.getElementById('total_with_discount_block');
+    var discountedInput = document.getElementById('recap_total_annual_discounted');
+    if (discountApplicable) {
+        var totalWithDiscount = totalAnnual * 0.98;   // réduction sur le total complet
+        if (discountBlock) discountBlock.style.display = 'block';
+        if (discountedInput) discountedInput.value = totalWithDiscount.toFixed(2);
+    } else {
+        if (discountBlock) discountBlock.style.display = 'none';
     }
-
+}
+// Recalculer quand on change le mode de paiement ou la réduction complémentaire
+document.querySelectorAll('input[name="payment_terms"]').forEach(function(radio) {
+    radio.addEventListener('change', function() { updateRecapTotals(); });
+});
+document.querySelectorAll('input[name="additional_reduction_request"]').forEach(function(radio) {
+    radio.addEventListener('change', function() { updateRecapTotals(); });
+});
     // =====================================================================
     // BOUTONS ÉLÈVES
     // =====================================================================
@@ -2479,6 +2519,8 @@ function getEcolageBeforeSolidarity() {
             toggleAmounts(); // exécution au chargement
         }
     })();
+
+    
 
     // =====================================================================
     // INITIALISATION GLOBALE
