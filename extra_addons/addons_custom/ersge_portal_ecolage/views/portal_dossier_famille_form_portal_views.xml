@@ -2188,25 +2188,35 @@ if (rdInput) {
         var totalField = document.getElementById('solidarity_total_amount');
         if (!totalField) return;
 
-        var ecolageMonthly = getEcolageAfterDiscount();
-        var afterMonthly = getAfterSchoolTotal();
-        var base = ecolageMonthly + afterMonthly;
+        var ecolageMonthly = getEcolageBeforeSolidarity();
+var base = ecolageMonthly;
 
         var isChecked = applyIncrease && applyIncrease.checked;
         var percent = percentInput ? (parseFloat(percentInput.value) || 0) : 0;
         var total = (isChecked && percent > 0) ? base * (1 + percent / 100) : 0;
         totalField.value = total.toFixed(2);
     }
-
-    function getEcolageAfterDiscount() {
-        var reductionRequested = getCheckedVal('reduction_requested') === '1';
-        if (!reductionRequested) {
-            return getBaseMensuel();
-        }
-        // Lire depuis le champ affiché
-        var el = document.getElementById('monthly_fee_after_requested_display');
-        return el ? (parseFloat(el.value) || 0) : getBaseMensuel();
+function getEcolageBeforeSolidarity() {
+    var reductionRequested = getCheckedVal('reduction_requested') === '1';
+    if (!reductionRequested) {
+        return getBaseMensuel();
     }
+    var el = document.getElementById('monthly_fee_after_requested_display');
+    return el ? (parseFloat(el.value) || 0) : getBaseMensuel();
+}
+    function getEcolageAfterDiscount() {
+    var base = getEcolageBeforeSolidarity();
+    var solidarityYes = getCheckedVal('solidarity_request') === 'yes';
+    var applyIncrease = document.getElementById('apply_solidarity_increase');
+    var percentInput = document.getElementById('solidarity_percentage');
+    if (solidarityYes && applyIncrease && applyIncrease.checked && percentInput) {
+        var percent = parseFloat(percentInput.value) || 0;
+        if (percent > 0) {
+            base = base * (1 + percent / 100);
+        }
+    }
+    return base;
+}
 
     document.querySelectorAll('input[name="solidarity_request"]').forEach(function(r) { r.addEventListener('change', function() { updateSolidarityTotal(); updateRecapTotals(); }); });
     var chkApply = document.getElementById('apply_solidarity_increase');
