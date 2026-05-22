@@ -1579,6 +1579,8 @@ Ajouter un parrainage
                                     </div>
                                 </div>
                             </div>
+
+                            <!-- Bloc existant : choix Oui/Non -->
                             <div class="col-12">
                                 <label class="form-label fw-semibold">Je souhaite que la facturation soit divisée entre plusieurs personnes (hors parrainage)</label>
                                 <div class="d-flex gap-3">
@@ -1589,6 +1591,28 @@ Ajouter un parrainage
                                     <div class="form-check">
                                         <input class="form-check-input" type="radio" name="multi_billing_request" id="multi_yes" value="1" t-att-checked="dossier.multi_billing_request"/>
                                         <label class="form-check-label" for="multi_yes">Oui</label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Champs de montants (masqués par défaut) -->
+                            <div id="billing_amounts_container" class="row mt-3" style="display: none;">
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold" for="parent1_billing_amount">
+            Père (Parent 1), indiquez un montant annuel *
+                                    </label>
+                                    <div class="input-group">
+                                        <input type="number" name="parent1_billing_amount" id="parent1_billing_amount" class="form-control" step="any" t-att-value="dossier.parent1_billing_amount"/>
+                                        <span class="input-group-text">CHF</span>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold" for="parent2_billing_amount">
+            Mère (Parent 2), indiquez un montant annuel *
+                                    </label>
+                                    <div class="input-group">
+                                        <input type="number" name="parent2_billing_amount" id="parent2_billing_amount" class="form-control" step="any" t-att-value="dossier.parent2_billing_amount"/>
+                                        <span class="input-group-text">CHF</span>
                                     </div>
                                 </div>
                             </div>
@@ -2427,7 +2451,34 @@ function getEcolageBeforeSolidarity() {
         });
     }
 
-   
+   //===========
+   // division facture
+   //===========
+       (function() {
+        var radioYes = document.getElementById('multi_yes');
+        var radioNo = document.getElementById('multi_no');
+        var container = document.getElementById('billing_amounts_container');
+        var input1 = document.getElementById('parent1_billing_amount');
+        var input2 = document.getElementById('parent2_billing_amount');
+
+        function toggleAmounts() {
+            if (radioYes && radioYes.checked) {
+                container.style.display = 'flex';   // ou 'block' selon votre layout
+                if (input1) input1.required = true;
+                if (input2) input2.required = true;
+            } else {
+                container.style.display = 'none';
+                if (input1) input1.required = false;
+                if (input2) input2.required = false;
+            }
+        }
+
+        if (radioYes && radioNo) {
+            radioYes.addEventListener('change', toggleAmounts);
+            radioNo.addEventListener('change', toggleAmounts);
+            toggleAmounts(); // exécution au chargement
+        }
+    })();
 
     // =====================================================================
     // INITIALISATION GLOBALE
