@@ -11,3 +11,4 @@ from . import forfait
 from . import budget_category
 from . import budget_line
 from . import dossier_student_line
+from . import sponsorship

@@ -1438,6 +1438,147 @@ Ce carnet est accessible uniquement avec identifiants et mots de passe dans « l
                                     </div>
                                 </div>
                             </div>
+
+                            <!-- Bloc parrainage (visible si oui) -->
+
+
+                            <div class="col-12" id="block_sponsorship_yes" t-att-style="'display:' + ('block' if dossier.sponsorship_request == 'yes' else 'none')">
+                                <div class="card mt-3">
+                                    <div class="card-header fw-semibold bg-light">
+                                        <i class="fa fa-handshake-o me-2"/>
+Informations parrainage
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="alert alert-info" role="alert">
+                                            <i class="fa fa-info-circle me-2"/>
+                Quelqu'un souhaite vous parrainer ou vous souhaitez lui proposer de le faire ?
+                Partagez-lui le formulaire :
+                                            <a href="https://ersge.ch/parrainer-un-enfant/" target="_blank">https://ersge.ch/parrainer-un-enfant/</a>
+                                        </div>
+
+                                        <div id="sponsorship_list">
+                                            <t t-foreach="dossier.sponsorship_ids" t-as="sp">
+                                                <div class="card mb-3 border sponsorship-item">
+                                                    <div class="card-body">
+                                                        <input type="hidden" t-att-name="'sp_id_' + str(sp.id)" t-att-value="sp.id"/>
+                                                        <div class="row g-3">
+                                                            <div class="col-md-6">
+                                                                <label class="form-label fw-semibold">Prénom <span class="text-danger">*</span>
+                                                                </label>
+                                                                <input type="text" class="form-control" t-att-name="'sp_firstname_' + str(sp.id)" t-att-value="sp.firstname or ''"/>
+                                                            </div>
+                                                            <div class="col-md-6">
+                                                                <label class="form-label fw-semibold">Nom <span class="text-danger">*</span>
+                                                                </label>
+                                                                <input type="text" class="form-control" t-att-name="'sp_lastname_' + str(sp.id)" t-att-value="sp.lastname or ''"/>
+                                                            </div>
+                                                            <div class="col-12">
+                                                                <label class="form-label fw-semibold">Adresse</label>
+                                                                <input type="text" class="form-control" t-att-name="'sp_street_' + str(sp.id)" t-att-value="sp.street or ''"/>
+                                                            </div>
+                                                            <div class="col-md-4">
+                                                                <label class="form-label fw-semibold">Code Postal</label>
+                                                                <input type="text" class="form-control" t-att-name="'sp_zip_' + str(sp.id)" t-att-value="sp.zip or ''"/>
+                                                            </div>
+                                                            <div class="col-md-8">
+                                                                <label class="form-label fw-semibold">Ville</label>
+                                                                <input type="text" class="form-control" t-att-name="'sp_city_' + str(sp.id)" t-att-value="sp.city or ''"/>
+                                                            </div>
+                                                            <div class="col-md-6">
+                                                                <label class="form-label fw-semibold">Pays</label>
+                                                                <select class="form-select" t-att-name="'sp_country_id_' + str(sp.id)">
+                                                                    <option value="">-- Sélectionner --</option>
+                                                                    <t t-foreach="countries" t-as="country">
+                                                                        <option t-att-value="country.id" t-att-selected="sp.country_id.id == country.id">
+                                                                            <t t-out="country.name"/>
+                                                                        </option>
+                                                                    </t>
+                                                                </select>
+                                                            </div>
+                                                            <div class="col-md-6">
+                                                                <label class="form-label fw-semibold">Montant à facturer /mois <span class="text-danger">*</span>
+                                                                </label>
+                                                                <div class="input-group">
+                                                                    <span class="input-group-text">CHF</span>
+                                                                    <input type="number" class="form-control" t-att-name="'sp_amount_' + str(sp.id)" t-att-value="sp.amount or ''" step="0.01"/>
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-12">
+                                                                <button type="button" class="btn btn-sm btn-outline-danger btn-remove-sponsorship" t-att-data-sp-id="sp.id">
+                                                                    <i class="fa fa-trash me-1"/>
+Supprimer
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </t>
+                                        </div>
+
+                                        <!-- Template nouveau parrain -->
+                                        <div id="new_sponsorship_template" style="display:none;">
+                                            <div class="card mb-3 border new-sponsorship">
+                                                <div class="card-body">
+                                                    <div class="row g-3">
+                                                        <div class="col-md-6">
+                                                            <label class="form-label fw-semibold">Prénom <span class="text-danger">*</span>
+                                                            </label>
+                                                            <input type="text" class="form-control" name="new_sp_firstname[]"/>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <label class="form-label fw-semibold">Nom <span class="text-danger">*</span>
+                                                            </label>
+                                                            <input type="text" class="form-control" name="new_sp_lastname[]"/>
+                                                        </div>
+                                                        <div class="col-12">
+                                                            <label class="form-label fw-semibold">Adresse</label>
+                                                            <input type="text" class="form-control" name="new_sp_street[]"/>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <label class="form-label fw-semibold">Code Postal</label>
+                                                            <input type="text" class="form-control" name="new_sp_zip[]"/>
+                                                        </div>
+                                                        <div class="col-md-8">
+                                                            <label class="form-label fw-semibold">Ville</label>
+                                                            <input type="text" class="form-control" name="new_sp_city[]"/>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <label class="form-label fw-semibold">Pays</label>
+                                                            <select class="form-select" name="new_sp_country_id[]">
+                                                                <option value="">-- Sélectionner --</option>
+                                                                <t t-foreach="countries" t-as="country">
+                                                                    <option t-att-value="country.id">
+                                                                        <t t-out="country.name"/>
+                                                                    </option>
+                                                                </t>
+                                                            </select>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <label class="form-label fw-semibold">Montant à facturer /mois <span class="text-danger">*</span>
+                                                            </label>
+                                                            <div class="input-group">
+                                                                <span class="input-group-text">CHF</span>
+                                                                <input type="number" class="form-control" name="new_sp_amount[]" step="0.01"/>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-12">
+                                                            <button type="button" class="btn btn-sm btn-outline-danger btn-remove-new-sponsorship">
+                                                                <i class="fa fa-trash me-1"/>
+Supprimer
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <button type="button" class="btn btn-outline-primary mt-2" id="btn_add_sponsorship">
+                                            <i class="fa fa-plus me-2"/>
+Ajouter un parrainage
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
                             <div class="col-12">
                                 <label class="form-label fw-semibold">Je souhaite que la facturation soit divisée entre plusieurs personnes (hors parrainage)</label>
                                 <div class="d-flex gap-3">
@@ -2175,6 +2316,33 @@ if (rdInput) {
     document.querySelectorAll('input[name="after_school_request"]').forEach(function(r) { r.addEventListener('change', toggleAfterSchool); });
     toggleAfterSchool();
     initAfterSchoolOptions();
+
+    // Parrainage
+document.querySelectorAll('input[name="sponsorship_request"]').forEach(function(r) {
+    r.addEventListener('change', function() {
+        var block = document.getElementById('block_sponsorship_yes');
+        if (block) block.style.display = (getCheckedVal('sponsorship_request') === 'yes') ? 'block' : 'none';
+    });
+});
+
+var btnAddSp = document.getElementById('btn_add_sponsorship');
+if (btnAddSp) {
+    btnAddSp.addEventListener('click', function() {
+        var template = document.querySelector('#new_sponsorship_template .card');
+        if (!template) return;
+        var clone = template.cloneNode(true);
+        clone.querySelector('.btn-remove-new-sponsorship').addEventListener('click', function() {
+            clone.remove();
+        });
+        document.getElementById('sponsorship_list').appendChild(clone);
+    });
+}
+
+document.addEventListener('click', function(e) {
+    var btn = e.target.closest('.btn-remove-sponsorship');
+    if (!btn) return;
+    btn.closest('.sponsorship-item').remove();
+});
 
     // =====================================================================
     // SOLIDARITÉ

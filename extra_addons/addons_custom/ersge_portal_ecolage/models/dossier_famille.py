@@ -384,7 +384,7 @@ class DossierFamille(models.Model):
     solidarity_percentage = fields.Float()
     sponsorship_request = fields.Selection([("yes", "Oui"), ("no", "Non")])
     sponsorship_type = fields.Selection([("type1", "Type 1"), ("type2", "Type 2")])
-    sponsorship_id = fields.Many2one("res.partner")
+    sponsorship_ids = fields.One2many('ersge.sponsorship', 'dossier_id', string='Parrains')
     multi_billing_request = fields.Boolean()
     billing_line_ids = fields.One2many(
         "ersge.billing.line", "dossier_id", string="Lignes de facturation"

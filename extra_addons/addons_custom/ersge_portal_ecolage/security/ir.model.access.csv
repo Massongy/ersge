@@ -30,3 +30,4 @@ access_ersge_budget_category,ersge.budget.category,model_ersge_budget_category,b
 access_ersge_after_school_prestation_user,access.ersge.after.school.prestation.user,model_ersge_after_school_prestation,base.group_user,1,1,1,1
 access_ersge_after_school_prestation_manager,access.ersge.after.school.prestation.manager,model_ersge_after_school_prestation,base.group_system,1,1,1,1
 access_ersge_after_school_prestation_portal,access.ersge.after.school.prestation.portal,model_ersge_after_school_prestation,base.group_portal,1,0,0,0
+access_ersge_sponsorship_user,ersge.sponsorship user,model_ersge_sponsorship,base.group_user,1,1,1,1

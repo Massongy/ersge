@@ -533,6 +533,56 @@ class PortalEcolage(http.Controller):
                             after_line.sudo().unlink()
                             _logger.warning("   Suppression ligne %s", after_line.id)
 
+                
+                # ========== 11. PARRAINS ==========
+                # Mise à jour parrains existants
+                _logger.warning("========== PARRAINS ==========")
+                _logger.warning("new_sp_firstnames: %s", form.getlist('new_sp_firstname[]'))
+                _logger.warning("params keys sp: %s", [k for k in params.keys() if 'sp' in k])
+                for key in list(params.keys()):
+                    if key.startswith('sp_id_'):
+                        sp_id = int(params.get(key))
+                        sp = request.env['ersge.sponsorship'].sudo().browse(sp_id)
+                        if sp.exists() and sp.dossier_id.id == dossier.id:
+                            sp.sudo().write({
+                                'firstname': params.get(f'sp_firstname_{sp_id}', ''),
+                                'lastname': params.get(f'sp_lastname_{sp_id}', ''),
+                                'street': params.get(f'sp_street_{sp_id}', ''),
+                                'zip': params.get(f'sp_zip_{sp_id}', ''),
+                                'city': params.get(f'sp_city_{sp_id}', ''),
+                                'country_id': int(params.get(f'sp_country_id_{sp_id}')) if params.get(f'sp_country_id_{sp_id}') else False,
+                                'amount': float(params.get(f'sp_amount_{sp_id}') or 0),
+                            })
+
+                # Suppression parrains retirés du formulaire
+                submitted_sp_ids = [int(params.get(k)) for k in params.keys() if k.startswith('sp_id_')]
+                for sp in dossier.sponsorship_ids:
+                    if sp.id not in submitted_sp_ids:
+                        sp.sudo().unlink()
+
+                # Nouveaux parrains
+                new_sp_firstnames = form.getlist('new_sp_firstname[]')
+                new_sp_lastnames = form.getlist('new_sp_lastname[]')
+                new_sp_streets = form.getlist('new_sp_street[]')
+                new_sp_zips = form.getlist('new_sp_zip[]')
+                new_sp_cities = form.getlist('new_sp_city[]')
+                new_sp_country_ids = form.getlist('new_sp_country_id[]')
+                new_sp_amounts = form.getlist('new_sp_amount[]')
+
+                for i in range(len(new_sp_firstnames)):
+                    if new_sp_firstnames[i] or new_sp_lastnames[i]:
+                        request.env['ersge.sponsorship'].sudo().create({
+                            'dossier_id': dossier.id,
+                            'firstname': new_sp_firstnames[i],
+                            'lastname': new_sp_lastnames[i],
+                            'street': new_sp_streets[i] if i < len(new_sp_streets) else '',
+                            'zip': new_sp_zips[i] if i < len(new_sp_zips) else '',
+                            'city': new_sp_cities[i] if i < len(new_sp_cities) else '',
+                            'country_id': int(new_sp_country_ids[i]) if i < len(new_sp_country_ids) and new_sp_country_ids[i] else False,
+                            'amount': float(new_sp_amounts[i]) if i < len(new_sp_amounts) and new_sp_amounts[i] else 0.0,
+                        })
+                
+                
                 _logger.warning("========== FIN POST ==========")
                 _logger.warning("URL complète: %s", request.httprequest.url)
                 _logger.warning("args: %s", dict(request.httprequest.args))
@@ -540,6 +590,9 @@ class PortalEcolage(http.Controller):
                 if params.get('form_action') == 'save_and_stay':
                     return request.redirect(f'/my/ecolage/edit/{dossier.id}')
                 return request.redirect('/my/ecolage?success=1')
+            
+
+                
 
             # ==================== GET ====================
             prefill_firstname = partner.firstname or ''
