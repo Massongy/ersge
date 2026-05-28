@@ -48,7 +48,10 @@
                             <p class="card-text">Année scolaire : <span t-field="dossier.annee_scolaire"/>
                             </p>
                             <div class="btn-group">
-                                <a t-att-href="'/my/ecolage/edit/%s' % dossier.id" class="btn btn-secondary">Modifier</a>
+                                <!-- Le bouton Modifier n'apparaît que si le dossier n'est PAS soumis -->
+                                <t t-if="dossier.state != 'soumis'">
+                                    <a t-att-href="'/my/ecolage/edit/%s' % dossier.id" class="btn btn-secondary">Modifier</a>
+                                </t>
                                 <a t-att-href="'/my/ecolage/dossier/%s' % dossier.id" class="btn btn-primary">Consulter et imprimer</a>
                                 <!-- Bouton Supprimer : visible seulement si le dossier n'est pas soumis -->
                                 <t t-if="dossier.state != 'soumis'">
