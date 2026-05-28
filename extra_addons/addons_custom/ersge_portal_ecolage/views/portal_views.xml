@@ -152,4 +152,1165 @@
             </div>
         </t>
     </template>
+
+    <template id="portal_dossier_view" name="Consultation dossier écolage">
+        <t t-call="portal.portal_layout">
+            <t t-set="page_title">Détail du dossier</t>
+            <div class="container mt-4" id="dossier-print-area">
+
+                <!-- STYLES IMPRESSION -->
+                <style>
+            @media print {
+                header, footer, nav, .o_main_navbar,
+                .no-print { display: none !important; }
+                #dossier-print-area { margin: 0; padding: 0; }
+                .card { break-inside: avoid; }
+                .section-title {
+                    background-color: #1a3a5c !important;
+                    -webkit-print-color-adjust: exact;
+                    print-color-adjust: exact;
+                }
+            }
+            .section-title {
+                background-color: #1a3a5c;
+                color: white;
+                padding: 8px 14px;
+                font-size: 1rem;
+                font-weight: 600;
+                margin-bottom: 0;
+                border-radius: 4px 4px 0 0;
+            }
+            .info-label {
+                font-size: 0.75rem;
+                color: #6c757d;
+                text-transform: uppercase;
+                letter-spacing: 0.04em;
+                margin-bottom: 1px;
+            }
+            .info-value {
+                font-size: 0.95rem;
+                font-weight: 500;
+                color: #212529;
+                min-height: 1.4em;
+            }
+            .info-block { margin-bottom: 12px; }
+            .badge-oui { background:#d1fae5; color:#065f46; padding:2px 8px;
+                         border-radius:12px; font-size:0.8rem; }
+            .badge-non { background:#fee2e2; color:#991b1b; padding:2px 8px;
+                         border-radius:12px; font-size:0.8rem; }
+            .sub-card {
+                border: 1px solid #e5e7eb;
+                border-radius: 6px;
+                padding: 14px;
+                margin-bottom: 14px;
+                background: #fafafa;
+            }
+            .sub-card-title {
+                font-weight: 600;
+                color: #1a3a5c;
+                border-bottom: 1px solid #e5e7eb;
+                padding-bottom: 6px;
+                margin-bottom: 10px;
+            }
+            .divider { border-top: 2px solid #1a3a5c; margin: 24px 0; }
+                </style>
+
+                <!-- BARRE ACTIONS (masquée à l'impression) -->
+                <div class="d-flex justify-content-between align-items-center mb-4 no-print">
+                    <h5 class="mb-0">
+                        <i class="fa fa-folder me-2 text-primary"/>
+                Dossier <strong>
+                        <t t-out="dossier.name"/>
+                    </strong>
+                </h5>
+                <div class="d-flex gap-2">
+                    <button onclick="window.print()" class="btn btn-outline-primary btn-sm">
+                        <i class="fa fa-print me-1"/>
+ Imprimer
+                    </button>
+                    <a href="/my/ecolage" class="btn btn-outline-secondary btn-sm">
+                        <i class="fa fa-arrow-left me-1"/>
+ Retour
+                    </a>
+                </div>
+            </div>
+
+            <!-- EN-TÊTE DOSSIER -->
+            <div class="card mb-4">
+                <div class="section-title">
+                    <i class="fa fa-file-text-o me-2"/>
+Dossier d'écolage
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-3 info-block">
+                            <div class="info-label">Référence</div>
+                            <div class="info-value">
+                                <t t-out="dossier.name"/>
+                            </div>
+                        </div>
+                        <div class="col-md-3 info-block">
+                            <div class="info-label">Année scolaire</div>
+                            <div class="info-value">
+                                <t t-out="dossier.annee_scolaire"/>
+                            </div>
+                        </div>
+                        <div class="col-md-3 info-block">
+                            <div class="info-label">Famille</div>
+                            <div class="info-value">
+                                <t t-out="dossier.family_id.name"/>
+                            </div>
+                        </div>
+                        <div class="col-md-3 info-block">
+                            <div class="info-label">Statut</div>
+                            <div class="info-value">
+                                <t t-if="dossier.state == 'soumis'">
+                                    <span class="badge bg-warning text-dark">Soumis</span>
+                                </t>
+                                <t t-elif="dossier.state == 'valide'">
+                                    <span class="badge bg-success">Validé</span>
+                                </t>
+                                <t t-elif="dossier.state == 'incomplet'">
+                                    <span class="badge bg-secondary">Incomplet</span>
+                                </t>
+                                <t t-else="">
+                                    <span class="badge bg-secondary">
+                                        <t t-out="dossier.state"/>
+                                    </span>
+                                </t>
+                            </div>
+                        </div>
+                        <t t-if="dossier.date_soumission">
+                            <div class="col-md-3 info-block">
+                                <div class="info-label">Date de soumission</div>
+                                <div class="info-value">
+                                    <t t-out="dossier.date_soumission"/>
+                                </div>
+                            </div>
+                        </t>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ============================================================ -->
+            <!-- SECTION 1 : INFORMATIONS PARENTS                             -->
+            <!-- ============================================================ -->
+            <div class="card mb-4">
+                <div class="section-title">
+                    <i class="fa fa-users me-2"/>
+1. Informations parents
+                </div>
+                <div class="card-body">
+
+                    <!-- Représentant légal -->
+                    <div class="sub-card">
+                        <div class="sub-card-title">
+                            <i class="fa fa-gavel me-2"/>
+Représentant légal
+                        </div>
+                        <div class="row g-3">
+                            <div class="col-md-6 info-block">
+                                <div class="info-label">Qui exerce la représentation légale ?</div>
+                                <div class="info-value">
+                                    <t t-if="dossier.legal_representation == 'both'">Les deux parents</t>
+                                    <t t-elif="dossier.legal_representation == 'father_only'">Parent 1 uniquement</t>
+                                    <t t-elif="dossier.legal_representation == 'mother_only'">Parent 2 uniquement</t>
+                                    <t t-elif="dossier.legal_representation == 'other'">Autre</t>
+                                    <t t-else="">—</t>
+                                </div>
+                            </div>
+                            <t t-if="dossier.legal_representation == 'other' and dossier.legal_representation_other">
+                                <div class="col-md-6 info-block">
+                                    <div class="info-label">Précision</div>
+                                    <div class="info-value">
+                                        <t t-out="dossier.legal_representation_other"/>
+                                    </div>
+                                </div>
+                            </t>
+                        </div>
+                    </div>
+
+                    <!-- Autre représentant légal -->
+                    <t t-if="dossier.legal_representation == 'other'">
+                        <div class="sub-card">
+                            <div class="sub-card-title">
+                                <i class="fa fa-user me-2 text-warning"/>
+Autre représentant légal
+                            </div>
+                            <div class="row g-3">
+                                <div class="col-md-4 info-block">
+                                    <div class="info-label">Prénom</div>
+                                    <div class="info-value">
+                                        <t t-out="dossier.other_firstname or '—'"/>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 info-block">
+                                    <div class="info-label">Nom</div>
+                                    <div class="info-value">
+                                        <t t-out="dossier.other_lastname or '—'"/>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 info-block">
+                                    <div class="info-label">Email</div>
+                                    <div class="info-value">
+                                        <t t-out="dossier.other_email or '—'"/>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 info-block">
+                                    <div class="info-label">Tél. mobile</div>
+                                    <div class="info-value">
+                                        <t t-out="dossier.other_phone or '—'"/>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 info-block">
+                                    <div class="info-label">Tél. fixe</div>
+                                    <div class="info-value">
+                                        <t t-out="dossier.other_phone_fixed or '—'"/>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 info-block">
+                                    <div class="info-label">Tél. professionnel</div>
+                                    <div class="info-value">
+                                        <t t-out="dossier.other_phone_pro or '—'"/>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 info-block">
+                                    <div class="info-label">Adresse</div>
+                                    <div class="info-value">
+                                        <t t-out="dossier.other_street or ''"/>
+                                        <t t-if="dossier.other_zip or dossier.other_city">
+                                            <br/>
+                                            <t t-out="dossier.other_zip or ''"/>
+                                            <t t-out="dossier.other_city or ''"/>
+                                        </t>
+                                        <t t-if="dossier.other_country_id">
+                                            <br/>
+                                            <t t-out="dossier.other_country_id.name"/>
+                                        </t>
+                                    </div>
+                                </div>
+                                <div class="col-md-3 info-block">
+                                    <div class="info-label">Profession</div>
+                                    <div class="info-value">
+                                        <t t-out="dossier.other_profession or '—'"/>
+                                    </div>
+                                </div>
+                                <div class="col-md-3 info-block">
+                                    <div class="info-label">Employeur</div>
+                                    <div class="info-value">
+                                        <t t-out="dossier.other_employeur or '—'"/>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+
+                    <!-- Parent 1 -->
+                    <t t-if="dossier.legal_representation in ('both', 'father_only')">
+                        <div class="sub-card">
+                            <div class="sub-card-title">
+                                <i class="fa fa-user me-2 text-primary"/>
+Parent 1
+                            </div>
+                            <div class="row g-3">
+                                <div class="col-md-4 info-block">
+                                    <div class="info-label">Prénom</div>
+                                    <div class="info-value">
+                                        <t t-out="dossier.parent1_firstname or (dossier.parent1_id.firstname if dossier.parent1_id else '—')"/>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 info-block">
+                                    <div class="info-label">Nom</div>
+                                    <div class="info-value">
+                                        <t t-out="dossier.parent1_lastname or (dossier.parent1_id.lastname if dossier.parent1_id else '—')"/>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 info-block">
+                                    <div class="info-label">Email</div>
+                                    <div class="info-value">
+                                        <t t-out="dossier.parent1_email or (dossier.parent1_id.email if dossier.parent1_id else '—')"/>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 info-block">
+                                    <div class="info-label">Tél. mobile</div>
+                                    <div class="info-value">
+                                        <t t-out="dossier.parent1_phone or (dossier.parent1_id.phone if dossier.parent1_id else '—')"/>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 info-block">
+                                    <div class="info-label">Tél. fixe</div>
+                                    <div class="info-value">
+                                        <t t-out="dossier.parent1_phone_fixed or (dossier.parent1_id.phone_fixed if dossier.parent1_id else '—')"/>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 info-block">
+                                    <div class="info-label">Tél. professionnel</div>
+                                    <div class="info-value">
+                                        <t t-out="dossier.parent1_phone_pro or (dossier.parent1_id.phone_pro if dossier.parent1_id else '—')"/>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 info-block">
+                                    <div class="info-label">Adresse</div>
+                                    <div class="info-value">
+                                        <t t-out="dossier.parent1_street or (dossier.parent1_id.street if dossier.parent1_id else '')"/>
+                                        <t t-if="dossier.parent1_zip or dossier.parent1_city or (dossier.parent1_id and (dossier.parent1_id.zip or dossier.parent1_id.city))">
+                                            <br/>
+                                            <t t-out="dossier.parent1_zip or (dossier.parent1_id.zip if dossier.parent1_id else '')"/>
+&#160;
+                                            <t t-out="dossier.parent1_city or (dossier.parent1_id.city if dossier.parent1_id else '')"/>
+                                        </t>
+                                        <t t-if="dossier.parent1_country_id or (dossier.parent1_id and dossier.parent1_id.country_id)">
+                                            <br/>
+                                            <t t-out="(dossier.parent1_country_id or dossier.parent1_id.country_id).name"/>
+                                        </t>
+                                    </div>
+                                </div>
+                                <div class="col-md-3 info-block">
+                                    <div class="info-label">Profession</div>
+                                    <div class="info-value">
+                                        <t t-out="dossier.parent1_profession or (dossier.parent1_id.profession if dossier.parent1_id else '—')"/>
+                                    </div>
+                                </div>
+                                <div class="col-md-3 info-block">
+                                    <div class="info-label">Employeur</div>
+                                    <div class="info-value">
+                                        <t t-out="dossier.parent1_employeur or (dossier.parent1_id.employer_name if dossier.parent1_id else '—')"/>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+
+                    <!-- Parent 2 -->
+                    <t t-if="dossier.legal_representation in ('both', 'mother_only')">
+                        <div class="sub-card">
+                            <div class="sub-card-title">
+                                <i class="fa fa-user me-2 text-success"/>
+Parent 2
+                            </div>
+                            <div class="row g-3">
+                                <div class="col-md-4 info-block">
+                                    <div class="info-label">Prénom</div>
+                                    <div class="info-value">
+                                        <t t-out="dossier.parent2_firstname or (dossier.parent2_id.firstname if dossier.parent2_id else '—')"/>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 info-block">
+                                    <div class="info-label">Nom</div>
+                                    <div class="info-value">
+                                        <t t-out="dossier.parent2_lastname or (dossier.parent2_id.lastname if dossier.parent2_id else '—')"/>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 info-block">
+                                    <div class="info-label">Email</div>
+                                    <div class="info-value">
+                                        <t t-out="dossier.parent2_email or (dossier.parent2_id.email if dossier.parent2_id else '—')"/>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 info-block">
+                                    <div class="info-label">Tél. mobile</div>
+                                    <div class="info-value">
+                                        <t t-out="dossier.parent2_phone or (dossier.parent2_id.phone if dossier.parent2_id else '—')"/>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 info-block">
+                                    <div class="info-label">Tél. fixe</div>
+                                    <div class="info-value">
+                                        <t t-out="dossier.parent2_phone_fixed or (dossier.parent2_id.phone_fixed if dossier.parent2_id else '—')"/>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 info-block">
+                                    <div class="info-label">Tél. professionnel</div>
+                                    <div class="info-value">
+                                        <t t-out="dossier.parent2_phone_pro or (dossier.parent2_id.phone_pro if dossier.parent2_id else '—')"/>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 info-block">
+                                    <div class="info-label">Adresse</div>
+                                    <div class="info-value">
+                                        <t t-if="dossier.same_address_as_parent1">
+                                            <em class="text-muted">Même adresse que Parent 1</em>
+                                        </t>
+                                        <t t-else="">
+                                            <t t-out="dossier.parent2_street or (dossier.parent2_id.street if dossier.parent2_id else '')"/>
+                                            <t t-if="dossier.parent2_zip or dossier.parent2_city">
+                                                <br/>
+                                                <t t-out="dossier.parent2_zip or ''"/>
+&#160;
+                                                <t t-out="dossier.parent2_city or ''"/>
+                                            </t>
+                                            <t t-if="dossier.parent2_country_id or (dossier.parent2_id and dossier.parent2_id.country_id)">
+                                                <br/>
+                                                <t t-out="(dossier.parent2_country_id or dossier.parent2_id.country_id).name"/>
+                                            </t>
+                                        </t>
+                                    </div>
+                                </div>
+                                <div class="col-md-3 info-block">
+                                    <div class="info-label">Profession</div>
+                                    <div class="info-value">
+                                        <t t-out="dossier.parent2_profession or (dossier.parent2_id.profession if dossier.parent2_id else '—')"/>
+                                    </div>
+                                </div>
+                                <div class="col-md-3 info-block">
+                                    <div class="info-label">Employeur</div>
+                                    <div class="info-value">
+                                        <t t-out="dossier.parent2_employeur or (dossier.parent2_id.employer_name if dossier.parent2_id else '—')"/>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+
+                    <!-- Dépôt -->
+                    <div class="sub-card">
+                        <div class="sub-card-title">
+                            <i class="fa fa-university me-2"/>
+Dépôt
+                        </div>
+                        <div class="row g-3">
+                            <div class="col-md-4 info-block">
+                                <div class="info-label">Statut du dépôt</div>
+                                <div class="info-value">
+                                    <t t-if="dossier.deposit_status == 'paid'">Déjà versé</t>
+                                    <t t-elif="dossier.deposit_status == 'unpaid'">Versement à effectuer (1 000 CHF)</t>
+                                    <t t-else="">—</t>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- ============================================================ -->
+            <!-- SECTION 2 : ÉLÈVES                                           -->
+            <!-- ============================================================ -->
+            <div class="card mb-4">
+                <div class="section-title">
+                    <i class="fa fa-child me-2"/>
+2. Élève(s)
+                </div>
+                <div class="card-body">
+                    <t t-if="not dossier.student_line_ids">
+                        <p class="text-muted">Aucun élève inscrit.</p>
+                    </t>
+                    <t t-foreach="dossier.student_line_ids" t-as="line">
+                        <div class="sub-card">
+                            <div class="sub-card-title">
+                                <i class="fa fa-user-circle me-2 text-primary"/>
+                                <t t-out="line.student_id.display_name or 'Élève'"/>
+                            </div>
+                            <div class="row g-3">
+                                <div class="col-md-3 info-block">
+                                    <div class="info-label">Prénom</div>
+                                    <div class="info-value">
+                                        <t t-out="line.student_id.firstname or '—'"/>
+                                    </div>
+                                </div>
+                                <div class="col-md-3 info-block">
+                                    <div class="info-label">Nom</div>
+                                    <div class="info-value">
+                                        <t t-out="line.student_id.lastname or '—'"/>
+                                    </div>
+                                </div>
+                                <div class="col-md-3 info-block">
+                                    <div class="info-label">Date de naissance</div>
+                                    <div class="info-value">
+                                        <t t-out="line.student_id.birthdate or '—'"/>
+                                    </div>
+                                </div>
+                                <div class="col-md-3 info-block">
+                                    <div class="info-label">Sexe</div>
+                                    <div class="info-value">
+                                        <t t-if="line.student_id.gender == 'M'">Masculin</t>
+                                        <t t-elif="line.student_id.gender == 'F'">Féminin</t>
+                                        <t t-else="">—</t>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 info-block">
+                                    <div class="info-label">Droit à l'image</div>
+                                    <div class="info-value">
+                                        <t t-if="line.student_id.image_rights">
+                                            <span class="badge-oui">✓ Accordé</span>
+                                        </t>
+                                        <t t-else="">
+                                            <span class="badge-non">✗ Refusé</span>
+                                        </t>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 info-block">
+                                    <div class="info-label">Forfait</div>
+                                    <div class="info-value">
+                                        <t t-if="line.forfait_id">
+                                            <t t-out="line.forfait_id.name"/>
+ —
+                                            <t t-out="line.forfait_montant_mensuel"/>
+ CHF/mois
+                                        </t>
+                                        <t t-else="">—</t>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </div>
+            </div>
+
+            <!-- ============================================================ -->
+            <!-- SECTION 3 : AIDE EMPLOYEUR                                   -->
+            <!-- ============================================================ -->
+            <div class="card mb-4">
+                <div class="section-title">
+                    <i class="fa fa-briefcase me-2"/>
+3. Aide employeur
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-4 info-block">
+                            <div class="info-label">Aide employeur</div>
+                            <div class="info-value">
+                                <t t-if="dossier.employer_assistance == 'yes'">
+                                    <span class="badge-oui">✓ Oui</span>
+                                </t>
+                                <t t-else="">
+                                    <span class="badge-non">Non</span>
+                                </t>
+                            </div>
+                        </div>
+                        <t t-if="dossier.employer_assistance == 'yes'">
+                            <div class="col-md-4 info-block">
+                                <div class="info-label">Facture à l'employeur</div>
+                                <div class="info-value">
+                                    <t t-if="dossier.send_invoice_to_employer">
+                                        <span class="badge-oui">✓ Oui</span>
+                                    </t>
+                                    <t t-else="">
+                                        <span class="badge-non">Non</span>
+                                    </t>
+                                </div>
+                            </div>
+                        </t>
+                    </div>
+                    <t t-if="dossier.employer_assistance == 'yes' and dossier.send_invoice_to_employer and dossier.employer_id">
+                        <div class="sub-card mt-3">
+                            <div class="sub-card-title">
+                                <i class="fa fa-building me-2"/>
+Coordonnées de l'employeur
+                            </div>
+                            <div class="row g-3">
+                                <div class="col-md-4 info-block">
+                                    <div class="info-label">Nom</div>
+                                    <div class="info-value">
+                                        <t t-out="dossier.employer_id.name or '—'"/>
+                                    </div>
+                                </div>
+                                <div class="col-md-8 info-block">
+                                    <div class="info-label">Adresse</div>
+                                    <div class="info-value">
+                                        <t t-out="dossier.employer_id.street or ''"/>
+                                        <t t-if="dossier.employer_id.zip or dossier.employer_id.city">
+                                            <br/>
+                                            <t t-out="dossier.employer_id.zip or ''"/>
+&#160;
+                                            <t t-out="dossier.employer_id.city or ''"/>
+                                        </t>
+                                        <t t-if="dossier.employer_id.country_id">
+                                            <br/>
+                                            <t t-out="dossier.employer_id.country_id.name"/>
+                                        </t>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </div>
+            </div>
+
+            <!-- ============================================================ -->
+            <!-- SECTION 4 : FORFAITS                                         -->
+            <!-- ============================================================ -->
+            <div class="card mb-4">
+                <div class="section-title">
+                    <i class="fa fa-tags me-2"/>
+4. Forfaits et cotisation
+                </div>
+                <div class="card-body">
+                    <t t-if="not dossier.student_line_ids">
+                        <p class="text-muted">Aucun élève inscrit.</p>
+                    </t>
+                    <t t-else="">
+                        <table class="table table-sm table-bordered">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Élève</th>
+                                    <th>Forfait</th>
+                                    <th class="text-end">Montant mensuel (CHF)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <t t-foreach="dossier.student_line_ids" t-as="line">
+                                    <tr>
+                                        <td>
+                                            <t t-out="line.student_id.display_name or '—'"/>
+                                        </td>
+                                        <td>
+                                            <t t-out="line.forfait_id.name if line.forfait_id else '—'"/>
+                                        </td>
+                                        <td class="text-end">
+                                            <t t-out="line.forfait_montant_mensuel or '0.00'"/>
+                                        </td>
+                                    </tr>
+                                </t>
+                            </tbody>
+                        </table>
+                    </t>
+                </div>
+            </div>
+
+            <!-- ============================================================ -->
+            <!-- SECTION 5 : RÉDUCTIONS                                       -->
+            <!-- ============================================================ -->
+            <div class="card mb-4">
+                <div class="section-title">
+                    <i class="fa fa-percent me-2"/>
+5. Réductions
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-4 info-block">
+                            <div class="info-label">Réduction demandée (enfants / ancienneté)</div>
+                            <div class="info-value">
+                                <t t-if="dossier.reduction_requested">
+                                    <span class="badge-oui">✓ Oui</span>
+                                </t>
+                                <t t-else="">
+                                    <span class="badge-non">Non</span>
+                                </t>
+                            </div>
+                        </div>
+                    </div>
+
+                    <t t-if="dossier.reduction_requested">
+                        <div class="sub-card mt-3">
+                            <div class="sub-card-title">Détail des réductions</div>
+                            <div class="row g-3">
+                                <div class="col-md-4 info-block">
+                                    <div class="info-label">Réduction enfants multiples</div>
+                                    <div class="info-value">
+                                        <t t-if="dossier.apply_children_discount">
+                                            <span class="badge-oui">✓ Oui</span>
+                                        </t>
+                                        <t t-else="">
+                                            <span class="badge-non">Non</span>
+                                        </t>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 info-block">
+                                    <div class="info-label">Réduction ancienneté</div>
+                                    <div class="info-value">
+                                        <t t-if="dossier.apply_seniority_discount">
+                                            <span class="badge-oui">✓ Oui</span>
+                                        </t>
+                                        <t t-else="">
+                                            <span class="badge-non">Non</span>
+                                        </t>
+                                    </div>
+                                </div>
+                                <t t-if="dossier.apply_seniority_discount">
+                                    <div class="col-md-4 info-block">
+                                        <div class="info-label">Années d'ancienneté</div>
+                                        <div class="info-value">
+                                            <t t-out="dossier.seniority_years or '—'"/>
+                                        </div>
+                                    </div>
+                                </t>
+                                <t t-if="dossier.requested_discount">
+                                    <div class="col-md-4 info-block">
+                                        <div class="info-label">Réduction sollicitée (%)</div>
+                                        <div class="info-value">
+                                            <t t-out="dossier.requested_discount"/>
+ %</div>
+                                    </div>
+                                </t>
+                            </div>
+                        </div>
+                    </t>
+
+                    <!-- Réduction complémentaire -->
+                    <div class="row g-3 mt-1">
+                        <div class="col-md-6 info-block">
+                            <div class="info-label">Réduction complémentaire demandée</div>
+                            <div class="info-value">
+                                <t t-if="dossier.additional_reduction_request">
+                                    <span class="badge-oui">✓ Oui</span>
+                                </t>
+                                <t t-else="">
+                                    <span class="badge-non">Non</span>
+                                </t>
+                            </div>
+                        </div>
+                    </div>
+
+                    <t t-if="dossier.additional_reduction_request">
+                        <div class="sub-card mt-2">
+                            <div class="sub-card-title">Réduction complémentaire</div>
+                            <div class="row g-3">
+                                <div class="col-md-4 info-block">
+                                    <div class="info-label">Revenu brut annuel familial (CHF)</div>
+                                    <div class="info-value">
+                                        <t t-out="dossier.gross_annual_income or '—'"/>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 info-block">
+                                    <div class="info-label">Montant mensuel proposé (CHF)</div>
+                                    <div class="info-value">
+                                        <t t-out="dossier.proposed_monthly_amount or '—'"/>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 info-block">
+                                    <div class="info-label">Méthode budget</div>
+                                    <div class="info-value">
+                                        <t t-if="dossier.budget_method == 'upload'">Fichier téléchargé</t>
+                                        <t t-elif="dossier.budget_method == 'online'">Rempli en ligne</t>
+                                        <t t-else="">—</t>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 info-block">
+                                    <div class="info-label">Mode lettre explicative</div>
+                                    <div class="info-value">
+                                        <t t-if="dossier.explanatory_letter_mode == 'upload'">Fichier téléchargé</t>
+                                        <t t-elif="dossier.explanatory_letter_mode == 'write'">Rédigée en ligne</t>
+                                        <t t-else="">—</t>
+                                    </div>
+                                </div>
+                                <t t-if="dossier.explanatory_letter_mode == 'write' and dossier.explanatory_letter_text">
+                                    <div class="col-12 info-block">
+                                        <div class="info-label">Lettre explicative</div>
+                                        <div class="info-value" style="white-space:pre-wrap; background:#f8f9fa; padding:10px; border-radius:4px;">
+                                            <t t-out="dossier.explanatory_letter_text"/>
+                                        </div>
+                                    </div>
+                                </t>
+                            </div>
+
+                            <!-- Budget en ligne -->
+                            <t t-if="dossier.budget_method == 'online'">
+                                <div class="mt-3">
+                                    <t t-if="dossier.budget_income_line_ids">
+                                        <h6 class="fw-semibold text-success mb-2">Revenus</h6>
+                                        <table class="table table-sm table-bordered mb-3">
+                                            <thead class="table-light">
+                                                <tr>
+                                                    <th>Catégorie</th>
+                                                    <th class="text-end">Madame (CHF)</th>
+                                                    <th class="text-end">Monsieur (CHF)</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <t t-foreach="dossier.budget_income_line_ids" t-as="bl">
+                                                    <tr>
+                                                        <td>
+                                                            <t t-out="bl.category_id.name"/>
+                                                        </td>
+                                                        <td class="text-end">
+                                                            <t t-out="bl.montant_madame or 0"/>
+                                                        </td>
+                                                        <td class="text-end">
+                                                            <t t-out="bl.montant_monsieur or 0"/>
+                                                        </td>
+                                                    </tr>
+                                                </t>
+                                            </tbody>
+                                        </table>
+                                    </t>
+                                    <t t-if="dossier.budget_expense_line_ids">
+                                        <h6 class="fw-semibold text-danger mb-2">Charges</h6>
+                                        <table class="table table-sm table-bordered mb-3">
+                                            <thead class="table-light">
+                                                <tr>
+                                                    <th>Catégorie</th>
+                                                    <th class="text-end">Madame (CHF)</th>
+                                                    <th class="text-end">Monsieur (CHF)</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <t t-foreach="dossier.budget_expense_line_ids" t-as="bl">
+                                                    <tr>
+                                                        <td>
+                                                            <t t-out="bl.category_id.name"/>
+                                                        </td>
+                                                        <td class="text-end">
+                                                            <t t-out="bl.montant_madame or 0"/>
+                                                        </td>
+                                                        <td class="text-end">
+                                                            <t t-out="bl.montant_monsieur or 0"/>
+                                                        </td>
+                                                    </tr>
+                                                </t>
+                                            </tbody>
+                                        </table>
+                                    </t>
+                                    <div class="row g-2 mt-1">
+                                        <div class="col-md-4 info-block">
+                                            <div class="info-label">Total revenus (CHF)</div>
+                                            <div class="info-value">
+                                                <t t-out="dossier.total_revenus or 0"/>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4 info-block">
+                                            <div class="info-label">Total charges (CHF)</div>
+                                            <div class="info-value">
+                                                <t t-out="dossier.total_charges or 0"/>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4 info-block">
+                                            <div class="info-label">Solde (CHF)</div>
+                                            <div class="info-value">
+                                                <t t-out="dossier.solde or 0"/>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </t>
+                        </div>
+                    </t>
+                </div>
+            </div>
+
+            <!-- ============================================================ -->
+            <!-- SECTION 6 : PARASCOLAIRE                                     -->
+            <!-- ============================================================ -->
+            <div class="card mb-4">
+                <div class="section-title">
+                    <i class="fa fa-clock-o me-2"/>
+6. Parascolaire
+                </div>
+                <div class="card-body">
+                    <div class="row g-3 mb-2">
+                        <div class="col-md-4 info-block">
+                            <div class="info-label">Inscription souhaitée</div>
+                            <div class="info-value">
+                                <t t-if="dossier.after_school_request == 'yes'">
+                                    <span class="badge-oui">✓ Oui</span>
+                                </t>
+                                <t t-else="">
+                                    <span class="badge-non">Non</span>
+                                </t>
+                            </div>
+                        </div>
+                    </div>
+                    <t t-if="dossier.after_school_request == 'yes' and dossier.after_school_line_ids">
+                        <t t-foreach="dossier.after_school_line_ids" t-as="asl">
+                            <div class="sub-card">
+                                <div class="sub-card-title">
+                                    <t t-out="asl.student_id.display_name or '—'"/>
+                                </div>
+                                <div class="row g-3">
+                                    <div class="col-md-4 info-block">
+                                        <div class="info-label">Type d'accueil</div>
+                                        <div class="info-value">
+                                            <t t-if="asl.accueil_type == 'jardins_enfants'">Jardins d'Enfants (2–3 ans)</t>
+                                            <t t-elif="asl.accueil_type == 'jardin'">Jardin d'accueil (3–6 ans)</t>
+                                            <t t-elif="asl.accueil_type == 'classe'">Classe d'accueil (6–12 ans)</t>
+                                            <t t-else="">—</t>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4 info-block">
+                                        <div class="info-label">Montant mensuel (CHF)</div>
+                                        <div class="info-value">
+                                            <t t-out="asl.montant_mensuel or '0.00'"/>
+                                        </div>
+                                    </div>
+                                    <t t-if="asl.prestation_ids">
+                                        <div class="col-md-12 info-block">
+                                            <div class="info-label">Prestations</div>
+                                            <div class="info-value">
+                                                <t t-foreach="asl.prestation_ids" t-as="p">
+                                                    <span class="badge bg-info text-dark me-1">
+                                                        <t t-out="p.name"/>
+                                                    </span>
+                                                </t>
+                                            </div>
+                                        </div>
+                                    </t>
+                                </div>
+                            </div>
+                        </t>
+                    </t>
+                </div>
+            </div>
+
+            <!-- ============================================================ -->
+            <!-- SECTION 7 : SOLIDARITÉ                                       -->
+            <!-- ============================================================ -->
+            <div class="card mb-4">
+                <div class="section-title">
+                    <i class="fa fa-handshake-o me-2"/>
+7. Solidarité
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-4 info-block">
+                            <div class="info-label">Contribution au fonds de solidarité</div>
+                            <div class="info-value">
+                                <t t-if="dossier.solidarity_request == 'yes'">
+                                    <span class="badge-oui">✓ Oui</span>
+                                </t>
+                                <t t-else="">
+                                    <span class="badge-non">Non</span>
+                                </t>
+                            </div>
+                        </div>
+                        <t t-if="dossier.solidarity_request == 'yes'">
+                            <div class="col-md-4 info-block">
+                                <div class="info-label">Majoration appliquée</div>
+                                <div class="info-value">
+                                    <t t-if="dossier.apply_solidarity_increase">
+                                        <span class="badge-oui">✓ Oui</span>
+                                    </t>
+                                    <t t-else="">
+                                        <span class="badge-non">Non</span>
+                                    </t>
+                                </div>
+                            </div>
+                            <t t-if="dossier.apply_solidarity_increase and dossier.solidarity_percentage">
+                                <div class="col-md-4 info-block">
+                                    <div class="info-label">Majoration (%)</div>
+                                    <div class="info-value">
+                                        <t t-out="dossier.solidarity_percentage"/>
+ %</div>
+                                </div>
+                            </t>
+                        </t>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ============================================================ -->
+            <!-- SECTION 8 : ÉCHANGES ENTRE PARENTS                          -->
+            <!-- ============================================================ -->
+            <div class="card mb-4">
+                <div class="section-title">
+                    <i class="fa fa-address-card me-2"/>
+8. Échanges entre parents
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-6 info-block">
+                            <div class="info-label">Carnet d'adresse des parents</div>
+                            <div class="info-value">
+                                <t t-if="dossier.address_book_optin">
+                                    <span class="badge-oui">✓ Accepté</span>
+                                </t>
+                                <t t-else="">
+                                    <span class="badge-non">Refusé</span>
+                                </t>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ============================================================ -->
+            <!-- SECTION 9 : RÉCAPITULATIF FINANCIER                         -->
+            <!-- ============================================================ -->
+            <div class="card mb-4">
+                <div class="section-title">
+                    <i class="fa fa-calculator me-2"/>
+9. Récapitulatif financier
+                </div>
+                <div class="card-body">
+
+                    <!-- Totaux -->
+                    <div class="sub-card">
+                        <div class="sub-card-title">Totaux</div>
+                        <div class="row g-3">
+                            <div class="col-md-3 info-block">
+                                <div class="info-label">Écolage mensuel (CHF)</div>
+                                <div class="info-value">
+                                    <t t-out="dossier.total_monthly_tuition or '0.00'"/>
+                                </div>
+                            </div>
+                            <div class="col-md-3 info-block">
+                                <div class="info-label">Parascolaire mensuel (CHF)</div>
+                                <div class="info-value">
+                                    <t t-out="dossier.total_monthly_after_school or '0.00'"/>
+                                </div>
+                            </div>
+                            <div class="col-md-3 info-block">
+                                <div class="info-label">Total mensuel (CHF)</div>
+                                <div class="info-value fw-bold">
+                                    <t t-out="dossier.total_monthly or '0.00'"/>
+                                </div>
+                            </div>
+                            <div class="col-md-3 info-block">
+                                <div class="info-label">Total annuel (CHF)</div>
+                                <div class="info-value fw-bold">
+                                    <t t-out="dossier.total_annual or '0.00'"/>
+                                </div>
+                            </div>
+                            <div class="col-md-3 info-block">
+                                <div class="info-label">Cotisation annuelle (CHF)</div>
+                                <div class="info-value">
+                                    <t t-out="dossier.membership_fee_amount or '0.00'"/>
+                                </div>
+                            </div>
+                            <div class="col-md-3 info-block">
+                                <div class="info-label">Dépôt (CHF)</div>
+                                <div class="info-value">
+                                    <t t-out="dossier.deposit_amount or '0.00'"/>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Parrainage -->
+                    <div class="row g-3 mt-1">
+                        <div class="col-md-4 info-block">
+                            <div class="info-label">Parrainage</div>
+                            <div class="info-value">
+                                <t t-if="dossier.sponsorship_request == 'yes'">
+                                    <span class="badge-oui">✓ Oui</span>
+                                </t>
+                                <t t-else="">
+                                    <span class="badge-non">Non</span>
+                                </t>
+                            </div>
+                        </div>
+                    </div>
+                    <t t-if="dossier.sponsorship_request == 'yes' and dossier.sponsorship_ids">
+                        <div class="sub-card mt-2">
+                            <div class="sub-card-title">
+                                <i class="fa fa-handshake-o me-2"/>
+Parrains</div>
+                            <table class="table table-sm table-bordered">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Prénom</th>
+                                        <th>Nom</th>
+                                        <th>Adresse</th>
+                                        <th class="text-end">Montant/mois (CHF)</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <t t-foreach="dossier.sponsorship_ids" t-as="sp">
+                                        <tr>
+                                            <td>
+                                                <t t-out="sp.firstname or '—'"/>
+                                            </td>
+                                            <td>
+                                                <t t-out="sp.lastname or '—'"/>
+                                            </td>
+                                            <td>
+                                                <t t-out="sp.street or ''"/>
+                                                <t t-if="sp.zip or sp.city">
+                                                    <t t-out="sp.zip or ''"/>
+&#160;<t t-out="sp.city or ''"/>
+                                                </t>
+                                                <t t-if="sp.country_id">—                                                    <t t-out="sp.country_id.name"/>
+                                                </t>
+                                            </td>
+                                            <td class="text-end">
+                                                <t t-out="sp.amount or 0"/>
+                                            </td>
+                                        </tr>
+                                    </t>
+                                </tbody>
+                            </table>
+                        </div>
+                    </t>
+
+                    <!-- Facturation divisée -->
+                    <div class="row g-3 mt-1">
+                        <div class="col-md-4 info-block">
+                            <div class="info-label">Facturation divisée</div>
+                            <div class="info-value">
+                                <t t-if="dossier.multi_billing_request">
+                                    <span class="badge-oui">✓ Oui</span>
+                                </t>
+                                <t t-else="">
+                                    <span class="badge-non">Non</span>
+                                </t>
+                            </div>
+                        </div>
+                        <t t-if="dossier.multi_billing_request">
+                            <div class="col-md-4 info-block">
+                                <div class="info-label">Montant annuel Parent 1 (CHF)</div>
+                                <div class="info-value">
+                                    <t t-out="dossier.parent1_billing_amount or '0.00'"/>
+                                </div>
+                            </div>
+                            <div class="col-md-4 info-block">
+                                <div class="info-label">Montant annuel Parent 2 (CHF)</div>
+                                <div class="info-value">
+                                    <t t-out="dossier.parent2_billing_amount or '0.00'"/>
+                                </div>
+                            </div>
+                        </t>
+                    </div>
+
+                    <!-- Modalité de versement -->
+                    <div class="row g-3 mt-1">
+                        <div class="col-md-6 info-block">
+                            <div class="info-label">Modalité de versement</div>
+                            <div class="info-value">
+                                <t t-if="dossier.payment_terms == 'monthly'">Mensuel (avant le 10 du mois)</t>
+                                <t t-elif="dossier.payment_terms == 'annually'">Annuel avant le 30 septembre (−2%)</t>
+                                <t t-else="">—</t>
+                            </div>
+                        </div>
+                        <t t-if="dossier.comments">
+                            <div class="col-12 info-block">
+                                <div class="info-label">Commentaires</div>
+                                <div class="info-value" style="white-space:pre-wrap; background:#f8f9fa; padding:10px; border-radius:4px;">
+                                    <t t-out="dossier.comments"/>
+                                </div>
+                            </div>
+                        </t>
+                    </div>
+
+                    <!-- Conditions générales & signature -->
+                    <div class="sub-card mt-3">
+                        <div class="sub-card-title">Conditions générales et signature</div>
+                        <div class="row g-3">
+                            <div class="col-md-4 info-block">
+                                <div class="info-label">Conditions acceptées</div>
+                                <div class="info-value">
+                                    <t t-if="dossier.terms_accepted">
+                                        <span class="badge-oui">✓ Acceptées</span>
+                                    </t>
+                                    <t t-else="">
+                                        <span class="badge-non">Non acceptées</span>
+                                    </t>
+                                </div>
+                            </div>
+                            <div class="col-md-8 info-block">
+                                <div class="info-label">Signature</div>
+                                <div class="info-value">
+                                    <t t-out="dossier.signature_text or '—'"/>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- BOUTON BAS DE PAGE -->
+            <div class="d-flex gap-2 mt-2 mb-5 no-print">
+                <button onclick="window.print()" class="btn btn-outline-primary">
+                    <i class="fa fa-print me-1"/>
+ Imprimer
+                </button>
+                <a href="/my/ecolage" class="btn btn-outline-secondary">
+                    <i class="fa fa-arrow-left me-1"/>
+ Retour
+                </a>
+            </div>
+
+        </div>
+    </t>
+</template>
+
 </odoo>

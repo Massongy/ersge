@@ -720,3 +720,19 @@ class PortalEcolage(http.Controller):
                 return {'success': False, 'error': 'Accès non autorisé'}
         except Exception as e:
             return {'success': False, 'error': str(e)}
+        
+
+
+    @http.route('/my/ecolage/dossier/<int:dossier_id>', type='http', auth='user', website=True)
+    def view_dossier(self, dossier_id, **kwargs):
+        partner = request.env.user.partner_id
+        dossier = request.env['ersge.dossier.famille'].sudo().browse(dossier_id)
+        if not dossier.exists():
+            return request.redirect('/my/ecolage')
+        if not partner.family_id or dossier.family_id.id != partner.family_id.id:
+            return request.redirect('/my/ecolage')
+        countries = request.env['res.country'].sudo().search([])
+        return request.render('ersge_portal_ecolage.portal_dossier_view', {
+            'dossier': dossier,
+            'countries': countries,
+        })
