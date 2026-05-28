@@ -213,6 +213,8 @@ class PortalEcolage(http.Controller):
         return request.render('ersge_portal_ecolage.portal_my_dossiers', {
             'dossiers': dossiers,
             'error': kwargs.get('error'),
+            'success': kwargs.get('success'),
+            'csrf_token': request.csrf_token(), 
         })
 
 
@@ -736,3 +738,26 @@ class PortalEcolage(http.Controller):
             'dossier': dossier,
             'countries': countries,
         })
+    
+
+    @http.route('/my/ecolage/delete/<int:dossier_id>', type='http', auth='user', website=True, methods=['POST'])
+    def delete_dossier(self, dossier_id):
+        partner = request.env.user.partner_id
+        dossier = request.env['ersge.dossier.famille'].sudo().browse(dossier_id)
+
+        if not dossier.exists():
+            return request.redirect('/my/ecolage?error=Dossier introuvable')
+
+        # Vérification que l'utilisateur appartient bien à la famille du dossier
+        if not partner.family_id or dossier.family_id.id != partner.family_id.id:
+            return request.redirect('/my/ecolage?error=Vous n’êtes pas autorisé à supprimer ce dossier')
+
+        # Vérification du statut (interdire si déjà soumis)
+        if dossier.state == 'soumis':
+            return request.redirect('/my/ecolage?error=Impossible de supprimer un dossier déjà soumis')
+
+        try:
+            dossier.unlink()
+            return request.redirect('/my/ecolage?success=Dossier supprimé avec succès')
+        except Exception as e:
+            return request.redirect(f'/my/ecolage?error=Erreur lors de la suppression : {str(e)}')

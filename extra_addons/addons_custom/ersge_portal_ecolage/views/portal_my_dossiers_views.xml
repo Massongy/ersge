@@ -11,6 +11,13 @@
                     </div>
                 </t>
 
+                <!-- Message de succès -->
+                <t t-if="success">
+                    <div class="alert alert-success" role="alert">
+                        <t t-esc="success"/>
+                    </div>
+                </t>
+
                 <!-- Bouton nouveau dossier -->
                 <a href="/my/ecolage/new" class="btn btn-primary mb-3">+ Nouveau dossier</a>
 
@@ -42,12 +49,18 @@
                             </p>
                             <div class="btn-group">
                                 <a t-att-href="'/my/ecolage/edit/%s' % dossier.id" class="btn btn-secondary">Modifier</a>
-                                <a t-att-href="'/my/ecolage/dossier/%s' % dossier.id" class="btn btn-primary">Voir le détail</a>
+                                <a t-att-href="'/my/ecolage/dossier/%s' % dossier.id" class="btn btn-primary">Consulter et imprimer</a>
+                                <!-- Bouton Supprimer : visible seulement si le dossier n'est pas soumis -->
+                                <t t-if="dossier.state != 'soumis'">
+                                    <form t-attf-action="/my/ecolage/delete/{{dossier.id}}" method="post" style="display: inline;">
+                                        <input type="hidden" name="csrf_token" t-att-value="csrf_token"/>
+                                        <button type="submit" class="btn btn-danger" onclick="return confirm('Supprimer définitivement ce dossier ?')">Supprimer</button>
+                                    </form>
+                                </t>
                             </div>
                         </div>
                     </div>
                 </t>
-
             </div>
         </t>
     </template>
