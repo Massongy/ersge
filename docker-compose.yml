@@ -8,19 +8,31 @@ services:
       - "5432:5432"
     volumes:
       - db_data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  mailhog:
+    image: mailhog/mailhog
+    ports:
+      - "1025:1025"   # SMTP
+      - "8025:8025"   # Interface web
+    restart: unless-stopped
 
   odoo:
     image: odoo:19.0-20260305
-    command: odoo --dev=all -u ersge_portal_ecolage
+    command: odoo --dev=all   # ⚠️ pas de -u ici pour le premier démarrage
     depends_on:
       - db
+      - mailhog
     ports:
       - "8069:8069"
     environment:
-      HOST: ${ODOO_HOST}
-      USER: ${ODOO_USER}
-      PASSWORD: ${ODOO_PASSWORD}
-
+      HOST: ${ODOO_HOST:-db}
+      USER: ${ODOO_USER:-odoo}
+      PASSWORD: ${ODOO_PASSWORD:-odoo}
+      SMTP_SERVER: mailhog
+      SMTP_PORT: 1025
+      SMTP_SSL: False
+      SMTP_DEBUG: True
     volumes:
       - odoo_data:/var/lib/odoo
       - ./extra_addons/addons_custom:/mnt/extra_addons/addons_custom
