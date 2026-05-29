@@ -265,31 +265,22 @@ class PortalEcolage(http.Controller):
 
     # ==================== RÉVOQUER UN ACCÈS ====================
 
-    @http.route(
-        '/my/ecolage/<int:dossier_id>/acces/<int:acces_id>/revoke',
-        type='http', auth='user', website=True,
-        methods=['POST'],
-    )
+    @http.route('/my/ecolage/<int:dossier_id>/acces/<int:acces_id>/revoke', type='http', auth='user', website=True, methods=['POST'])
     def portal_revoke_acces(self, dossier_id, acces_id, **kwargs):
         partner = request.env.user.partner_id
-        dossier = request.env['ersge.dossier.famille'].sudo().browse(
-            dossier_id
-        )
-
-        if not dossier.exists() or not self._check_dossier_access(
-            dossier, partner
-        ):
+        dossier = request.env['ersge.dossier.famille'].sudo().browse(dossier_id)
+        if not dossier.exists() or not self._check_dossier_access(dossier, partner):
             return request.redirect('/my/ecolage')
 
-        acces = request.env['ersge.dossier.acces'].sudo().browse(
-            acces_id
-        )
-        if acces.exists() and acces.partner_id != partner:
+        acces = request.env['ersge.dossier.acces'].sudo().browse(acces_id)
+        # ⚠️ NOUVELLE CONDITION : ne révoquer que si l'invitation est en attente
+        if acces.exists() and acces.partner_id != partner and acces.invite_state == 'pending':
             acces.unlink()
+        else:
+            # Optionnel : ajouter un message d'erreur dans l'URL
+            return request.redirect(f'/my/ecolage/{dossier_id}/acces?error=impossible_de_revoquer_un_acces_accepte')
 
-        return request.redirect(
-            f'/my/ecolage/{dossier_id}/acces'
-        )
+        return request.redirect(f'/my/ecolage/{dossier_id}/acces')
 
     # ==================== NOUVEAU DOSSIER ====================
 

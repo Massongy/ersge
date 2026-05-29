@@ -91,26 +91,32 @@ class ErsgeDossierAcces(models.Model):
         )
         body = f"""
             <p>Bonjour,</p>
-            <p>
-                Vous avez été invité(e) à accéder au dossier d'écolage
-                de la famille <strong>{famille_name}</strong>
-                en tant que <strong>{role_label}</strong>.
-            </p>
-            <p>Cliquez sur le bouton ci-dessous pour accepter :</p>
-            <p>
-                <a href="{url}" style="
-                    background:#1a3a5c;color:white;
-                    padding:10px 20px;border-radius:4px;
-                    text-decoration:none;font-weight:bold;
-                ">
-                    Accéder au dossier
-                </a>
-            </p>
-            <p style="color:#888;font-size:0.85em;">
-                Si vous n'avez pas encore de compte sur le portail,
-                vous serez invité(e) à en créer un gratuitement.<br/>
-                Lien direct : {url}
-            </p>
+        <p>
+            Vous avez été invité(e) à accéder au dossier d'écolage
+            de la famille <strong>{famille_name}</strong>
+            en tant que <strong>{role_label}</strong>.
+        </p>
+        <p>Cliquez sur le bouton ci-dessous pour accepter :</p>
+        <p>
+            <a href="{url}" style="
+                background:#1a3a5c;color:white;
+                padding:10px 20px;border-radius:4px;
+                text-decoration:none;font-weight:bold;
+            ">
+                Accéder au dossier
+            </a>
+        </p>
+        <p style="color:#888;font-size:0.85em;">
+            <strong>Important :</strong> Pour accepter l'invitation, vous devez utiliser
+            l'adresse email <strong>{dest_email}</strong> (celle qui a reçu cet email).<br/>
+            Si vous n'avez pas encore de compte avec cette adresse, vous devrez en créer un
+            lors de votre première connexion. Aucune autre adresse ne sera acceptée.
+        </p>
+        <p style="color:#888;font-size:0.85em;">
+            Si vous n'avez pas encore de compte sur le portail,
+            vous serez invité(e) à en créer un gratuitement.<br/>
+            Lien direct : {url}
+        </p>
         """
         mail = self.env['mail.mail'].sudo().create({
             'subject': subject,

@@ -85,15 +85,15 @@
                                 </div>
 
                                 <!-- Bouton révoquer -->
-                                <form t-attf-action="/my/ecolage/#{dossier.id}/acces/#{acces.id}/revoke" method="post">
-                                    <input type="hidden" name="csrf_token" t-att-value="csrf_token"/>
-                                    <button type="submit" class="btn btn-sm
-                                                   btn-outline-danger" onclick="return confirm(
-                                                'Révoquer cet accès ?'
-                                            )">
-                                        <i class="fa fa-times"/>
-                                    </button>
-                                </form>
+                                <!-- Bouton révoquer -->
+                                <t t-if="acces.invite_state == 'pending'">
+                                    <form t-attf-action="/my/ecolage/#{dossier.id}/acces/#{acces.id}/revoke" method="post">
+                                        <input type="hidden" name="csrf_token" t-att-value="csrf_token"/>
+                                        <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Révoquer cet accès ?')">
+                                            <i class="fa fa-times"/>
+                                        </button>
+                                    </form>
+                                </t>
                             </div>
                         </t>
                     </div>
