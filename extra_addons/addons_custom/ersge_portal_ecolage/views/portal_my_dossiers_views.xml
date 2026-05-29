@@ -60,6 +60,12 @@
                                         <button type="submit" class="btn btn-danger" onclick="return confirm('Supprimer définitivement ce dossier ?')">Supprimer</button>
                                     </form>
                                 </t>
+                                <t t-if="dossier.state != 'soumis'">
+                                    <a t-attf-href="/my/ecolage/#{dossier.id}/acces" class="btn btn-outline-info btn-sm">
+                                        <i class="fa fa-share-alt me-1"/>
+        Partager
+                                    </a>
+                                </t>
                             </div>
                         </div>
                     </div>

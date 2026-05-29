@@ -6,6 +6,7 @@ from . import enrollment
 from . import billing_line
 from . import after_school_line
 from . import after_school_prestation
+from . import dossier_acces 
 from . import dossier_famille
 from . import forfait
 from . import budget_category

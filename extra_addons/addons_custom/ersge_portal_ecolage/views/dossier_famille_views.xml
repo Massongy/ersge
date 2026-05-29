@@ -525,6 +525,4 @@
 <field name="context">{}</field>
 </record>
 
-<menuitem id="menu_ersge_root" name="Écolage" sequence="10"/>
-
 </odoo>

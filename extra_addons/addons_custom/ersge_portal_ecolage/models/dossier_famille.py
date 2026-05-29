@@ -543,6 +543,64 @@ class DossierFamille(models.Model):
     legal_notice = fields.Html(readonly=True)
     technical_contact = fields.Html(readonly=True)
 
+
+    # === ACCÈS PORTAIL ===
+
+    acces_ids = fields.One2many(
+        'ersge.dossier.acces',
+        'dossier_id',
+        string='Accès au dossier',
+    )
+
+    def get_portal_partners(self):
+        return self.acces_ids.filtered(
+            lambda a: a.invite_state == 'accepted'
+        ).mapped('partner_id')
+
+    def user_has_access(self, partner):
+        return partner in self.get_portal_partners()
+
+    def add_acces(self, partner, role='parent1'):
+        existing = self.acces_ids.filtered(
+            lambda a: a.partner_id == partner
+        )
+        if not existing:
+            self.env['ersge.dossier.acces'].sudo().create({
+                'dossier_id': self.id,
+                'partner_id': partner.id,
+                'role': role,
+                'invite_state': 'accepted',
+            })
+
+    def invite_by_email(self, email, role='parent2'):
+        email = email.strip().lower()
+        partner = self.env['res.partner'].sudo().search(
+            [('email', '=ilike', email)], limit=1
+        )
+        if partner:
+            already = self.acces_ids.filtered(
+                lambda a: a.partner_id == partner
+            )
+            if already:
+                return already
+        acces_vals = {
+            'dossier_id': self.id,
+            'role': role,
+            'invite_email': email,
+        }
+        if partner:
+            acces_vals.update({
+                'partner_id': partner.id,
+                'invite_state': 'accepted',
+            })
+            acces = self.env['ersge.dossier.acces'].sudo().create(acces_vals)
+        else:
+            acces_vals['invite_state'] = 'pending'
+            acces = self.env['ersge.dossier.acces'].sudo().create(acces_vals)
+            acces.generate_token()
+        acces.send_invite_email()
+        return acces
+
     # -------------------------------------------------------------------------
     # Compute methods
     # -------------------------------------------------------------------------

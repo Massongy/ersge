@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ============================================================ -->
+    <!-- Page de gestion des accès                                    -->
+    <!-- ============================================================ -->
+    <template id="portal_dossier_acces" name="Accès au dossier">
+        <t t-call="portal.portal_layout">
+            <t t-set="page_title">Partager le dossier</t>
+            <div class="container mt-4">
+
+                <div class="d-flex align-items-center
+                            justify-content-between mb-4">
+                    <h4 class="mb-0">
+                        <i class="fa fa-share-alt me-2 text-primary"/>
+                        Partager —
+                        <strong>
+                            <t t-out="dossier.name"/>
+                        </strong>
+                    </h4>
+                    <a t-attf-href="/my/ecolage/edit/#{dossier.id}" class="btn btn-outline-secondary btn-sm">
+                        <i class="fa fa-arrow-left me-1"/>
+                        Retour au dossier
+                    </a>
+                </div>
+
+                <!-- Accès existants -->
+                <div class="card mb-4">
+                    <div class="card-header fw-semibold bg-light">
+                        <i class="fa fa-users me-2"/>
+                        Personnes ayant accès
+                    </div>
+                    <div class="card-body p-0">
+                        <t t-if="not acces_list">
+                            <p class="text-muted p-3 mb-0">
+                                Aucun accès partagé pour le moment.
+                            </p>
+                        </t>
+                        <t t-foreach="acces_list" t-as="acces">
+                            <div class="d-flex justify-content-between
+                                        align-items-center
+                                        px-3 py-2 border-bottom">
+                                <div>
+                                    <i class="fa fa-user me-2
+                                              text-secondary"/>
+                                    <t t-if="acces.partner_id">
+                                        <strong>
+                                            <t t-out="acces.partner_id.name"/>
+                                        </strong>
+                                        <span class="text-muted ms-1 small">
+                                            (                                            <t t-out="acces.invite_email
+                                                or acces.partner_id.email"/>
+)
+                                        </span>
+                                    </t>
+                                    <t t-else="">
+                                        <em class="text-muted">
+                                            <t t-out="acces.invite_email"/>
+                                        </em>
+                                    </t>
+
+                                    <!-- Badge état -->
+                                    <span t-attf-class="badge ms-2 #{
+                                        'bg-success'
+                                        if acces.invite_state == 'accepted'
+                                        else 'bg-warning text-dark'
+                                    }">
+                                        <t t-if="acces.invite_state
+                                                 == 'accepted'">
+                                            Actif
+                                        </t>
+                                        <t t-else="">En attente</t>
+                                    </span>
+
+                                    <!-- Badge rôle -->
+                                    <span class="badge bg-secondary ms-1">
+                                        <t t-if="acces.role == 'parent1'">
+                                            Parent 1
+                                        </t>
+                                        <t t-elif="acces.role == 'parent2'">
+                                            Parent 2
+                                        </t>
+                                        <t t-else="">Tuteur</t>
+                                    </span>
+                                </div>
+
+                                <!-- Bouton révoquer -->
+                                <form t-attf-action="/my/ecolage/#{dossier.id}/acces/#{acces.id}/revoke" method="post">
+                                    <input type="hidden" name="csrf_token" t-att-value="csrf_token"/>
+                                    <button type="submit" class="btn btn-sm
+                                                   btn-outline-danger" onclick="return confirm(
+                                                'Révoquer cet accès ?'
+                                            )">
+                                        <i class="fa fa-times"/>
+                                    </button>
+                                </form>
+                            </div>
+                        </t>
+                    </div>
+                </div>
+
+                <!-- Formulaire invitation -->
+                <div class="card mb-4">
+                    <div class="card-header fw-semibold bg-light">
+                        <i class="fa fa-envelope me-2"/>
+                        Inviter une personne
+                    </div>
+                    <div class="card-body">
+
+                        <t t-if="error">
+                            <div class="alert alert-danger">
+                                <t t-out="error"/>
+                            </div>
+                        </t>
+                        <t t-if="success">
+                            <div class="alert alert-success">
+                                <t t-out="success"/>
+                            </div>
+                        </t>
+
+                        <form method="post" t-attf-action="/my/ecolage/#{dossier.id}/acces">
+                            <input type="hidden" name="csrf_token" t-att-value="csrf_token"/>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold">
+                                        Adresse email
+                                        <span class="text-danger">*</span>
+                                    </label>
+                                    <input type="email" name="email" class="form-control" placeholder="parent@exemple.com" required="required"/>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label fw-semibold">
+                                        Rôle
+                                    </label>
+                                    <select name="role" class="form-select">
+                                        <option value="parent2">
+                                            Parent 2
+                                        </option>
+                                        <option value="tutor">
+                                            Tuteur / Autre
+                                        </option>
+                                    </select>
+                                </div>
+                                <div class="col-md-2 d-flex
+                                            align-items-end">
+                                    <button type="submit" class="btn btn-primary w-100">
+                                        <i class="fa fa-paper-plane me-1"/>
+                                        Inviter
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+            </div>
+        </t>
+    </template>
+
+    <!-- ============================================================ -->
+    <!-- Token invalide ou expiré                                     -->
+    <!-- ============================================================ -->
+    <template id="portal_invite_invalid" name="Invitation invalide">
+        <t t-call="portal.portal_layout">
+            <div class="container mt-4">
+                <div class="alert alert-danger">
+                    <i class="fa fa-exclamation-triangle me-2"/>
+                    <strong>Lien invalide ou expiré.</strong>
+                    <br/>
+                    Ce lien d'invitation n'est plus valide.
+                    Contactez la personne qui vous l'a envoyé.
+                </div>
+                <a href="/my/ecolage" class="btn btn-outline-secondary">
+                    <i class="fa fa-arrow-left me-1"/>
+                    Retour au portail
+                </a>
+            </div>
+        </t>
+    </template>
+
+</odoo>
