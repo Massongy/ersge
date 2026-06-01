@@ -73,21 +73,29 @@
                             </h5>
                             <p class="card-text">Année scolaire : <span t-field="dossier.annee_scolaire"/>
                             </p>
-                            <div class="btn-group">
-                                <!-- Le bouton Modifier n'apparaît que si le dossier n'est PAS soumis -->
+                            <div class="d-flex flex-wrap gap-2">
+                                <!-- Modifier -->
                                 <t t-if="dossier.state != 'soumis'">
-                                    <a t-att-href="'/my/ecolage/edit/%s' % dossier.id" class="btn btn-secondary">Modifier</a>
+                                    <a t-att-href="'/my/ecolage/edit/%s' % dossier.id" class="btn btn-secondary btn-sm rounded">
+                                        Modifier
+                                    </a>
                                 </t>
-                                <a t-att-href="'/my/ecolage/dossier/%s' % dossier.id" class="btn btn-primary">Consulter et imprimer</a>
-                                <!-- Bouton Supprimer : visible seulement si le dossier n'est pas soumis -->
+                                <!-- Consulter -->
+                                <a t-att-href="'/my/ecolage/dossier/%s' % dossier.id" class="btn btn-primary btn-sm rounded">
+                                    Consulter et imprimer
+                                </a>
+                                <!-- Supprimer -->
                                 <t t-if="dossier.state != 'soumis'">
-                                    <form t-attf-action="/my/ecolage/delete/{{dossier.id}}" method="post" style="display: inline;">
+                                    <form t-attf-action="/my/ecolage/delete/{{dossier.id}}" method="post" style="display: inline-block;">
                                         <input type="hidden" name="csrf_token" t-att-value="csrf_token"/>
-                                        <button type="submit" class="btn btn-danger" onclick="return confirm('Supprimer définitivement ce dossier ?')">Supprimer</button>
+                                        <button type="submit" class="btn btn-danger btn-sm rounded" onclick="return confirm('Supprimer définitivement ce dossier ?')">
+                                            Supprimer
+                                        </button>
                                     </form>
                                 </t>
+                                <!-- Partager -->
                                 <t t-if="dossier.state != 'soumis'">
-                                    <a t-attf-href="/my/ecolage/#{dossier.id}/acces" class="btn btn-outline-info btn-sm">
+                                    <a t-attf-href="/my/ecolage/#{dossier.id}/acces" class="btn btn-outline-info btn-sm rounded">
                                         <i class="fa fa-share-alt me-1"/>
  Partager
                                     </a>
