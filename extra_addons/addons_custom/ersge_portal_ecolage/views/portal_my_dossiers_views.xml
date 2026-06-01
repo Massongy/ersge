@@ -17,6 +17,11 @@
                         <t t-esc="success"/>
                     </div>
                 </t>
+                <!-- Lien vers la gestion des familles -->
+                <a href="/my/ecolage/families" class="btn btn-outline-secondary mb-3">
+                    <i class="fa fa-users me-1"/>
+ Gérer mes familles
+                </a>
 
                 <!-- Bouton nouveau dossier -->
                 <a href="/my/ecolage/dossier/choose" class="btn btn-primary mb-3">+ Nouveau dossier</a>

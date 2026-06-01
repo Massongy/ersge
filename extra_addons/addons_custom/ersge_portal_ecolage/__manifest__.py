@@ -28,6 +28,7 @@
         "views/portal_views.xml",
         "views/portal_my_dossiers_views.xml",
         "views/portal_dossier_famille_form_portal_views.xml",
+        'views/portal_my_families.xml',
     ],
     "demo": [
         "demo/demo_data.xml",

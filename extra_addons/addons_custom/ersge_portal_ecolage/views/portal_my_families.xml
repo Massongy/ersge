@@ -1,0 +1,60 @@
+<odoo>
+    <template id="portal_my_families" name="Mes familles">
+        <t t-call="portal.portal_layout">
+            <t t-set="page_title">Mes familles</t>
+            <div class="container mt-4">
+                <!-- Messages d'alerte -->
+                <t t-if="error">
+                    <div class="alert alert-warning">
+                        <t t-esc="error"/>
+                    </div>
+                </t>
+                <t t-if="success">
+                    <div class="alert alert-success">
+                        <t t-esc="success"/>
+                    </div>
+                </t>
+
+                <!-- Lien retour -->
+                <a href="/my/ecolage" class="btn btn-outline-secondary mb-3">
+                    <i class="fa fa-arrow-left me-1"/>
+ Retour aux dossiers
+                </a>
+
+                <t t-if="not families">
+                    <div class="alert alert-info">
+                        Vous n'êtes membre d'aucune famille.
+                    </div>
+                </t>
+                <t t-foreach="families" t-as="family">
+                    <div class="card mb-3">
+                        <div class="card-body d-flex justify-content-between align-items-center">
+                            <div>
+                                <h5 class="card-title mb-1">
+                                    <t t-esc="family.name"/>
+                                </h5>
+                                <p class="card-text text-muted small mb-0">
+                                    Dossiers liés : <t t-esc="len(family.dossier_ids)"/>
+                                </p>
+                            </div>
+                            <div>
+                                <t t-if="not family.dossier_ids">
+                                    <form t-attf-action="/my/ecolage/family/delete/{{family.id}}" method="post" style="display: inline;">
+                                        <input type="hidden" name="csrf_token" t-att-value="csrf_token"/>
+                                        <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Supprimer définitivement cette famille ? Les dossiers liés seront également supprimés.')">
+                                            <i class="fa fa-trash me-1"/>
+ Supprimer
+                                        </button>
+                                    </form>
+                                </t>
+                                <t t-else="">
+                                    <span class="text-muted small">(Famille non supprimable car des dossiers existent)</span>
+                                </t>
+                            </div>
+                        </div>
+                    </div>
+                </t>
+            </div>
+        </t>
+    </template>
+</odoo>

@@ -170,6 +170,12 @@ class PortalEcolage(http.Controller):
 
     # ==================== ACCEPTER UNE INVITATION ====================
 
+    def _add_partner_to_family(self, partner, dossier):
+        """Ajoute le partenaire à la famille du dossier."""
+        family = dossier.family_id
+        if family and partner not in family.partner_ids:
+            family.write({'partner_ids': [(4, partner.id)]})
+
     @http.route(
         '/my/ecolage/join/<string:token>',
         type='http', auth='public', website=True,
@@ -191,6 +197,8 @@ class PortalEcolage(http.Controller):
                 'invite_state': 'accepted',
                 'invite_token': False,
             })
+            # Ajouter le partenaire à la famille
+            self._add_partner_to_family(partner, acces.dossier_id)
             return request.redirect(f'/my/ecolage/edit/{acces.dossier_id.id}')
 
         # Non connecté → stocker token en session + login
@@ -221,6 +229,8 @@ class PortalEcolage(http.Controller):
             'invite_token': False,
         })
         request.session.pop('invite_token', None)
+        # Ajouter le partenaire à la famille
+        self._add_partner_to_family(partner, acces.dossier_id)
         return request.redirect(f'/my/ecolage/edit/{acces.dossier_id.id}')
 
     # ==================== RÉVOQUER UN ACCÈS ====================
@@ -746,3 +756,34 @@ class PortalEcolage(http.Controller):
         if dossier_id:
             return request.redirect(f'/my/ecolage/{dossier_id}/acces')
         return request.redirect('/my/ecolage')
+    
+
+    @http.route('/my/ecolage/families', type='http', auth='user', website=True)
+    def my_families(self, **kwargs):
+        """Liste des familles dont l'utilisateur est membre."""
+        partner = request.env.user.partner_id
+        families = self._get_partner_families(partner)
+        return request.render('ersge_portal_ecolage.portal_my_families', {
+            'families': families,
+            'csrf_token': request.csrf_token(),
+            'error': kwargs.get('error'),
+            'success': kwargs.get('success'),
+        })
+
+    @http.route('/my/ecolage/family/delete/<int:family_id>', type='http', auth='user', website=True, methods=['POST'])
+    def delete_family(self, family_id, **kwargs):
+        """Supprimer une famille si elle n'a pas de dossier."""
+        partner = request.env.user.partner_id
+        family = request.env['ersge.family'].sudo().browse(family_id)
+        
+        # Vérifier que le partenaire est bien membre de cette famille
+        if partner not in family.partner_ids:
+            return request.redirect('/my/ecolage/families?error=Vous n\'avez pas accès à cette famille.')
+        
+        # Vérifier que la famille n'a pas de dossiers associés
+        if family.dossier_ids:
+            return request.redirect('/my/ecolage/families?error=Impossible de supprimer une famille qui a des dossiers.')
+        
+        # Supprimer la famille
+        family.unlink()
+        return request.redirect('/my/ecolage/families?success=Famille supprimée avec succès.')
