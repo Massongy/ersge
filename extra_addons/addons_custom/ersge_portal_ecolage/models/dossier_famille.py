@@ -574,30 +574,25 @@ class DossierFamille(models.Model):
 
     def invite_by_email(self, email, role='parent2'):
         email = email.strip().lower()
-        partner = self.env['res.partner'].sudo().search(
-            [('email', '=ilike', email)], limit=1
+        
+        # Vérifier s'il existe déjà un accès pour cet email (en attente ou accepté)
+        existing = self.acces_ids.filtered(
+            lambda a: a.invite_email == email or (a.partner_id and a.partner_id.email == email)
         )
-        if partner:
-            already = self.acces_ids.filtered(
-                lambda a: a.partner_id == partner
-            )
-            if already:
-                return already
+        if existing:
+            # Option : retourner l'existant ou lever une erreur
+            # Ici on retourne l'existant pour ne pas dupliquer
+            return existing
+        
+        # Création d'un accès toujours en attente, sans lier directement le partenaire
         acces_vals = {
             'dossier_id': self.id,
             'role': role,
             'invite_email': email,
+            'invite_state': 'pending',
         }
-        if partner:
-            acces_vals.update({
-                'partner_id': partner.id,
-                'invite_state': 'accepted',
-            })
-            acces = self.env['ersge.dossier.acces'].sudo().create(acces_vals)
-        else:
-            acces_vals['invite_state'] = 'pending'
-            acces = self.env['ersge.dossier.acces'].sudo().create(acces_vals)
-            acces.generate_token()
+        acces = self.env['ersge.dossier.acces'].sudo().create(acces_vals)
+        acces.generate_token()
         acces.send_invite_email()
         return acces
 

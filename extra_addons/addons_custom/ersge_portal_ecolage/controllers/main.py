@@ -101,8 +101,9 @@ class PortalEcolage(http.Controller):
                 })
 
             # Création du dossier
-            new_dossier = request.env['ersge.dossier.famille'].sudo().create({
-                'family_id': family.id,
+            new_dossier = request.env['ersge.dossier.famille'].sudo().with_context(
+                default_family_id=family.id
+            ).create({
                 'annee_scolaire': request.env['ersge.dossier.famille']._get_current_school_year(),
                 'state': 'incomplet',
             })
