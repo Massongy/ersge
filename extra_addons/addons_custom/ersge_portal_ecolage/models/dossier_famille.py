@@ -922,6 +922,12 @@ class DossierFamille(models.Model):
                     defaults["student_line_ids"] = student_lines
                     _logger.warning(f"Enfants copiés: {len(student_lines)} lignes")
 
+                    # Mise à jour de la dernière classe (ou forfait) pour chaque élève
+                    for line in dernier_dossier.student_line_ids:
+                        class_info = line.classe or (line.forfait_id.name if line.forfait_id else '')
+                        if class_info:
+                            line.student_id.sudo().write({'last_class_level': class_info})
+
                 defaults["after_school_request"] = dernier_dossier.after_school_request
 
                 # --- Copie parascolaire depuis ancien dossier ---
@@ -991,176 +997,175 @@ class DossierFamille(models.Model):
         defaults["prefilled_from_previous"] = bool(dernier_dossier)
         return defaults
 
-    # -------------------------------------------------------------------------
-    # CRUD
-    # -------------------------------------------------------------------------
-
+        # -------------------------------------------------------------------------
+        # CRUD
+        # -------------------------------------------------------------------------
     @api.model_create_multi
     def create(self, vals_list):
-        _logger.warning("=== METHODE CREATE EXECUTEE ===")
-        for vals in vals_list:
-            if vals.get("name", "New") == "New":
-                vals["name"] = (
-                    self.env["ir.sequence"].next_by_code("ersge.dossier.famille")
-                    or "New"
-                )
-            # Nettoyer les lignes budget sans category_id
-            if "budget_line_ids" in vals:
-                vals["budget_line_ids"] = [
-                    cmd
-                    for cmd in vals["budget_line_ids"]
-                    if not (cmd[0] == 0 and not cmd[2].get("category_id"))
-                ]
-            # ✅ Nettoyer les lignes parascolaires sans student_id
-            if "after_school_line_ids" in vals:
-                vals["after_school_line_ids"] = [
-                    cmd
-                    for cmd in vals["after_school_line_ids"]
-                    if not (cmd[0] == 0 and not cmd[2].get("student_id"))
-                ]
-
-        records = super().create(vals_list)
-
-        for record in records:
-            # Budget
-            record._init_budget_lines()
-
-            # Parents
-            if (
-                record.family_id
-                and record.parent1_firstname
-                and record.parent1_lastname
-            ):
-                partner1 = self.env["res.partner"].search(
-                    [
-                        ("firstname", "=", record.parent1_firstname),
-                        ("lastname", "=", record.parent1_lastname),
-                        ("family_id", "=", record.family_id.id),
-                    ],
-                    limit=1,
-                )
-                if not partner1:
-                    partner1 = self.env["res.partner"].create(
-                        {
-                            "name": f"{record.parent1_firstname} {record.parent1_lastname}",
-                            "firstname": record.parent1_firstname,
-                            "lastname": record.parent1_lastname,
-                            "email": record.parent1_email,
-                            "phone": record.parent1_phone,
-                            "phone_fixed": record.parent1_phone_fixed,
-                            "phone_pro": record.parent1_phone_pro,
-                            "street": record.parent1_street,
-                            "zip": record.parent1_zip,
-                            "city": record.parent1_city,
-                            "country_id": (
-                                record.parent1_country_id.id
-                                if record.parent1_country_id
-                                else False
-                            ),
-                            "profession": record.parent1_profession,
-                            "employer_name": record.parent1_employeur,
-                            "is_parent": True,
-                            "family_id": record.family_id.id,
-                        }
+            _logger.warning("=== METHODE CREATE EXECUTEE ===")
+            for vals in vals_list:
+                if vals.get("name", "New") == "New":
+                    vals["name"] = (
+                        self.env["ir.sequence"].next_by_code("ersge.dossier.famille")
+                        or "New"
                     )
-                else:
-                    partner1.write(
-                        {
-                            "email": record.parent1_email,
-                            "phone": record.parent1_phone,
-                            "phone_fixed": record.parent1_phone_fixed,
-                            "phone_pro": record.parent1_phone_pro,
-                            "street": record.parent1_street,
-                            "zip": record.parent1_zip,
-                            "city": record.parent1_city,
-                            "country_id": (
-                                record.parent1_country_id.id
-                                if record.parent1_country_id
-                                else False
-                            ),
-                            "profession": record.parent1_profession,
-                            "employer_name": record.parent1_employeur,
-                        }
-                    )
-                record.parent1_id = partner1.id
+                # Nettoyer les lignes budget sans category_id
+                if "budget_line_ids" in vals:
+                    vals["budget_line_ids"] = [
+                        cmd
+                        for cmd in vals["budget_line_ids"]
+                        if not (cmd[0] == 0 and not cmd[2].get("category_id"))
+                    ]
+                # ✅ Nettoyer les lignes parascolaires sans student_id
+                if "after_school_line_ids" in vals:
+                    vals["after_school_line_ids"] = [
+                        cmd
+                        for cmd in vals["after_school_line_ids"]
+                        if not (cmd[0] == 0 and not cmd[2].get("student_id"))
+                    ]
 
-                if record.parent2_firstname and record.parent2_lastname:
-                    partner2 = self.env["res.partner"].search(
+            records = super().create(vals_list)
+
+            for record in records:
+                # Budget
+                record._init_budget_lines()
+
+                # Parents
+                if (
+                    record.family_id
+                    and record.parent1_firstname
+                    and record.parent1_lastname
+                ):
+                    partner1 = self.env["res.partner"].search(
                         [
-                            ("firstname", "=", record.parent2_firstname),
-                            ("lastname", "=", record.parent2_lastname),
+                            ("firstname", "=", record.parent1_firstname),
+                            ("lastname", "=", record.parent1_lastname),
                             ("family_id", "=", record.family_id.id),
                         ],
                         limit=1,
                     )
-                    if not partner2:
-                        partner2 = self.env["res.partner"].create(
+                    if not partner1:
+                        partner1 = self.env["res.partner"].create(
                             {
-                                "name": f"{record.parent2_firstname} {record.parent2_lastname}",
-                                "firstname": record.parent2_firstname,
-                                "lastname": record.parent2_lastname,
-                                "email": record.parent2_email,
-                                "phone": record.parent2_phone,
-                                "phone_fixed": record.parent2_phone_fixed,
-                                "phone_pro": record.parent2_phone_pro,
-                                "street": record.parent2_street,
-                                "zip": record.parent2_zip,
-                                "city": record.parent2_city,
+                                "name": f"{record.parent1_firstname} {record.parent1_lastname}",
+                                "firstname": record.parent1_firstname,
+                                "lastname": record.parent1_lastname,
+                                "email": record.parent1_email,
+                                "phone": record.parent1_phone,
+                                "phone_fixed": record.parent1_phone_fixed,
+                                "phone_pro": record.parent1_phone_pro,
+                                "street": record.parent1_street,
+                                "zip": record.parent1_zip,
+                                "city": record.parent1_city,
                                 "country_id": (
-                                    record.parent2_country_id.id
-                                    if record.parent2_country_id
+                                    record.parent1_country_id.id
+                                    if record.parent1_country_id
                                     else False
                                 ),
-                                "profession": record.parent2_profession,
-                                "employer_name": record.parent2_employeur,
+                                "profession": record.parent1_profession,
+                                "employer_name": record.parent1_employeur,
                                 "is_parent": True,
                                 "family_id": record.family_id.id,
                             }
                         )
                     else:
-                        partner2.write(
+                        partner1.write(
                             {
-                                "email": record.parent2_email,
-                                "phone": record.parent2_phone,
-                                "phone_fixed": record.parent2_phone_fixed,
-                                "phone_pro": record.parent2_phone_pro,
-                                "street": record.parent2_street,
-                                "zip": record.parent2_zip,
-                                "city": record.parent2_city,
+                                "email": record.parent1_email,
+                                "phone": record.parent1_phone,
+                                "phone_fixed": record.parent1_phone_fixed,
+                                "phone_pro": record.parent1_phone_pro,
+                                "street": record.parent1_street,
+                                "zip": record.parent1_zip,
+                                "city": record.parent1_city,
                                 "country_id": (
-                                    record.parent2_country_id.id
-                                    if record.parent2_country_id
+                                    record.parent1_country_id.id
+                                    if record.parent1_country_id
                                     else False
                                 ),
-                                "profession": record.parent2_profession,
-                                "employer_name": record.parent2_employeur,
+                                "profession": record.parent1_profession,
+                                "employer_name": record.parent1_employeur,
                             }
                         )
-                    record.parent2_id = partner2.id
+                    record.parent1_id = partner1.id
 
-            # Lignes parascolaires
-            if not record.after_school_line_ids and record.student_line_ids:
-                lines = [
-                    (
-                        0,
-                        0,
-                        {
-                            "student_id": line.student_id.id,
-                            "selected": False,
-                            "accueil_type": "jardin",
-                        },
-                    )
-                    for line in record.student_line_ids
-                    if line.student_id
-                ]
-                if lines:
-                    record.write({"after_school_line_ids": lines})
-                    _logger.warning(
-                        f"create(): {len(lines)} lignes parascolaires créées"
-                    )
+                    if record.parent2_firstname and record.parent2_lastname:
+                        partner2 = self.env["res.partner"].search(
+                            [
+                                ("firstname", "=", record.parent2_firstname),
+                                ("lastname", "=", record.parent2_lastname),
+                                ("family_id", "=", record.family_id.id),
+                            ],
+                            limit=1,
+                        )
+                        if not partner2:
+                            partner2 = self.env["res.partner"].create(
+                                {
+                                    "name": f"{record.parent2_firstname} {record.parent2_lastname}",
+                                    "firstname": record.parent2_firstname,
+                                    "lastname": record.parent2_lastname,
+                                    "email": record.parent2_email,
+                                    "phone": record.parent2_phone,
+                                    "phone_fixed": record.parent2_phone_fixed,
+                                    "phone_pro": record.parent2_phone_pro,
+                                    "street": record.parent2_street,
+                                    "zip": record.parent2_zip,
+                                    "city": record.parent2_city,
+                                    "country_id": (
+                                        record.parent2_country_id.id
+                                        if record.parent2_country_id
+                                        else False
+                                    ),
+                                    "profession": record.parent2_profession,
+                                    "employer_name": record.parent2_employeur,
+                                    "is_parent": True,
+                                    "family_id": record.family_id.id,
+                                }
+                            )
+                        else:
+                            partner2.write(
+                                {
+                                    "email": record.parent2_email,
+                                    "phone": record.parent2_phone,
+                                    "phone_fixed": record.parent2_phone_fixed,
+                                    "phone_pro": record.parent2_phone_pro,
+                                    "street": record.parent2_street,
+                                    "zip": record.parent2_zip,
+                                    "city": record.parent2_city,
+                                    "country_id": (
+                                        record.parent2_country_id.id
+                                        if record.parent2_country_id
+                                        else False
+                                    ),
+                                    "profession": record.parent2_profession,
+                                    "employer_name": record.parent2_employeur,
+                                }
+                            )
+                        record.parent2_id = partner2.id
 
-        return records
+                # Lignes parascolaires
+                if not record.after_school_line_ids and record.student_line_ids:
+                    lines = [
+                        (
+                            0,
+                            0,
+                            {
+                                "student_id": line.student_id.id,
+                                "selected": False,
+                                "accueil_type": "jardin",
+                            },
+                        )
+                        for line in record.student_line_ids
+                        if line.student_id
+                    ]
+                    if lines:
+                        record.write({"after_school_line_ids": lines})
+                        _logger.warning(
+                            f"create(): {len(lines)} lignes parascolaires créées"
+                        )
 
+            return records    
+    
     # -------------------------------------------------------------------------
     # Onchange methods
     # -------------------------------------------------------------------------

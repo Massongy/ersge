@@ -28,6 +28,9 @@ class ErsgeStudent(models.Model):
     family_id = fields.Many2one(
         "ersge.family", string="Famille", required=True, ondelete="restrict"
     )
+
+    last_class_level = fields.Char(string="Dernière classe suivie")
+    
     active = fields.Boolean(default=True)
 
     def name_get(self):

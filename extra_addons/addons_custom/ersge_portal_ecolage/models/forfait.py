@@ -11,3 +11,7 @@ class Forfait(models.Model):
     montant_mensuel = fields.Float(string='Montant mensuel (CHF)', required=True)
     description = fields.Text(string='Description')
     active = fields.Boolean(string='Actif', default=True)
+    class_number = fields.Integer(
+        string='Numéro de classe',
+        help="Numéro de la classe (ex: 1 pour 1ère, 12 pour 12e, 0 pour jardins d'enfants, -1 pour autres)"
+    )

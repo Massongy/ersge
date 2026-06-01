@@ -641,14 +641,34 @@ Coordonnées de l'employeur
                                                 <div class="row g-3">
                                                     <div class="col-md-6">
                                                         <label class="form-label fw-semibold">Forfait</label>
+                                                        <!-- Extraire le numéro de classe depuis last_class_level -->
+                                                        <t t-set="last_class_str" t-value="line.student_id.last_class_level or ''"/>
+                                                        <t t-set="last_number" t-value="0"/>
+                                                        <t t-if="last_class_str and 'classe' in last_class_str">
+                                                            <t t-set="last_number" t-value="int(''.join([c for c in last_class_str.split('classe')[0] if c.isdigit()]))"/>
+                                                        </t>
+
                                                         <select class="form-select forfait-select" t-att-name="'forfait_id_' + str(line.id)" t-att-data-line-id="line.id">
                                                             <option value="">-- Aucun forfait --</option>
                                                             <t t-foreach="forfaits" t-as="f">
-                                                                <option t-att-value="f.id" t-att-selected="line.forfait_id.id == f.id">
-                                                                    <t t-out="f.name"/>
- -                                                                    <t t-esc="f.montant_mensuel"/>
+                                                                <t t-set="afficher" t-value="True"/>
+                                                                <t t-if="last_number == 0">
+                                                                    <!-- Nouvel élève : afficher tous les forfaits -->
+                                                                    <t t-set="afficher" t-value="True"/>
+                                                                </t>
+                                                                <t t-elif="f.class_number in [last_number, last_number+1]">
+                                                                    <t t-set="afficher" t-value="True"/>
+                                                                </t>
+                                                                <t t-else="">
+                                                                    <t t-set="afficher" t-value="False"/>
+                                                                </t>
+                                                                <t t-if="afficher">
+                                                                    <option t-att-value="f.id" t-att-selected="line.forfait_id.id == f.id">
+                                                                        <t t-out="f.name"/>
+ -                                                                        <t t-esc="f.montant_mensuel"/>
  CHF/mois
-                                                                </option>
+                                                                    </option>
+                                                                </t>
                                                             </t>
                                                         </select>
                                                     </div>
@@ -1685,13 +1705,16 @@ Ajouter un parrainage
 
 <div class="d-flex gap-2 mt-3">
     <button type="submit" name="form_action" value="save_and_exit" class="btn btn-primary btn-lg">
-        <i class="fa fa-save me-2"/>Enregistrer
+        <i class="fa fa-save me-2"/>
+Enregistrer
     </button>
     <button type="submit" name="form_action" value="submit_dossier" class="btn btn-success btn-lg">
-        <i class="fa fa-paper-plane me-2"/>Envoyer le dossier
+        <i class="fa fa-paper-plane me-2"/>
+Envoyer le dossier
     </button>
     <a href="/my/ecolage" class="btn btn-outline-secondary btn-lg">
-        <i class="fa fa-arrow-left me-2"/>Annuler
+        <i class="fa fa-arrow-left me-2"/>
+Annuler
     </a>
 </div>
 </form>
