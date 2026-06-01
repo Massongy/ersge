@@ -19,7 +19,7 @@
                 </t>
 
                 <!-- Bouton nouveau dossier -->
-                <a href="/my/ecolage/new" class="btn btn-primary mb-3">+ Nouveau dossier</a>
+                <a href="/my/ecolage/dossier/choose" class="btn btn-primary mb-3">+ Nouveau dossier</a>
 
                 <t t-if="not dossiers">
                     <div class="alert alert-info">Vous n'avez aucun dossier pour le moment.</div>
@@ -29,6 +29,8 @@
                         <div class="card-body">
                             <h5 class="card-title">
                                 <span t-field="dossier.name"/>
+                                <small class="text-muted"> - Famille <t t-esc="dossier.family_id.name"/>
+                                </small>
                                 <t t-if="dossier.state == 'soumis'">
                                     <span class="badge ml-2 badge-warning">
                                         <t t-out="dossier.state"/>

@@ -6,7 +6,13 @@ class ErsgeFamily(models.Model):
     _description = 'Famille'
 
     name = fields.Char(string='Nom de la famille', required=True)
-    parent_ids = fields.One2many('res.partner', 'family_id', string='Parents')
+    partner_ids = fields.Many2many(
+            'res.partner',
+            'ersge_family_partner_rel',   # même table de relation que dans res.partner
+            'family_id',
+            'partner_id',
+            string='Membres de la famille'
+        )
     is_teacher = fields.Boolean(string="Famille enseignante", default=False)
     student_ids = fields.One2many('ersge.student', 'family_id', string='Élèves')
     dossier_ids = fields.One2many('ersge.dossier.famille', 'family_id', string='Dossiers')

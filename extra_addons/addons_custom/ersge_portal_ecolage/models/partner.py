@@ -11,10 +11,16 @@ class Partner(models.Model):
     is_employer = fields.Boolean(string="Est un employeur", default=False)
 
     # Liens
-    family_id = fields.Many2one("ersge.family", string="Famille")
+    family_ids = fields.Many2many(
+        "ersge.family",
+        "ersge_family_partner_rel",
+        "partner_id",
+        "family_id",
+        string="Familles",
+    )    
     employer_id = fields.Many2one(
-        "res.partner", string="Employeur", domain="[('is_employer', '=', True)]"
-    )
+            "res.partner", string="Employeur", domain="[('is_employer', '=', True)]"
+        )
 
     # Champs pour les parents (prénom, nom séparés)
     firstname = fields.Char(string="Prénom")
@@ -65,3 +71,15 @@ class Partner(models.Model):
                 name = record.name or "Sans nom"
             result.append((record.id, name))
         return result
+    
+    family_id = fields.Many2one(
+        "ersge.family",
+        string="Famille principale",
+        compute="_compute_family_id",
+        store=True,
+    )
+
+    @api.depends("family_ids")
+    def _compute_family_id(self):
+        for rec in self:
+            rec.family_id = rec.family_ids[:1] if rec.family_ids else False

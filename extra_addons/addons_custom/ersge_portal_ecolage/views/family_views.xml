@@ -8,7 +8,7 @@
                 <field name="name"/>
                 <field name="is_teacher"/>
                 <field name="email"/>
-                <field name="parent_ids" widget="many2many_tags" string="Parents"/>
+                <field name="partner_ids" widget="many2many_tags" string="Membres" domain="[('is_parent', '=', True)]" context="{'default_is_parent': True}"/>
             </list>
         </field>
     </record>
@@ -23,7 +23,7 @@
                         <field name="name"/>
                         <field name="is_teacher"/>
                         <field name="email"/>
-                        <field name="parent_ids" widget="many2many_tags" string="Parents"/>
+                        <field name="partner_ids" widget="many2many_tags" string="Membres" domain="[('is_parent', '=', True)]" context="{'default_is_parent': True}"/>
                     </group>
                     <notebook>
                         <page string="Dossiers">
