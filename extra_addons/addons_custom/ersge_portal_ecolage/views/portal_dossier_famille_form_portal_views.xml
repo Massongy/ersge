@@ -629,6 +629,14 @@ Coordonnées de l'employeur
                             <t t-else="">
                                 <div id="forfaits_list">
                                     <t t-foreach="dossier.student_line_ids" t-as="line">
+                                        <!-- Âge et classe précédente -->
+                                        <t t-set="student_age" t-value="line.student_id.age or 0"/>
+                                        <t t-set="last_class_str" t-value="line.student_id.last_class_level or ''"/>
+                                        <t t-set="last_number" t-value="0"/>
+                                        <t t-if="last_class_str and 'classe' in last_class_str">
+                                            <t t-set="last_number" t-value="int(''.join([c for c in last_class_str.split('classe')[0] if c.isdigit()]))"/>
+                                        </t>
+
                                         <div class="card mb-3 forfait-line" t-att-data-line-id="line.id">
                                             <div class="card-header fw-semibold bg-light">
                                                 <span>
@@ -641,26 +649,21 @@ Coordonnées de l'employeur
                                                 <div class="row g-3">
                                                     <div class="col-md-6">
                                                         <label class="form-label fw-semibold">Forfait</label>
-                                                        <!-- Extraire le numéro de classe depuis last_class_level -->
-                                                        <t t-set="last_class_str" t-value="line.student_id.last_class_level or ''"/>
-                                                        <t t-set="last_number" t-value="0"/>
-                                                        <t t-if="last_class_str and 'classe' in last_class_str">
-                                                            <t t-set="last_number" t-value="int(''.join([c for c in last_class_str.split('classe')[0] if c.isdigit()]))"/>
-                                                        </t>
-
                                                         <select class="form-select forfait-select" t-att-name="'forfait_id_' + str(line.id)" t-att-data-line-id="line.id">
                                                             <option value="">-- Aucun forfait --</option>
                                                             <t t-foreach="forfaits" t-as="f">
-                                                                <t t-set="afficher" t-value="True"/>
-                                                                <t t-if="last_number == 0">
-                                                                    <!-- Nouvel élève : afficher tous les forfaits -->
-                                                                    <t t-set="afficher" t-value="True"/>
+                                                                <t t-set="afficher" t-value="False"/>
+                                                                <!-- Forfaits jardins (class_number == 0) : selon âge -->
+                                                                <t t-if="f.class_number == 0">
+                                                                    <t t-if="(f.age_min == 0 or student_age &gt;= f.age_min) and (f.age_max == 0 or student_age &lt;= f.age_max)">
+                                                                        <t t-set="afficher" t-value="True"/>
+                                                                    </t>
                                                                 </t>
-                                                                <t t-elif="f.class_number in [last_number, last_number+1]">
-                                                                    <t t-set="afficher" t-value="True"/>
-                                                                </t>
+                                                                <!-- Forfaits de classe (class_number > 0) : uniquement si élève a déjà une classe ou âge > 6 -->
                                                                 <t t-else="">
-                                                                    <t t-set="afficher" t-value="False"/>
+                                                                    <t t-if="(last_number != 0 or student_age &gt; 6) and (last_number == 0 or f.class_number in [last_number, last_number+1])">
+                                                                        <t t-set="afficher" t-value="True"/>
+                                                                    </t>
                                                                 </t>
                                                                 <t t-if="afficher">
                                                                     <option t-att-value="f.id" t-att-selected="line.forfait_id.id == f.id">
@@ -1184,29 +1187,29 @@ Inscription au parascolaire
                                         <div class="after-school-options" t-att-style="'display:' + ('block' if has_after else 'none')">
                                             <div class="row g-3 mt-2">
                                                 <div class="col-12">
-    <label class="form-label fw-semibold">Type d'accueil</label>
-    <div class="d-flex flex-column gap-2">
-        <t t-set="student_age" t-value="student_line.student_id.age or 0"/>
-        <t t-if="student_age &gt;= 2 and student_age &lt;= 3">
-            <div class="form-check">
-                <input class="form-check-input" type="radio" t-att-name="'accueil_type_' + str(student_line.id)" value="jardins_enfants" t-att-checked="after_line and after_line.accueil_type == 'jardins_enfants'"/>
-                <label class="form-check-label">Jardins d'Enfants (2‑3 ans)</label>
-            </div>
-        </t>
-        <t t-if="student_age &gt;= 3 and student_age &lt;= 6">
-            <div class="form-check">
-                <input class="form-check-input" type="radio" t-att-name="'accueil_type_' + str(student_line.id)" value="jardin" t-att-checked="after_line and after_line.accueil_type == 'jardin'"/>
-                <label class="form-check-label">Jardin d'accueil (3‑6 ans)</label>
-            </div>
-        </t>
-        <t t-if="student_age &gt;= 6 and student_age &lt;= 12">
-            <div class="form-check">
-                <input class="form-check-input" type="radio" t-att-name="'accueil_type_' + str(student_line.id)" value="classe" t-att-checked="after_line and after_line.accueil_type == 'classe'"/>
-                <label class="form-check-label">Classe d'accueil (6‑12 ans)</label>
-            </div>
-        </t>
-    </div>
-</div>
+                                                    <label class="form-label fw-semibold">Type d'accueil</label>
+                                                    <div class="d-flex flex-column gap-2">
+                                                        <t t-set="student_age" t-value="student_line.student_id.age or 0"/>
+                                                        <t t-if="student_age &gt;= 2 and student_age &lt;= 3">
+                                                            <div class="form-check">
+                                                                <input class="form-check-input" type="radio" t-att-name="'accueil_type_' + str(student_line.id)" value="jardins_enfants" t-att-checked="after_line and after_line.accueil_type == 'jardins_enfants'"/>
+                                                                <label class="form-check-label">Jardins d'Enfants (2‑3 ans)</label>
+                                                            </div>
+                                                        </t>
+                                                        <t t-if="student_age &gt;= 3 and student_age &lt;= 6">
+                                                            <div class="form-check">
+                                                                <input class="form-check-input" type="radio" t-att-name="'accueil_type_' + str(student_line.id)" value="jardin" t-att-checked="after_line and after_line.accueil_type == 'jardin'"/>
+                                                                <label class="form-check-label">Jardin d'accueil (3‑6 ans)</label>
+                                                            </div>
+                                                        </t>
+                                                        <t t-if="student_age &gt;= 6 and student_age &lt;= 12">
+                                                            <div class="form-check">
+                                                                <input class="form-check-input" type="radio" t-att-name="'accueil_type_' + str(student_line.id)" value="classe" t-att-checked="after_line and after_line.accueil_type == 'classe'"/>
+                                                                <label class="form-check-label">Classe d'accueil (6‑12 ans)</label>
+                                                            </div>
+                                                        </t>
+                                                    </div>
+                                                </div>
                                                 <div class="col-12">
                                                     <label class="form-label fw-semibold">Prestations souhaitées</label>
                                                     <div class="d-flex flex-wrap gap-2">
