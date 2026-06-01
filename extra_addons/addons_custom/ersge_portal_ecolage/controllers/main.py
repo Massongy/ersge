@@ -55,13 +55,22 @@ class PortalEcolage(http.Controller):
     @http.route('/my/ecolage', type='http', auth='user', website=True)
     def my_ecolage(self, **kwargs):
         partner = request.env.user.partner_id
+        family_id = kwargs.get('family_id')
         dossiers = self._get_partner_dossiers(partner)
 
+        # Filtre par famille si demandé
+        if family_id:
+            family = request.env['ersge.family'].sudo().browse(int(family_id))
+            # Vérifier que la famille appartient bien au partenaire
+            if partner in family.partner_ids:
+                dossiers = dossiers.filtered(lambda d: d.family_id.id == family.id)
+
         return request.render('ersge_portal_ecolage.portal_my_dossiers', {
-            'dossiers':   dossiers,
-            'error':      kwargs.get('error'),
-            'success':    kwargs.get('success'),
-            'csrf_token': request.csrf_token(),
+            'dossiers':          dossiers,
+            'error':             kwargs.get('error'),
+            'success':           kwargs.get('success'),
+            'csrf_token':        request.csrf_token(),
+            'current_family_id': int(family_id) if family_id else None,
         })
 
     # ==================== CRÉATION D'UN NOUVEAU DOSSIER (CHOIX FAMILLE) ====================

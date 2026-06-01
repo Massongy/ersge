@@ -17,18 +17,37 @@
                         <t t-esc="success"/>
                     </div>
                 </t>
-                <!-- Lien vers la gestion des familles -->
+
+                <!-- Lien vers la gestion des familles (toujours présent) -->
                 <a href="/my/ecolage/families" class="btn btn-outline-secondary mb-3">
                     <i class="fa fa-users me-1"/>
  Gérer mes familles
                 </a>
 
+                <!-- Lien de retour quand la liste est filtrée par une famille -->
+                <t t-if="current_family_id">
+                    <a href="/my/ecolage/families" class="btn btn-outline-secondary mb-3">
+                        <i class="fa fa-arrow-left me-1"/>
+ Toutes mes familles
+                    </a>
+                </t>
+
                 <!-- Bouton nouveau dossier -->
                 <a href="/my/ecolage/dossier/choose" class="btn btn-primary mb-3">+ Nouveau dossier</a>
+
+                <!-- Message informatif si filtre actif -->
+                <t t-if="current_family_id">
+                    <div class="alert alert-info">
+                        <i class="fa fa-filter me-2"></i>
+                        Affichage des dossiers de la famille sélectionnée.
+                        <a href="/my/ecolage/families">Voir toutes mes familles</a>
+                    </div>
+                </t>
 
                 <t t-if="not dossiers">
                     <div class="alert alert-info">Vous n'avez aucun dossier pour le moment.</div>
                 </t>
+
                 <t t-foreach="dossiers" t-as="dossier">
                     <div class="card mb-2">
                         <div class="card-body">
@@ -70,7 +89,7 @@
                                 <t t-if="dossier.state != 'soumis'">
                                     <a t-attf-href="/my/ecolage/#{dossier.id}/acces" class="btn btn-outline-info btn-sm">
                                         <i class="fa fa-share-alt me-1"/>
-        Partager
+ Partager
                                     </a>
                                 </t>
                             </div>
