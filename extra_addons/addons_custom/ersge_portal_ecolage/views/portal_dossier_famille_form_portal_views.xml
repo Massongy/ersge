@@ -1165,7 +1165,7 @@ Inscription au parascolaire
                     <div class="card mb-4">
                         <div class="card-header fw-semibold bg-light">
                             <i class="fa fa-users me-2"/>
-Inscriptions par élève
+        Inscriptions par élève
                         </div>
                         <div class="card-body">
                             <t t-foreach="dossier.student_line_ids" t-as="student_line">
@@ -1184,32 +1184,43 @@ Inscriptions par élève
                                         <div class="after-school-options" t-att-style="'display:' + ('block' if has_after else 'none')">
                                             <div class="row g-3 mt-2">
                                                 <div class="col-12">
-                                                    <label class="form-label fw-semibold">Type d'accueil</label>
-                                                    <div class="d-flex flex-column gap-2">
-                                                        <div class="form-check">
-                                                            <input class="form-check-input" type="radio" t-att-name="'accueil_type_' + str(student_line.id)" value="jardins_enfants" t-att-checked="after_line and after_line.accueil_type == 'jardins_enfants'"/>
-                                                            <label class="form-check-label">Jardins d'Enfants (2‑3 ans)</label>
-                                                        </div>
-                                                        <div class="form-check">
-                                                            <input class="form-check-input" type="radio" t-att-name="'accueil_type_' + str(student_line.id)" value="jardin" t-att-checked="after_line and after_line.accueil_type == 'jardin'"/>
-                                                            <label class="form-check-label">Jardin d'accueil (3‑6 ans)</label>
-                                                        </div>
-                                                        <div class="form-check">
-                                                            <input class="form-check-input" type="radio" t-att-name="'accueil_type_' + str(student_line.id)" value="classe" t-att-checked="after_line and after_line.accueil_type == 'classe'"/>
-                                                            <label class="form-check-label">Classe d'accueil (6‑12 ans)</label>
-                                                        </div>
-                                                    </div>
-                                                </div>
+    <label class="form-label fw-semibold">Type d'accueil</label>
+    <div class="d-flex flex-column gap-2">
+        <t t-set="student_age" t-value="student_line.student_id.age or 0"/>
+        <t t-if="student_age &gt;= 2 and student_age &lt;= 3">
+            <div class="form-check">
+                <input class="form-check-input" type="radio" t-att-name="'accueil_type_' + str(student_line.id)" value="jardins_enfants" t-att-checked="after_line and after_line.accueil_type == 'jardins_enfants'"/>
+                <label class="form-check-label">Jardins d'Enfants (2‑3 ans)</label>
+            </div>
+        </t>
+        <t t-if="student_age &gt;= 3 and student_age &lt;= 6">
+            <div class="form-check">
+                <input class="form-check-input" type="radio" t-att-name="'accueil_type_' + str(student_line.id)" value="jardin" t-att-checked="after_line and after_line.accueil_type == 'jardin'"/>
+                <label class="form-check-label">Jardin d'accueil (3‑6 ans)</label>
+            </div>
+        </t>
+        <t t-if="student_age &gt;= 6 and student_age &lt;= 12">
+            <div class="form-check">
+                <input class="form-check-input" type="radio" t-att-name="'accueil_type_' + str(student_line.id)" value="classe" t-att-checked="after_line and after_line.accueil_type == 'classe'"/>
+                <label class="form-check-label">Classe d'accueil (6‑12 ans)</label>
+            </div>
+        </t>
+    </div>
+</div>
                                                 <div class="col-12">
                                                     <label class="form-label fw-semibold">Prestations souhaitées</label>
                                                     <div class="d-flex flex-wrap gap-2">
+                                                        <!-- Filtrage par âge -->
+                                                        <t t-set="student_age" t-value="student_line.student_id.age"/>
                                                         <t t-foreach="after_school_prestations" t-as="prestation">
-                                                            <div class="form-check prestation-item" t-att-data-applicable="prestation.applicable_to or 'jardins_enfants'">
-                                                                <input class="form-check-input prestation-checkbox" type="checkbox" t-att-name="'prestation_' + str(student_line.id) + '_' + str(prestation.id)" t-att-data-prix-jardin="prestation.prix_jardin" t-att-data-prix-classe="prestation.prix_classe" value="1" t-att-checked="after_line and prestation.id in after_line.prestation_ids.ids"/>
-                                                                <label class="form-check-label">
-                                                                    <t t-out="prestation.name"/>
-                                                                </label>
-                                                            </div>
+                                                            <t t-if="(prestation.age_min == 0 or student_age &gt;= prestation.age_min) and (prestation.age_max == 0 or student_age &lt;= prestation.age_max)">
+                                                                <div class="form-check prestation-item" t-att-data-applicable="prestation.applicable_to or 'jardins_enfants'">
+                                                                    <input class="form-check-input prestation-checkbox" type="checkbox" t-att-name="'prestation_' + str(student_line.id) + '_' + str(prestation.id)" t-att-data-prix-jardin="prestation.prix_jardin" t-att-data-prix-classe="prestation.prix_classe" value="1" t-att-checked="after_line and prestation.id in after_line.prestation_ids.ids"/>
+                                                                    <label class="form-check-label">
+                                                                        <t t-out="prestation.name"/>
+                                                                    </label>
+                                                                </div>
+                                                            </t>
                                                         </t>
                                                     </div>
                                                 </div>
@@ -1223,7 +1234,7 @@ Inscriptions par élève
                                 </div>
                             </t>
                             <div t-if="not dossier.student_line_ids" class="alert alert-info">
-                                                    Aucun élève inscrit. Veuillez d'abord renseigner la section "Élèves".
+            Aucun élève inscrit. Veuillez d'abord renseigner la section "Élèves".
                             </div>
                         </div>
                     </div>

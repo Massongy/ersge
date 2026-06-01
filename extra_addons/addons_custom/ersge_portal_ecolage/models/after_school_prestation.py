@@ -46,4 +46,8 @@ class AfterSchoolPrestation(models.Model):
     string="Applicable à",
     required=True,
     default="jardin",
-)
+    )
+    
+    # Nouveaux champs pour le filtrage par âge
+    age_min = fields.Integer(string="Âge minimum (années)", default=0, help="Âge minimum recommandé pour cette prestation")
+    age_max = fields.Integer(string="Âge maximum (années)", default=0, help="Âge maximum recommandé pour cette prestation")

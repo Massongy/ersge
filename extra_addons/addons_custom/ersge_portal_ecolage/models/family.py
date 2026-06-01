@@ -44,6 +44,6 @@ class ErsgeFamily(models.Model):
 
     def _compute_email(self):
         for family in self:
-            family.email = family.parent_ids[:1].email if family.parent_ids else False
+            family.email = family.partner_ids[:1].email if family.partner_ids else False
 
     # Méthode pour générer un token (dans le contrôleur)

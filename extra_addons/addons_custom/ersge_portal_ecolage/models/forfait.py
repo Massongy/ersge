@@ -15,3 +15,5 @@ class Forfait(models.Model):
         string='Numéro de classe',
         help="Numéro de la classe (ex: 1 pour 1ère, 12 pour 12e, 0 pour jardins d'enfants, -1 pour autres)"
     )
+    age_min = fields.Integer(string="Âge minimum (années)", default=0, help="Âge minimum recommandé")
+    age_max = fields.Integer(string="Âge maximum (années)", default=0, help="Âge maximum recommandé")

@@ -8,6 +8,8 @@
         <field name="applicable_to">jardins_enfants</field>
         <field name="prix_jardin">100</field>
         <field name="prix_classe">100</field>
+        <field name="age_min">2</field>
+        <field name="age_max">3</field>
     </record>
     <record id="prestation_mardi_midi_jardins" model="ersge.after.school.prestation">
         <field name="name">Mardi 12h-13h avec repas inclus</field>
@@ -16,6 +18,8 @@
         <field name="applicable_to">jardins_enfants</field>
         <field name="prix_jardin">100</field>
         <field name="prix_classe">100</field>
+        <field name="age_min">2</field>
+        <field name="age_max">3</field>
     </record>
     <record id="prestation_jeudi_midi_jardins" model="ersge.after.school.prestation">
         <field name="name">Jeudi 12h-13h avec repas inclus</field>
@@ -24,6 +28,8 @@
         <field name="applicable_to">jardins_enfants</field>
         <field name="prix_jardin">100</field>
         <field name="prix_classe">100</field>
+        <field name="age_min">2</field>
+        <field name="age_max">3</field>
     </record>
     <record id="prestation_vendredi_midi_jardins" model="ersge.after.school.prestation">
         <field name="name">Vendredi 12h-13h avec repas inclus</field>
@@ -32,6 +38,8 @@
         <field name="applicable_to">jardins_enfants</field>
         <field name="prix_jardin">100</field>
         <field name="prix_classe">100</field>
+        <field name="age_min">2</field>
+        <field name="age_max">3</field>
     </record>
 
     <!-- LUNDI : jardin + classe -->
@@ -42,6 +50,8 @@
         <field name="applicable_to">jardin</field>
         <field name="prix_jardin">100</field>
         <field name="prix_classe">100</field>
+        <field name="age_min">3</field>
+        <field name="age_max">6</field>
     </record>
     <record id="prestation_lundi_midi_classe" model="ersge.after.school.prestation">
         <field name="name">Lundi 12h-15h30</field>
@@ -50,6 +60,8 @@
         <field name="applicable_to">classe</field>
         <field name="prix_jardin">100</field>
         <field name="prix_classe">100</field>
+        <field name="age_min">6</field>
+        <field name="age_max">12</field>
     </record>
     <record id="prestation_lundi_cirque" model="ersge.after.school.prestation">
         <field name="name">Lundi 12h-15h30 Accompagnement Cirque</field>
@@ -58,6 +70,8 @@
         <field name="applicable_to">jardin</field>
         <field name="prix_jardin">100</field>
         <field name="prix_classe">100</field>
+        <field name="age_min">3</field>
+        <field name="age_max">6</field>
     </record>
     <record id="prestation_lundi_cirque_classe" model="ersge.after.school.prestation">
         <field name="name">Lundi 12h-15h30 Accompagnement Cirque</field>
@@ -66,6 +80,8 @@
         <field name="applicable_to">classe</field>
         <field name="prix_jardin">100</field>
         <field name="prix_classe">100</field>
+        <field name="age_min">6</field>
+        <field name="age_max">12</field>
     </record>
     <record id="prestation_lundi_soir" model="ersge.after.school.prestation">
         <field name="name">Lundi 15h30-17h45</field>
@@ -74,6 +90,8 @@
         <field name="applicable_to">jardin</field>
         <field name="prix_jardin">100</field>
         <field name="prix_classe">100</field>
+        <field name="age_min">3</field>
+        <field name="age_max">6</field>
     </record>
     <record id="prestation_lundi_soir_classe" model="ersge.after.school.prestation">
         <field name="name">Lundi 15h30-17h45</field>
@@ -82,9 +100,11 @@
         <field name="applicable_to">classe</field>
         <field name="prix_jardin">100</field>
         <field name="prix_classe">100</field>
+        <field name="age_min">6</field>
+        <field name="age_max">12</field>
     </record>
 
-    <!-- MARDI : jardin + classe -->
+    <!-- MARDI -->
     <record id="prestation_mardi_midi" model="ersge.after.school.prestation">
         <field name="name">Mardi 12h-15h30</field>
         <field name="jour">mardi</field>
@@ -92,6 +112,8 @@
         <field name="applicable_to">jardin</field>
         <field name="prix_jardin">100</field>
         <field name="prix_classe">100</field>
+        <field name="age_min">3</field>
+        <field name="age_max">6</field>
     </record>
     <record id="prestation_mardi_midi_classe" model="ersge.after.school.prestation">
         <field name="name">Mardi 12h-15h30</field>
@@ -100,6 +122,8 @@
         <field name="applicable_to">classe</field>
         <field name="prix_jardin">100</field>
         <field name="prix_classe">100</field>
+        <field name="age_min">6</field>
+        <field name="age_max">12</field>
     </record>
     <record id="prestation_mardi_soir" model="ersge.after.school.prestation">
         <field name="name">Mardi 15h30-17h45</field>
@@ -108,6 +132,8 @@
         <field name="applicable_to">jardin</field>
         <field name="prix_jardin">100</field>
         <field name="prix_classe">100</field>
+        <field name="age_min">3</field>
+        <field name="age_max">6</field>
     </record>
     <record id="prestation_mardi_soir_classe" model="ersge.after.school.prestation">
         <field name="name">Mardi 15h30-17h45</field>
@@ -116,9 +142,11 @@
         <field name="applicable_to">classe</field>
         <field name="prix_jardin">100</field>
         <field name="prix_classe">100</field>
+        <field name="age_min">6</field>
+        <field name="age_max">12</field>
     </record>
 
-    <!-- MERCREDI : jardin + classe -->
+    <!-- MERCREDI -->
     <record id="prestation_mercredi_midi" model="ersge.after.school.prestation">
         <field name="name">Mercredi 12h-15h30</field>
         <field name="jour">mercredi</field>
@@ -126,6 +154,8 @@
         <field name="applicable_to">jardin</field>
         <field name="prix_jardin">100</field>
         <field name="prix_classe">100</field>
+        <field name="age_min">3</field>
+        <field name="age_max">6</field>
     </record>
     <record id="prestation_mercredi_midi_classe" model="ersge.after.school.prestation">
         <field name="name">Mercredi 12h-15h30</field>
@@ -134,6 +164,8 @@
         <field name="applicable_to">classe</field>
         <field name="prix_jardin">100</field>
         <field name="prix_classe">100</field>
+        <field name="age_min">6</field>
+        <field name="age_max">12</field>
     </record>
     <record id="prestation_mercredi_soir" model="ersge.after.school.prestation">
         <field name="name">Mercredi 15h30-17h45</field>
@@ -142,6 +174,8 @@
         <field name="applicable_to">jardin</field>
         <field name="prix_jardin">100</field>
         <field name="prix_classe">100</field>
+        <field name="age_min">3</field>
+        <field name="age_max">6</field>
     </record>
     <record id="prestation_mercredi_soir_classe" model="ersge.after.school.prestation">
         <field name="name">Mercredi 15h30-17h45</field>
@@ -150,9 +184,11 @@
         <field name="applicable_to">classe</field>
         <field name="prix_jardin">100</field>
         <field name="prix_classe">100</field>
+        <field name="age_min">6</field>
+        <field name="age_max">12</field>
     </record>
 
-    <!-- JEUDI : jardin + classe -->
+    <!-- JEUDI -->
     <record id="prestation_jeudi_midi" model="ersge.after.school.prestation">
         <field name="name">Jeudi 12h-15h30</field>
         <field name="jour">jeudi</field>
@@ -160,6 +196,8 @@
         <field name="applicable_to">jardin</field>
         <field name="prix_jardin">100</field>
         <field name="prix_classe">100</field>
+        <field name="age_min">3</field>
+        <field name="age_max">6</field>
     </record>
     <record id="prestation_jeudi_midi_classe" model="ersge.after.school.prestation">
         <field name="name">Jeudi 12h-15h30</field>
@@ -168,6 +206,8 @@
         <field name="applicable_to">classe</field>
         <field name="prix_jardin">100</field>
         <field name="prix_classe">100</field>
+        <field name="age_min">6</field>
+        <field name="age_max">12</field>
     </record>
     <record id="prestation_jeudi_cirque" model="ersge.after.school.prestation">
         <field name="name">Jeudi 12h-15h30 Accompagnement Cirque</field>
@@ -176,6 +216,8 @@
         <field name="applicable_to">jardin</field>
         <field name="prix_jardin">100</field>
         <field name="prix_classe">100</field>
+        <field name="age_min">3</field>
+        <field name="age_max">6</field>
     </record>
     <record id="prestation_jeudi_cirque_classe" model="ersge.after.school.prestation">
         <field name="name">Jeudi 12h-15h30 Accompagnement Cirque</field>
@@ -184,6 +226,8 @@
         <field name="applicable_to">classe</field>
         <field name="prix_jardin">100</field>
         <field name="prix_classe">100</field>
+        <field name="age_min">6</field>
+        <field name="age_max">12</field>
     </record>
     <record id="prestation_jeudi_soir" model="ersge.after.school.prestation">
         <field name="name">Jeudi 15h30-17h45</field>
@@ -192,6 +236,8 @@
         <field name="applicable_to">jardin</field>
         <field name="prix_jardin">100</field>
         <field name="prix_classe">100</field>
+        <field name="age_min">3</field>
+        <field name="age_max">6</field>
     </record>
     <record id="prestation_jeudi_soir_classe" model="ersge.after.school.prestation">
         <field name="name">Jeudi 15h30-17h45</field>
@@ -200,9 +246,11 @@
         <field name="applicable_to">classe</field>
         <field name="prix_jardin">100</field>
         <field name="prix_classe">100</field>
+        <field name="age_min">6</field>
+        <field name="age_max">12</field>
     </record>
 
-    <!-- VENDREDI : jardin + classe -->
+    <!-- VENDREDI -->
     <record id="prestation_vendredi_midi" model="ersge.after.school.prestation">
         <field name="name">Vendredi 12h-15h30</field>
         <field name="jour">vendredi</field>
@@ -210,6 +258,8 @@
         <field name="applicable_to">jardin</field>
         <field name="prix_jardin">100</field>
         <field name="prix_classe">100</field>
+        <field name="age_min">3</field>
+        <field name="age_max">6</field>
     </record>
     <record id="prestation_vendredi_midi_classe" model="ersge.after.school.prestation">
         <field name="name">Vendredi 12h-15h30</field>
@@ -218,6 +268,8 @@
         <field name="applicable_to">classe</field>
         <field name="prix_jardin">100</field>
         <field name="prix_classe">100</field>
+        <field name="age_min">6</field>
+        <field name="age_max">12</field>
     </record>
     <record id="prestation_vendredi_cirque" model="ersge.after.school.prestation">
         <field name="name">Vendredi 12h-15h30 Accompagnement Cirque</field>
@@ -226,6 +278,8 @@
         <field name="applicable_to">jardin</field>
         <field name="prix_jardin">100</field>
         <field name="prix_classe">100</field>
+        <field name="age_min">3</field>
+        <field name="age_max">6</field>
     </record>
     <record id="prestation_vendredi_cirque_classe" model="ersge.after.school.prestation">
         <field name="name">Vendredi 12h-15h30 Accompagnement Cirque</field>
@@ -234,6 +288,8 @@
         <field name="applicable_to">classe</field>
         <field name="prix_jardin">100</field>
         <field name="prix_classe">100</field>
+        <field name="age_min">6</field>
+        <field name="age_max">12</field>
     </record>
     <record id="prestation_vendredi_soir" model="ersge.after.school.prestation">
         <field name="name">Vendredi 15h30-17h45</field>
@@ -242,6 +298,8 @@
         <field name="applicable_to">jardin</field>
         <field name="prix_jardin">100</field>
         <field name="prix_classe">100</field>
+        <field name="age_min">3</field>
+        <field name="age_max">6</field>
     </record>
     <record id="prestation_vendredi_soir_classe" model="ersge.after.school.prestation">
         <field name="name">Vendredi 15h30-17h45</field>
@@ -250,5 +308,7 @@
         <field name="applicable_to">classe</field>
         <field name="prix_jardin">100</field>
         <field name="prix_classe">100</field>
+        <field name="age_min">6</field>
+        <field name="age_max">12</field>
     </record>
 </odoo>

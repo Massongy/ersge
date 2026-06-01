@@ -11,6 +11,7 @@
         <field name="arch" type="xml">
             <list>
                 <field name="name" string="Forfait"/>
+                <field name="class_number" string="N° classe" widget="integer"/>
                 <field name="montant_mensuel" string="Montant mensuel (CHF)" sum="Total"/>
                 <field name="active" string="Actif" widget="boolean_toggle"/>
             </list>
@@ -26,6 +27,7 @@
                 <sheet>
                     <group>
                         <field name="name" string="Nom du forfait" required="1"/>
+                        <field name="class_number" string="Numéro de classe" help="0 = hors classe (jardins, etc.) ; 1 = 1ère, 2 = 2e, ..."/>
                         <field name="montant_mensuel" string="Montant mensuel (CHF)" required="1"/>
                         <field name="description" string="Description"/>
                         <field name="active" string="Actif"/>

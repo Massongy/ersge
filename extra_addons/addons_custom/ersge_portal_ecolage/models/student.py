@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from odoo import models, fields, api
+from datetime import date
 
 
 class ErsgeStudent(models.Model):
@@ -32,6 +33,9 @@ class ErsgeStudent(models.Model):
     last_class_level = fields.Char(string="Dernière classe suivie")
     
     active = fields.Boolean(default=True)
+
+    # Nouveau champ âge calculé
+    age = fields.Integer(string="Âge", compute="_compute_age", store=True)
 
     def name_get(self):
         result = []
@@ -68,3 +72,12 @@ class ErsgeStudent(models.Model):
         for student in self:
             name = f"{student.firstname or ''} {student.lastname or ''}".strip()
             student.display_name = name or "Nouvel élève"
+
+    @api.depends("birthdate")
+    def _compute_age(self):
+        today = date.today()
+        for student in self:
+            if student.birthdate:
+                student.age = today.year - student.birthdate.year - ((today.month, today.day) < (student.birthdate.month, student.birthdate.day))
+            else:
+                student.age = 0

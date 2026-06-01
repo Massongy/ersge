@@ -10,7 +10,8 @@
                 <field name="jour"/>
                 <field name="creneau"/>
                 <field name="applicable_to"/>
-
+                <field name="age_min" string="Âge min"/>
+                <field name="age_max" string="Âge max"/>
                 <field name="prix_jardin" widget="monetary"/>
                 <field name="prix_classe" widget="monetary"/>
                 <field name="active" widget="boolean_toggle"/>
@@ -30,7 +31,8 @@
                         <field name="jour"/>
                         <field name="creneau"/>
                         <field name="applicable_to" widget="radio"/>
-
+                        <field name="age_min" string="Âge minimum (années)"/>
+                        <field name="age_max" string="Âge maximum (années)"/>
                         <field name="prix_jardin" widget="monetary"/>
                         <field name="prix_classe" widget="monetary"/>
                         <field name="active"/>
