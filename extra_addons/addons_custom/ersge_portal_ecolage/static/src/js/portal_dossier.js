@@ -1318,12 +1318,16 @@ document.addEventListener('click', function(e) {
             if (modalBody) modalBody.innerHTML = html;
             const modalElement = document.getElementById('recapModal');
             if (modalElement) {
-                if (currentModal) currentModal.dispose();
-                currentModal = new bootstrap.Modal(modalElement, {
+                if (currentModal) {
+                    jQuery(modalElement).modal('hide');
+                    currentModal = null;
+                }
+                jQuery(modalElement).modal({
                     backdrop: 'static',
                     keyboard: true
                 });
-                currentModal.show();
+                jQuery(modalElement).modal('show');
+                currentModal = modalElement;
             }
         })
         .catch(error => console.error('Erreur:', error));
@@ -1352,7 +1356,8 @@ document.addEventListener('DOMContentLoaded', function () {
                 if (oldConfirm) oldConfirm.remove();
                 
                 if (currentModal) {
-                    currentModal.hide();
+                    jQuery(currentModal).modal('hide');
+                    currentModal = null;
                 }
                 setTimeout(() => {
                     forceCleanupModal();
@@ -1368,7 +1373,7 @@ document.addEventListener('hidden.bs.modal', function (e) {
     if (e.target.id === 'recapModal') {
         forceCleanupModal();
         if (currentModal) {
-            currentModal.dispose();
+            jQuery(currentModal).modal('dispose');
             currentModal = null;
         }
     }
