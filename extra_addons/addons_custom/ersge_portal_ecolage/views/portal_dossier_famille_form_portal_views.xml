@@ -1733,6 +1733,35 @@ Annuler
 </div>
 </form>
 </div>
+
+<!-- Modal Récapitulatif -->
+<div class="modal fade" id="recapModal" tabindex="-1" aria-labelledby="recapModalLabel" aria-hidden="true">
+<div class="modal-dialog modal-xl modal-dialog-scrollable">
+<div class="modal-content">
+    <div class="modal-header bg-primary text-white">
+        <h5 class="modal-title" id="recapModalLabel">
+            <i class="fa fa-check-circle me-2"></i> Récapitulatif du dossier
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fermer"></button>
+    </div>
+    <div class="modal-body" id="recapModalBody">
+        <!-- Le contenu sera généré par JavaScript -->
+        <div class="text-center p-5">
+            <i class="fa fa-spinner fa-spin fa-2x"></i>
+            <p>Chargement du récapitulatif...</p>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+            <i class="fa fa-pencil me-2"></i>Modifier
+        </button>
+        <button type="button" class="btn btn-success" id="confirmSubmitBtn">
+            <i class="fa fa-paper-plane me-2"></i>Confirmer et envoyer
+        </button>
+    </div>
+</div>
+</div>
+</div>
 <script src="/ersge_portal_ecolage/static/src/js/portal_dossier.js"></script>
 
 

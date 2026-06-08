@@ -1,6 +1,5 @@
 // static/src/js/portal_dossier.js
 
-
 console.log("Début du script portal_dossier.js");
 
 // Patch pour éviter les ID vides
@@ -672,12 +671,12 @@ function initForm(root) {
 function attachDelegatedEvents(root) {
     console.log("attachDelegatedEvents appelée");
     console.log("Écouteurs installés pour legal_representation");
-root.querySelectorAll('input[name="legal_representation"]').forEach(r => {
-    console.log("radio trouvé :", r);
-    r.addEventListener('change', () => {
-        console.log("Événement change capturé sur radio");
+    root.querySelectorAll('input[name="legal_representation"]').forEach(r => {
+        console.log("radio trouvé :", r);
+        r.addEventListener('change', () => {
+            console.log("Événement change capturé sur radio");
+        });
     });
-});
     root.addEventListener('change', function(e) {
         const target = e.target;
         if (target.name === 'legal_representation') {
@@ -828,6 +827,315 @@ root.querySelectorAll('input[name="legal_representation"]').forEach(r => {
     });
 }
 
+// =====================================================================
+// GÉNÉRATION DU RÉCAPITULATIF (CORRECTION DROIT À L'IMAGE)
+// =====================================================================
+function generateRecap(form) {
+    let html = '<div class="row">';
+
+    // ---------- 1. Représentation légale ----------
+    const legalRep = form.querySelector('input[name="legal_representation"]:checked');
+    const legalRepValue = legalRep ? legalRep.value : '';
+    let legalRepText = '';
+    switch (legalRepValue) {
+        case 'both': legalRepText = 'Les deux parents'; break;
+        case 'father_only': legalRepText = 'Parent 1 uniquement'; break;
+        case 'mother_only': legalRepText = 'Parent 2 uniquement'; break;
+        case 'other': legalRepText = 'Autre'; break;
+        default: legalRepText = 'Non renseigné';
+    }
+    html += `<div class="col-12 mb-3"><strong>Représentation légale :</strong> ${legalRepText}</div>`;
+
+    // Parent 1
+    const p1_first = form.querySelector('input[name="parent1_firstname"]')?.value || '';
+    const p1_last = form.querySelector('input[name="parent1_lastname"]')?.value || '';
+    const p1_email = form.querySelector('input[name="parent1_email"]')?.value || '';
+    const p1_phone = form.querySelector('input[name="parent1_phone"]')?.value || '';
+    html += `<div class="col-md-6"><strong>Parent 1 :</strong> ${p1_first} ${p1_last}<br>📧 ${p1_email}<br>📞 ${p1_phone}</div>`;
+
+    // Parent 2
+    const p2_first = form.querySelector('input[name="parent2_firstname"]')?.value || '';
+    const p2_last = form.querySelector('input[name="parent2_lastname"]')?.value || '';
+    const p2_email = form.querySelector('input[name="parent2_email"]')?.value || '';
+    const p2_phone = form.querySelector('input[name="parent2_phone"]')?.value || '';
+    html += `<div class="col-md-6"><strong>Parent 2 :</strong> ${p2_first} ${p2_last}<br>📧 ${p2_email}<br>📞 ${p2_phone}</div>`;
+
+    // Autre représentant
+    if (legalRepValue === 'other') {
+        const other_first = form.querySelector('input[name="other_firstname"]')?.value || '';
+        const other_last = form.querySelector('input[name="other_lastname"]')?.value || '';
+        const other_email = form.querySelector('input[name="other_email"]')?.value || '';
+        html += `<div class="col-12 mt-2"><strong>Autre représentant :</strong> ${other_first} ${other_last} (${other_email})</div>`;
+    }
+
+    // Adresse commune ou séparée ? (optionnel)
+    const sameAddr = form.querySelector('#same_address_as_parent1')?.checked;
+    html += `<div class="col-12"><small>Adresse parent 2 ${sameAddr ? 'identique au parent 1' : 'différente'}</small></div>`;
+
+    // ---------- 2. Élèves ----------
+    const students = form.querySelectorAll('.student-line:not(.new-student)');
+    if (students.length) {
+        html += `<div class="col-12 mt-3"><h6>📚 Élèves inscrits</h6><ul>`;
+        students.forEach(stud => {
+            const first = stud.querySelector('input[name^="student_firstname_"]')?.value || '';
+            const last = stud.querySelector('input[name^="student_lastname_"]')?.value || '';
+            const birth = stud.querySelector('input[name^="student_birthdate_"]')?.value || '';
+            const gender = stud.querySelector('select[name^="student_gender_"]')?.value === 'M' ? 'Masculin' : (stud.querySelector('select[name^="student_gender_"]')?.value === 'F' ? 'Féminin' : '');
+            // CORRECTION : cibler uniquement la checkbox (pas le hidden)
+            const imageCheckbox = stud.querySelector('input[type="checkbox"][name^="student_image_rights_"]');
+            const imageRights = imageCheckbox ? (imageCheckbox.checked ? '✅ Accord' : '❌ Refus') : 'Non spécifié';
+            html += `<li><strong>${first} ${last}</strong> (né(e) le ${birth}, ${gender}) - Droit à l'image : ${imageRights}</li>`;
+        });
+        html += `</ul></div>`;
+    }
+
+    // ---------- 3. Forfaits (écolage) ----------
+    let totalMensuelBase = 0;
+    const forfaitLines = document.querySelectorAll('.forfait-line');
+    if (forfaitLines.length) {
+        html += `<div class="col-12 mt-3"><h6>🎓 Forfaits sélectionnés</h6><ul>`;
+        forfaitLines.forEach(line => {
+            const studentName = line.querySelector('.card-header span')?.innerText || 'Élève';
+            const forfaitSelect = line.querySelector('.forfait-select');
+            const selectedOption = forfaitSelect?.options[forfaitSelect.selectedIndex];
+            const forfaitName = selectedOption?.text.split(' -')[0] || 'Aucun';
+            const montantInput = line.querySelector('.montant-mensuel');
+            const montant = parseFloat(montantInput?.value) || 0;
+            totalMensuelBase += montant;
+            html += `<li><strong>${studentName}</strong> : ${forfaitName} → ${montant.toFixed(2)} CHF/mois</li>`;
+        });
+        html += `</ul></div>`;
+    }
+    html += `<div class="col-12"><strong>💰 Total mensuel écolage (hors réductions) :</strong> ${totalMensuelBase.toFixed(2)} CHF</div>`;
+
+    // ---------- 4. Réductions demandées ----------
+    const reductionRequested = form.querySelector('input[name="reduction_requested"]:checked')?.value;
+    if (reductionRequested === '1') {
+        html += `<div class="col-12 mt-3"><h6>🔻 Réductions sollicitées</h6>`;
+        // Réduction enfants
+        const applyChildren = document.getElementById('apply_children_discount')?.checked;
+        const maxChildren = document.getElementById('max_children_discount_display')?.value || '0';
+        html += `<div>👨‍👩‍👧‍👦 Rabais nombre d'enfants : ${applyChildren ? '✅ Demandé' : '❌ Non demandé'} (max ${maxChildren}%)</div>`;
+        // Réduction ancienneté
+        const seniorityYears = document.getElementById('seniority_years')?.options[document.getElementById('seniority_years')?.selectedIndex]?.text || '';
+        const applySeniority = document.getElementById('apply_seniority_discount')?.checked;
+        const maxSeniority = document.getElementById('max_seniority_discount_display')?.value || '0';
+        html += `<div>📅 Ancienneté : ${seniorityYears} - Rabais : ${applySeniority ? '✅ Demandé' : '❌ Non demandé'} (max ${maxSeniority}%)</div>`;
+        // Réduction moindre
+        const reductionMoindre = form.querySelector('input[name="reduction_moindre"]:checked')?.value === '1';
+        let requestedDiscount = '0';
+        if (reductionMoindre) {
+            requestedDiscount = document.getElementById('requested_discount')?.value || '0';
+            html += `<div>✏️ Réduction moindre demandée : ${requestedDiscount}%</div>`;
+        } else {
+            const maxTotal = document.getElementById('max_total_discount_display')?.value || '0';
+            html += `<div>🔝 Réduction maximale sollicitée : ${maxTotal}%</div>`;
+        }
+        const finalMonthly = document.getElementById('monthly_fee_after_requested_display')?.value || totalMensuelBase;
+        html += `<div><strong>💵 Total mensuel après réduction :</strong> ${parseFloat(finalMonthly).toFixed(2)} CHF</div>`;
+        html += `</div>`;
+    }
+
+    // ---------- 5. Réduction complémentaire ----------
+    const additionalReduction = form.querySelector('input[name="additional_reduction_request"]:checked')?.value === '1';
+    if (additionalReduction) {
+        html += `<div class="col-12 mt-3"><h6>📄 Demande de réduction complémentaire</h6>`;
+        const grossIncome = document.getElementById('gross_annual_income')?.value || '0';
+        const incomePercent = document.getElementById('income_percentage_display')?.value || '0';
+        const proposedAmount = form.querySelector('input[name="proposed_monthly_amount"]')?.value || '0';
+        html += `<div>💰 Revenu brut annuel : ${parseFloat(grossIncome).toFixed(2)} CHF</div>`;
+        html += `<div>📊 Pourcentage du tarif sur revenu : ${incomePercent}%</div>`;
+        html += `<div>✉️ Écolage mensuel proposé : ${parseFloat(proposedAmount).toFixed(2)} CHF</div>`;
+        html += `<div>📎 Justificatifs : avis de taxation + fiches de salaire + lettre explicative (${form.querySelector('input[name="explanatory_letter_mode"]:checked')?.value === 'write' ? 'écrite' : 'fichier joint'})</div>`;
+        html += `</div>`;
+    }
+
+    // ---------- 6. Parascolaire ----------
+    const afterSchoolRequest = form.querySelector('input[name="after_school_request"]:checked')?.value;
+    if (afterSchoolRequest === 'yes') {
+        html += `<div class="col-12 mt-3"><h6>🏫 Parascolaire</h6>`;
+        const afterTotal = document.getElementById('after_school_total_amount')?.innerText || '0.00';
+        html += `<div>Demande d’inscription : Oui</div>`;
+        // Détail par élève
+        const afterToggles = form.querySelectorAll('.after-school-toggle:checked');
+        if (afterToggles.length) {
+            html += `<ul>`;
+            afterToggles.forEach(toggle => {
+                const studentCard = toggle.closest('.card');
+                const studentName = studentCard?.querySelector('.card-header')?.innerText || 'Élève';
+                const accueilType = studentCard?.querySelector('input[name^="accueil_type_"]:checked')?.parentElement?.innerText || '';
+                const montant = studentCard?.querySelector('.after-school-montant')?.value || '0';
+                html += `<li>${studentName} : ${accueilType} → ${parseFloat(montant).toFixed(2)} CHF/mois</li>`;
+            });
+            html += `</ul>`;
+        }
+        html += `<div><strong>💰 Total mensuel parascolaire :</strong> ${parseFloat(afterTotal).toFixed(2)} CHF</div>`;
+        html += `</div>`;
+    } else {
+        html += `<div class="col-12 mt-3"><strong>🏫 Parascolaire :</strong> Non demandé</div>`;
+    }
+
+    // ---------- 7. Solidarité ----------
+    const solidarityRequest = form.querySelector('input[name="solidarity_request"]:checked')?.value;
+    if (solidarityRequest === 'yes') {
+        const applySolidarity = document.getElementById('apply_solidarity_increase')?.checked;
+        const solidarityPercent = document.getElementById('solidarity_percentage')?.value || '0';
+        const solidarityTotal = document.getElementById('solidarity_total_amount')?.value || '0';
+        html += `<div class="col-12 mt-3"><h6>🤝 Solidarité</h6>`;
+        html += `<div>Contribution au fonds : ${applySolidarity ? `Oui (+${solidarityPercent}%)` : 'Non'}</div>`;
+        if (applySolidarity) html += `<div>Montant mensuel total après solidarité : ${parseFloat(solidarityTotal).toFixed(2)} CHF</div>`;
+        html += `</div>`;
+    }
+
+    // ---------- 8. Parrainage ----------
+    const sponsorshipRequest = form.querySelector('input[name="sponsorship_request"]:checked')?.value;
+    if (sponsorshipRequest === 'yes') {
+        const sponsors = form.querySelectorAll('.sponsorship-item');
+        if (sponsors.length) {
+            html += `<div class="col-12 mt-3"><h6>🤝 Parrainage</h6><ul>`;
+            sponsors.forEach(sp => {
+                const first = sp.querySelector('input[name^="sp_firstname_"]')?.value || '';
+                const last = sp.querySelector('input[name^="sp_lastname_"]')?.value || '';
+                const amount = sp.querySelector('input[name^="sp_amount_"]')?.value || '0';
+                html += `<li>${first} ${last} : ${parseFloat(amount).toFixed(2)} CHF/mois</li>`;
+            });
+            html += `</ul></div>`;
+        }
+    }
+
+    // ---------- 9. Facturation (mode de paiement, division) ----------
+    const paymentTerms = form.querySelector('input[name="payment_terms"]:checked')?.value;
+    let paymentText = paymentTerms === 'monthly' ? 'Mensuel (avant le 10)' : 'Annuel (avant le 30 septembre, déduction 2%)';
+    html += `<div class="col-12 mt-3"><strong>💳 Mode de paiement :</strong> ${paymentText}</div>`;
+    const multiBilling = form.querySelector('input[name="multi_billing_request"]:checked')?.value === '1';
+    if (multiBilling) {
+        const p1Amount = form.querySelector('#parent1_billing_amount')?.value || '0';
+        const p2Amount = form.querySelector('#parent2_billing_amount')?.value || '0';
+        html += `<div><strong>📑 Facturation divisée :</strong> Parent 1 : ${parseFloat(p1Amount).toFixed(2)} CHF/an, Parent 2 : ${parseFloat(p2Amount).toFixed(2)} CHF/an</div>`;
+    }
+
+    // ---------- 10. Cotisation annuelle et dépôt ----------
+    const membership = document.getElementById('membership_fee_amount')?.innerText || '0';
+    const deposit = document.getElementById('deposit_amount')?.innerText || '0';
+    html += `<div class="col-12 mt-3"><strong>🏛️ Cotisation annuelle :</strong> ${parseFloat(membership).toFixed(2)} CHF</div>`;
+    html += `<div><strong>🏦 Dépôt :</strong> ${parseFloat(deposit).toFixed(2)} CHF</div>`;
+
+    // ---------- 11. Totaux finaux ----------
+    const totalMonthly = document.getElementById('recap_total_monthly')?.value || '0';
+    const totalAnnual = document.getElementById('recap_total_annual')?.value || '0';
+    html += `<div class="col-12 mt-2"><hr><strong>📆 TOTAL MENSUEL (écolage + parascolaire) :</strong> ${parseFloat(totalMonthly).toFixed(2)} CHF</div>`;
+    html += `<div><strong>📅 TOTAL ANNUEL (tout compris) :</strong> ${parseFloat(totalAnnual).toFixed(2)} CHF</div>`;
+
+    // Réduction 2% si applicable
+    const discountBlock = document.getElementById('total_with_discount_block');
+    if (discountBlock && discountBlock.style.display !== 'none') {
+        const discountedTotal = document.getElementById('recap_total_annual_discounted')?.value || '0';
+        html += `<div class="col-12 text-success"><strong>⭐ Paiement annuel anticipé (déduction 2%) : ${parseFloat(discountedTotal).toFixed(2)} CHF</strong></div>`;
+    }
+
+    // ---------- 12. Conditions et signature ----------
+    const termsAccepted = form.querySelector('#terms_accepted')?.checked ? '✅ Acceptées' : '❌ Non acceptées';
+    const signature = form.querySelector('#signature_text')?.value || 'Non renseignée';
+    html += `<div class="col-12 mt-3"><strong>📜 Conditions générales :</strong> ${termsAccepted}</div>`;
+    html += `<div><strong>✍️ Signature :</strong> ${signature}</div>`;
+
+    html += `</div>`;
+    return html;
+}
+
+// =====================================================================
+// GESTION DE LA MODALE AVEC TEMPLATE DE CONSULTATION (Ajax)
+// =====================================================================
+let currentModal = null;
+
+function forceCleanupModal() {
+    document.body.classList.remove('modal-open');
+    document.body.style.overflow = '';
+    document.documentElement.style.overflow = '';
+    const backdrops = document.querySelectorAll('.modal-backdrop');
+    backdrops.forEach(backdrop => backdrop.remove());
+}
+
+// Interception du bouton "Envoyer le dossier"
+document.addEventListener('click', function(e) {
+    const btn = e.target.closest('button[name="form_action"][value="submit_dossier"]');
+    if (btn && btn.closest('#ecolage_form_root')) {
+        e.preventDefault();
+        e.stopPropagation();
+        const form = document.getElementById('ecolage_form_root');
+        const dossierId = form.querySelector('input[name="dossier_id"]')?.value;
+        if (!dossierId) {
+            console.error("ID dossier manquant");
+            return;
+        }
+        // Charger le template complet via la route dédiée
+        fetch('/my/ecolage/dossier/' + dossierId + '/recap_html')
+            .then(response => response.text())
+            .then(html => {
+                const modalBody = document.getElementById('recapModalBody');
+                if (modalBody) modalBody.innerHTML = html;
+                const modalElement = document.getElementById('recapModal');
+                if (modalElement) {
+                    if (currentModal) currentModal.dispose();
+                    currentModal = new bootstrap.Modal(modalElement, {
+                        backdrop: 'static',
+                        keyboard: true
+                    });
+                    currentModal.show();
+                } else {
+                    console.error("Modal #recapModal non trouvée");
+                }
+            })
+            .catch(error => console.error('Erreur chargement récap:', error));
+    }
+});
+
+// Écouteur pour le bouton de confirmation dans la modale
+document.addEventListener('DOMContentLoaded', function () {
+    const confirmBtn = document.getElementById('confirmSubmitBtn');
+    if (confirmBtn) {
+        confirmBtn.addEventListener('click', function() {
+            const form = document.getElementById('ecolage_form_root');
+            if (form) {
+                // Créer ou modifier le champ form_action
+                let actionInput = form.querySelector('input[name="form_action"]');
+                if (!actionInput) {
+                    actionInput = document.createElement('input');
+                    actionInput.type = 'hidden';
+                    actionInput.name = 'form_action';
+                    form.appendChild(actionInput);
+                }
+                actionInput.value = 'submit_dossier';
+                
+                // Supprimer l'ancien champ confirmed_submit si présent
+                let oldConfirm = form.querySelector('input[name="confirmed_submit"]');
+                if (oldConfirm) oldConfirm.remove();
+                
+                if (currentModal) {
+                    currentModal.hide();
+                }
+                setTimeout(() => {
+                    forceCleanupModal();
+                    form.submit();
+                }, 300);
+            }
+        });
+    }
+});
+
+// Nettoyage après fermeture de la modale
+document.addEventListener('hidden.bs.modal', function (e) {
+    if (e.target.id === 'recapModal') {
+        forceCleanupModal();
+        if (currentModal) {
+            currentModal.dispose();
+            currentModal = null;
+        }
+    }
+});
+// =====================================================================
+// ATTENTE DU FORMULAIRE ET INITIALISATION
+// =====================================================================
 document.addEventListener('DOMContentLoaded', function () {
     console.log("DOMContentLoaded déclenché");
     function waitForForm() {
@@ -844,5 +1152,4 @@ document.addEventListener('DOMContentLoaded', function () {
     }
     waitForForm();
 });
-
 console.log("portal_dossier.js chargé - en attente du formulaire");

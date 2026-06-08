@@ -797,3 +797,10 @@ class PortalEcolage(http.Controller):
         # Supprimer la famille
         family.unlink()
         return request.redirect('/my/ecolage/families?success=Famille supprimée avec succès.')
+    
+    @http.route(['/my/ecolage/dossier/<int:dossier_id>/recap_html'], type='http', auth='user', website=True)
+    def dossier_recap_html(self, dossier_id):
+        dossier = request.env['ersge.dossier.famille'].sudo().browse(dossier_id)
+        if not dossier.exists():
+            return request.not_found()
+        return request.render('ersge_portal_ecolage.portal_dossier_consult_content', {'dossier': dossier})
