@@ -36,4 +36,10 @@
     "installable": True,
     "application": True,
     "license": "LGPL-3",
+    "assets": {
+        "web.assets_frontend": [
+            "ersge_portal_ecolage/static/src/js/portal_dossier.js",
+        ],
+    }
+    
 }
