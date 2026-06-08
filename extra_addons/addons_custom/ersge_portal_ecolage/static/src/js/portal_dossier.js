@@ -1057,6 +1057,7 @@ function forceCleanupModal() {
 }
 
 // Interception du bouton "Envoyer le dossier"
+// Interception du bouton "Envoyer le dossier" : on sauvegarde d'abord
 document.addEventListener('click', function(e) {
     const btn = e.target.closest('button[name="form_action"][value="submit_dossier"]');
     if (btn && btn.closest('#ecolage_form_root')) {
@@ -1068,25 +1069,41 @@ document.addEventListener('click', function(e) {
             console.error("ID dossier manquant");
             return;
         }
-        // Charger le template complet via la route dédiée
-        fetch('/my/ecolage/dossier/' + dossierId + '/recap_html')
-            .then(response => response.text())
-            .then(html => {
-                const modalBody = document.getElementById('recapModalBody');
-                if (modalBody) modalBody.innerHTML = html;
-                const modalElement = document.getElementById('recapModal');
-                if (modalElement) {
-                    if (currentModal) currentModal.dispose();
-                    currentModal = new bootstrap.Modal(modalElement, {
-                        backdrop: 'static',
-                        keyboard: true
-                    });
-                    currentModal.show();
-                } else {
-                    console.error("Modal #recapModal non trouvée");
-                }
-            })
-            .catch(error => console.error('Erreur chargement récap:', error));
+
+        // 1) Sauvegarder le formulaire (sans quitter la page)
+        const formData = new FormData(form);
+        formData.set('form_action', 'save_and_stay');   // force l'enregistrement
+
+        fetch(form.action || '/my/ecolage/edit/' + dossierId, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => {
+            if (response.ok) {
+                // 2) Après sauvegarde réussie, charger le récapitulatif mis à jour
+                return fetch('/my/ecolage/dossier/' + dossierId + '/recap_html');
+            } else {
+                throw new Error('Sauvegarde échouée');
+            }
+        })
+        .then(response => response.text())
+        .then(html => {
+            const modalBody = document.getElementById('recapModalBody');
+            if (modalBody) modalBody.innerHTML = html;
+            const modalElement = document.getElementById('recapModal');
+            if (modalElement) {
+                if (currentModal) currentModal.dispose();
+                currentModal = new bootstrap.Modal(modalElement, {
+                    backdrop: 'static',
+                    keyboard: true
+                });
+                currentModal.show();
+            }
+        })
+        .catch(error => console.error('Erreur:', error));
     }
 });
 
