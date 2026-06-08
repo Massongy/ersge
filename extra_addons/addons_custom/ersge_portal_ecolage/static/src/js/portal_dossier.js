@@ -41,6 +41,223 @@ function getCsrfToken() {
 }
 
 // =====================================================================
+// GESTION DYNAMIQUE DES CHAMPS REQUIRED (conditionnels)
+// =====================================================================
+function updateConditionalRequired(root) {
+    // Parent 2
+    const parent2Block = document.getElementById('block_parent2');
+    const parent2Inputs = root.querySelectorAll('#block_parent2 input[name^="parent2_"]');
+    parent2Inputs.forEach(input => {
+        if (parent2Block && parent2Block.style.display !== 'none') {
+            input.setAttribute('required', 'required');
+        } else {
+            input.removeAttribute('required');
+        }
+    });
+
+    // Autre représentant (sauf le champ "Précisez" déjà required)
+    const otherBlock = document.getElementById('block_other');
+    const otherInputs = root.querySelectorAll('#block_other input[name^="other_"]');
+    otherInputs.forEach(input => {
+        if (otherBlock && otherBlock.style.display !== 'none') {
+            if (input.name !== 'legal_representation_other') {
+                input.setAttribute('required', 'required');
+            }
+        } else {
+            input.removeAttribute('required');
+        }
+    });
+
+    // Employeur (si send_invoice_to_employer est coché)
+    const employerBlock = document.getElementById('block_employer_id');
+    const employerInputs = root.querySelectorAll('#block_employer_id input, #block_employer_id select');
+    const sendToEmployer = root.querySelector('#send_invoice_to_employer')?.checked;
+    employerInputs.forEach(input => {
+        if (employerBlock && employerBlock.style.display !== 'none' && sendToEmployer) {
+            input.setAttribute('required', 'required');
+        } else {
+            input.removeAttribute('required');
+        }
+    });
+}
+
+// =====================================================================
+// FONCTION DE VALIDATION COMPLÈTE (obligatoire + format)
+// =====================================================================
+function validateRequiredAndFormat(root) {
+    let errors = [];
+
+    // Helper : vérifier email
+    function isValidEmail(email) {
+        const re = /^[^\s@]+@([^\s@]+\.)+[^\s@]+$/;
+        return re.test(email);
+    }
+
+    // Helper : vérifier téléphone (chiffres, espaces, +, -)
+    function isValidPhone(phone) {
+        const re = /^[\d\s\+-]+$/;
+        return re.test(phone);
+    }
+
+    // Helper : vérifier NPA (4 à 6 chiffres)
+    function isValidZip(zip) {
+        const re = /^\d{4,6}$/;
+        return re.test(zip);
+    }
+
+    // ==================== 1. Représentation légale ====================
+    const legalRep = root.querySelector('input[name="legal_representation"]:checked');
+    if (!legalRep) errors.push("Représentation légale non choisie");
+
+    // ==================== 2. Parent 1 ====================
+    const p1_first = root.querySelector('input[name="parent1_firstname"]');
+    const p1_last = root.querySelector('input[name="parent1_lastname"]');
+    const p1_email = root.querySelector('input[name="parent1_email"]');
+    const p1_street = root.querySelector('input[name="parent1_street"]');
+    const p1_zip = root.querySelector('input[name="parent1_zip"]');
+    const p1_city = root.querySelector('input[name="parent1_city"]');
+    const p1_country = root.querySelector('select[name="parent1_country_id"]');
+    const p1_phone = root.querySelector('input[name="parent1_phone"]');
+
+    if (!p1_first || !p1_first.value.trim()) errors.push("Prénom Parent 1");
+    if (!p1_last || !p1_last.value.trim()) errors.push("Nom Parent 1");
+    if (!p1_email || !p1_email.value.trim()) errors.push("Email Parent 1");
+    else if (!isValidEmail(p1_email.value.trim())) errors.push("Email Parent 1 invalide");
+    if (!p1_street || !p1_street.value.trim()) errors.push("Rue Parent 1");
+    if (!p1_zip || !p1_zip.value.trim()) errors.push("NPA Parent 1");
+    else if (!isValidZip(p1_zip.value.trim())) errors.push("NPA Parent 1 (doit être composé de 4 à 6 chiffres)");
+    if (!p1_city || !p1_city.value.trim()) errors.push("Ville Parent 1");
+    if (!p1_country || !p1_country.value) errors.push("Pays Parent 1");
+    if (p1_phone && p1_phone.value.trim() && !isValidPhone(p1_phone.value.trim())) errors.push("Téléphone mobile Parent 1 (caractères non autorisés)");
+
+    // ==================== 3. Parent 2 (si bloc visible) ====================
+    const parent2Block = document.getElementById('block_parent2');
+    if (parent2Block && parent2Block.style.display !== 'none') {
+        const p2_first = root.querySelector('input[name="parent2_firstname"]');
+        const p2_last = root.querySelector('input[name="parent2_lastname"]');
+        const p2_email = root.querySelector('input[name="parent2_email"]');
+        const p2_street = root.querySelector('input[name="parent2_street"]');
+        const p2_zip = root.querySelector('input[name="parent2_zip"]');
+        const p2_city = root.querySelector('input[name="parent2_city"]');
+        const p2_country = root.querySelector('select[name="parent2_country_id"]');
+        const p2_phone = root.querySelector('input[name="parent2_phone"]');
+        const sameAddr = root.querySelector('#same_address_as_parent1')?.checked;
+
+        if (!p2_first || !p2_first.value.trim()) errors.push("Prénom Parent 2");
+        if (!p2_last || !p2_last.value.trim()) errors.push("Nom Parent 2");
+        if (!p2_email || !p2_email.value.trim()) errors.push("Email Parent 2");
+        else if (!isValidEmail(p2_email.value.trim())) errors.push("Email Parent 2 invalide");
+        if (!sameAddr) {
+            if (!p2_street || !p2_street.value.trim()) errors.push("Rue Parent 2");
+            if (!p2_zip || !p2_zip.value.trim()) errors.push("NPA Parent 2");
+            else if (!isValidZip(p2_zip.value.trim())) errors.push("NPA Parent 2 (doit être composé de 4 à 6 chiffres)");
+            if (!p2_city || !p2_city.value.trim()) errors.push("Ville Parent 2");
+            if (!p2_country || !p2_country.value) errors.push("Pays Parent 2");
+        }
+        if (p2_phone && p2_phone.value.trim() && !isValidPhone(p2_phone.value.trim())) errors.push("Téléphone mobile Parent 2 (caractères non autorisés)");
+    }
+
+    // ==================== 4. Autre représentant (si bloc visible) ====================
+    const otherBlock = document.getElementById('block_other');
+    if (otherBlock && otherBlock.style.display !== 'none') {
+        const other_precise = root.querySelector('input[name="legal_representation_other"]');
+        const other_first = root.querySelector('input[name="other_firstname"]');
+        const other_last = root.querySelector('input[name="other_lastname"]');
+        const other_email = root.querySelector('input[name="other_email"]');
+        const other_street = root.querySelector('input[name="other_street"]');
+        const other_zip = root.querySelector('input[name="other_zip"]');
+        const other_city = root.querySelector('input[name="other_city"]');
+        const other_country = root.querySelector('select[name="other_country_id"]');
+        const other_phone = root.querySelector('input[name="other_phone"]');
+
+        if (!other_precise || !other_precise.value.trim()) errors.push("Précision autre représentant");
+        if (!other_first || !other_first.value.trim()) errors.push("Prénom autre représentant");
+        if (!other_last || !other_last.value.trim()) errors.push("Nom autre représentant");
+        if (!other_email || !other_email.value.trim()) errors.push("Email autre représentant");
+        else if (!isValidEmail(other_email.value.trim())) errors.push("Email autre représentant invalide");
+        if (!other_street || !other_street.value.trim()) errors.push("Rue autre représentant");
+        if (!other_zip || !other_zip.value.trim()) errors.push("NPA autre représentant");
+        else if (!isValidZip(other_zip.value.trim())) errors.push("NPA autre représentant (doit être composé de 4 à 6 chiffres)");
+        if (!other_city || !other_city.value.trim()) errors.push("Ville autre représentant");
+        if (!other_country || !other_country.value) errors.push("Pays autre représentant");
+        if (other_phone && other_phone.value.trim() && !isValidPhone(other_phone.value.trim())) errors.push("Téléphone autre représentant (caractères non autorisés)");
+    }
+
+    // ==================== 5. Élèves existants ====================
+    const studentLines = root.querySelectorAll('.student-line:not(.new-student)');
+    if (studentLines.length === 0) {
+        errors.push("Au moins un élève");
+    } else {
+        studentLines.forEach((line, idx) => {
+            const first = line.querySelector('input[name^="student_firstname_"]');
+            const last = line.querySelector('input[name^="student_lastname_"]');
+            const birth = line.querySelector('input[name^="student_birthdate_"]');
+            if (!first || !first.value.trim()) errors.push(`Prénom élève ${idx+1}`);
+            if (!last || !last.value.trim()) errors.push(`Nom élève ${idx+1}`);
+            if (!birth || !birth.value) errors.push(`Date de naissance élève ${idx+1}`);
+        });
+    }
+
+   // ==================== 6. Nouveaux élèves ====================
+const newStudents = root.querySelectorAll('.new-student');
+newStudents.forEach((line, idx) => {
+    const first = line.querySelector('input[name^="new_student_firstname"]');
+    const last = line.querySelector('input[name^="new_student_lastname"]');
+    const birth = line.querySelector('input[name^="new_student_birthdate"]');
+    
+    // Vérifier si tous les champs obligatoires sont vides
+    const firstNameVal = first ? first.value.trim() : '';
+    const lastNameVal = last ? last.value.trim() : '';
+    const birthVal = birth ? birth.value : '';
+    
+    // Si tous sont vides, ignorer cette ligne (pas d'erreur)
+    if (firstNameVal === '' && lastNameVal === '' && birthVal === '') {
+        return; // passer à la ligne suivante
+    }
+    
+    // Sinon, valider que chaque champ est rempli
+    if (!first || firstNameVal === '') errors.push(`Prénom nouvel élève ${idx+1}`);
+    if (!last || lastNameVal === '') errors.push(`Nom nouvel élève ${idx+1}`);
+    if (!birth || birthVal === '') errors.push(`Date de naissance nouvel élève ${idx+1}`);
+});
+
+    // ==================== 7. Forfaits ====================
+    const forfaitSelects = root.querySelectorAll('.forfait-select');
+    forfaitSelects.forEach((select, idx) => {
+        if (!select.value) {
+            const studentLine = select.closest('.forfait-line');
+            const studentName = studentLine ? (studentLine.querySelector('.card-header span')?.innerText || `élève ${idx+1}`) : `élève ${idx+1}`;
+            errors.push(`Forfait pour ${studentName}`);
+        }
+    });
+
+    // ==================== 8. Conditions générales ====================
+    const terms = root.querySelector('input[name="terms_accepted"]');
+    if (terms && !terms.checked) errors.push("Acceptation des conditions générales");
+
+    // ==================== 9. Signature ====================
+    const signature = root.querySelector('input[name="signature_text"]');
+    if (signature && !signature.value.trim()) errors.push("Signature");
+
+    // ==================== 10. Employeur ====================
+    const sendToEmployer = root.querySelector('#send_invoice_to_employer');
+    if (sendToEmployer && sendToEmployer.checked) {
+        const employerName = root.querySelector('input[name="employer_name"]');
+        const employerStreet = root.querySelector('input[name="employer_street"]');
+        const employerZip = root.querySelector('input[name="employer_zip"]');
+        const employerCity = root.querySelector('input[name="employer_city"]');
+        const employerCountry = root.querySelector('select[name="employer_country_id"]');
+        if (!employerName || !employerName.value.trim()) errors.push("Nom de l'employeur");
+        if (!employerStreet || !employerStreet.value.trim()) errors.push("Adresse de l'employeur");
+        if (!employerZip || !employerZip.value.trim()) errors.push("Code Postal de l'employeur");
+        else if (!isValidZip(employerZip.value.trim())) errors.push("Code Postal employeur (doit être composé de 4 à 6 chiffres)");
+        if (!employerCity || !employerCity.value.trim()) errors.push("Ville de l'employeur");
+        if (!employerCountry || !employerCountry.value) errors.push("Pays de l'employeur");
+    }
+
+    return errors;
+}
+// =====================================================================
 // FONCTIONS DE MISE À JOUR (toute la logique métier)
 // =====================================================================
 
@@ -54,6 +271,7 @@ function updateLegalVisibility(root) {
     if (p2) p2.style.display = (val === 'both' || val === 'mother_only') ? 'block' : 'none';
     if (other) other.style.display = (val === 'other') ? 'block' : 'none';
     updateCotisation(root);
+    updateConditionalRequired(root);
 }
 
 function updateCotisation(root) {
@@ -88,6 +306,7 @@ function toggleEmployerBlock(root) {
     const block = root.querySelector('#block_employer_id');
     if (chk && block) {
         block.style.display = chk.checked ? 'block' : 'none';
+        updateConditionalRequired(root);
     }
 }
 
@@ -666,6 +885,8 @@ function initForm(root) {
         const montantInput = root.querySelector('.montant-mensuel[data-line-id="' + lineId + '"]');
         if (montantInput) updateForfaitMontant(select, montantInput);
     });
+    // Mise à jour initiale des required conditionnels
+    updateConditionalRequired(root);
 }
 
 function attachDelegatedEvents(root) {
@@ -881,7 +1102,6 @@ function generateRecap(form) {
             const last = stud.querySelector('input[name^="student_lastname_"]')?.value || '';
             const birth = stud.querySelector('input[name^="student_birthdate_"]')?.value || '';
             const gender = stud.querySelector('select[name^="student_gender_"]')?.value === 'M' ? 'Masculin' : (stud.querySelector('select[name^="student_gender_"]')?.value === 'F' ? 'Féminin' : '');
-            // CORRECTION : cibler uniquement la checkbox (pas le hidden)
             const imageCheckbox = stud.querySelector('input[type="checkbox"][name^="student_image_rights_"]');
             const imageRights = imageCheckbox ? (imageCheckbox.checked ? '✅ Accord' : '❌ Refus') : 'Non spécifié';
             html += `<li><strong>${first} ${last}</strong> (né(e) le ${birth}, ${gender}) - Droit à l'image : ${imageRights}</li>`;
@@ -912,16 +1132,13 @@ function generateRecap(form) {
     const reductionRequested = form.querySelector('input[name="reduction_requested"]:checked')?.value;
     if (reductionRequested === '1') {
         html += `<div class="col-12 mt-3"><h6>🔻 Réductions sollicitées</h6>`;
-        // Réduction enfants
         const applyChildren = document.getElementById('apply_children_discount')?.checked;
         const maxChildren = document.getElementById('max_children_discount_display')?.value || '0';
         html += `<div>👨‍👩‍👧‍👦 Rabais nombre d'enfants : ${applyChildren ? '✅ Demandé' : '❌ Non demandé'} (max ${maxChildren}%)</div>`;
-        // Réduction ancienneté
         const seniorityYears = document.getElementById('seniority_years')?.options[document.getElementById('seniority_years')?.selectedIndex]?.text || '';
         const applySeniority = document.getElementById('apply_seniority_discount')?.checked;
         const maxSeniority = document.getElementById('max_seniority_discount_display')?.value || '0';
         html += `<div>📅 Ancienneté : ${seniorityYears} - Rabais : ${applySeniority ? '✅ Demandé' : '❌ Non demandé'} (max ${maxSeniority}%)</div>`;
-        // Réduction moindre
         const reductionMoindre = form.querySelector('input[name="reduction_moindre"]:checked')?.value === '1';
         let requestedDiscount = '0';
         if (reductionMoindre) {
@@ -946,7 +1163,8 @@ function generateRecap(form) {
         html += `<div>💰 Revenu brut annuel : ${parseFloat(grossIncome).toFixed(2)} CHF</div>`;
         html += `<div>📊 Pourcentage du tarif sur revenu : ${incomePercent}%</div>`;
         html += `<div>✉️ Écolage mensuel proposé : ${parseFloat(proposedAmount).toFixed(2)} CHF</div>`;
-        html += `<div>📎 Justificatifs : avis de taxation + fiches de salaire + lettre explicative (${form.querySelector('input[name="explanatory_letter_mode"]:checked')?.value === 'write' ? 'écrite' : 'fichier joint'})</div>`;
+        const explanatoryMode = form.querySelector('input[name="explanatory_letter_mode"]:checked')?.value;
+        html += `<div>📎 Justificatifs : avis de taxation + fiches de salaire + lettre explicative (${explanatoryMode === 'write' ? 'écrite' : 'fichier joint'})</div>`;
         html += `</div>`;
     }
 
@@ -956,7 +1174,6 @@ function generateRecap(form) {
         html += `<div class="col-12 mt-3"><h6>🏫 Parascolaire</h6>`;
         const afterTotal = document.getElementById('after_school_total_amount')?.innerText || '0.00';
         html += `<div>Demande d’inscription : Oui</div>`;
-        // Détail par élève
         const afterToggles = form.querySelectorAll('.after-school-toggle:checked');
         if (afterToggles.length) {
             html += `<ul>`;
@@ -1026,7 +1243,6 @@ function generateRecap(form) {
     html += `<div class="col-12 mt-2"><hr><strong>📆 TOTAL MENSUEL (écolage + parascolaire) :</strong> ${parseFloat(totalMonthly).toFixed(2)} CHF</div>`;
     html += `<div><strong>📅 TOTAL ANNUEL (tout compris) :</strong> ${parseFloat(totalAnnual).toFixed(2)} CHF</div>`;
 
-    // Réduction 2% si applicable
     const discountBlock = document.getElementById('total_with_discount_block');
     if (discountBlock && discountBlock.style.display !== 'none') {
         const discountedTotal = document.getElementById('recap_total_annual_discounted')?.value || '0';
@@ -1056,14 +1272,21 @@ function forceCleanupModal() {
     backdrops.forEach(backdrop => backdrop.remove());
 }
 
-// Interception du bouton "Envoyer le dossier"
-// Interception du bouton "Envoyer le dossier" : on sauvegarde d'abord
+// Interception du bouton "Envoyer le dossier" : validation puis sauvegarde Ajax puis modale
 document.addEventListener('click', function(e) {
     const btn = e.target.closest('button[name="form_action"][value="submit_dossier"]');
     if (btn && btn.closest('#ecolage_form_root')) {
         e.preventDefault();
         e.stopPropagation();
         const form = document.getElementById('ecolage_form_root');
+
+        // Validation des champs obligatoires et formats
+        const validationErrors = validateRequiredAndFormat(form);
+        if (validationErrors.length > 0) {
+            alert("Veuillez corriger les erreurs suivantes avant d'envoyer :\n\n- " + validationErrors.join("\n- "));
+            return;
+        }
+
         const dossierId = form.querySelector('input[name="dossier_id"]')?.value;
         if (!dossierId) {
             console.error("ID dossier manquant");
@@ -1072,7 +1295,7 @@ document.addEventListener('click', function(e) {
 
         // 1) Sauvegarder le formulaire (sans quitter la page)
         const formData = new FormData(form);
-        formData.set('form_action', 'save_and_stay');   // force l'enregistrement
+        formData.set('form_action', 'save_and_stay');
 
         fetch(form.action || '/my/ecolage/edit/' + dossierId, {
             method: 'POST',
@@ -1150,6 +1373,7 @@ document.addEventListener('hidden.bs.modal', function (e) {
         }
     }
 });
+
 // =====================================================================
 // ATTENTE DU FORMULAIRE ET INITIALISATION
 // =====================================================================
