@@ -613,7 +613,7 @@ class PortalEcolage(http.Controller):
                         'state': 'soumis',
                         'date_soumission': fields.Datetime.now(),
                     })
-                    return request.redirect('/my/ecolage?success=1&submitted=1')
+                    return request.redirect('/my/ecolage?success=Dossier%20soumis%20avec%20succ%C3%A8s')
                 elif params.get('form_action') == 'save_and_exit':
                     return request.redirect('/my/ecolage?success=Dossier%20enregistré')
                 return request.redirect('/my/ecolage?success=1')
