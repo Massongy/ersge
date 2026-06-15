@@ -666,11 +666,17 @@ Coordonnées de l'employeur
                                         Tarifs mensuels sur 12 mois - 1er versement au mois d'août.<br/>
                                         Frais non compris : Activités en dehors des murs de l'école (ex. voyage, échange linguistique...) et goûters aux jardins d'enfants.
                             </div>
+                            <div class="alert alert-warning mt-2" role="alert">
+                                <i class="fa fa-exclamation-triangle me-2"></i>
+                                <strong>Note :</strong> Les forfaits proposés sont calculés en fonction de l’âge de votre enfant ou de sa situation de l’année dernière.<br/>
+    En cas de situation particulière, merci de contacter directement l’école.
+                            </div>
 
                             <t t-if="not dossier.student_line_ids">
                                 <div class="alert alert-info">
                                             Aucun élève inscrit. Veuillez d'abord renseigner la section "Élèves".
                                 </div>
+
                             </t>
                             <t t-else="">
                                 <div id="forfaits_list">
@@ -740,18 +746,18 @@ Coordonnées de l'employeur
                 </div>
                 <!-- Fin Section 4 -->
 
-                <!-- Section 5 : Réductions -->
+                <!-- Section 5 : Réductions & Solidarité -->
                 <div class="accordion-item border mb-3 rounded shadow-sm">
                     <h2 class="accordion-header" id="headingReductions">
                         <button class="accordion-button collapsed rounded" type="button" data-bs-toggle="collapse" data-bs-target="#collapseReductions" aria-expanded="false" aria-controls="collapseReductions">
                             <i class="fa fa-percent me-2 text-primary"/>
-                            <strong>Réductions</strong>
+                            <strong>Réductions &amp; Solidarité</strong>
                         </button>
                     </h2>
                     <div id="collapseReductions" class="accordion-collapse collapse" aria-labelledby="headingReductions">
                         <div class="accordion-body">
 
-                            <!-- Solliciter une réduction -->
+                            <!-- ========== DEMANDE DE RÉDUCTION (nombre d'enfants / ancienneté) ========== -->
                             <div class="card mb-4">
                                 <div class="card-header fw-semibold bg-light">
                                     <i class="fa fa-scissors me-2"/>
@@ -846,74 +852,60 @@ Demande de réduction selon l'ancienneté
                                             </div>
                                         </div>
                                     </div>
-                                </div>
-
-                                <!-- Ajustement réduction -->
-                                <div class="card mb-4">
-                                    <div class="card-header fw-semibold bg-light">
-                                        <i class="fa fa-sliders me-2"/>
-Ajustez vos réductions
-                                    </div>
-                                    <div class="card-body">
-                                        <div class="alert alert-info">
-                                            <i class="fa fa-info-circle me-2"/>
-Sollicitez, en conscience, la réduction juste en fonction de votre situation.
-                                        </div>
-                                        <div class="row g-3">
-                                            <div class="col-12">
-                                                <label class="form-label fw-semibold">Vous pourriez solliciter la réduction maximale suivante (ancienneté et/ou nombre d'enfants)</label>
-                                                <div class="input-group">
-                                                    <input type="text" class="form-control bg-light" readonly="readonly" id="max_total_discount_display"/>
-                                                    <span class="input-group-text">%</span>
-                                                </div>
-                                                <div class="form-text text-muted">Zone non modifiable</div>
-                                            </div>
-                                            <div class="col-12">
-                                                <label class="form-label fw-semibold">Total mensuel après rabais maximal (CHF)</label>
-                                                <input type="text" class="form-control bg-light" readonly="readonly" id="monthly_fee_at_max_display"/>
-                                                <div class="form-text text-muted">Zone non modifiable</div>
-                                            </div>
-
-                                            <!-- NOUVEAU : bouton Oui/Non réduction moindre -->
-                                            <div class="col-12">
-                                                <label class="form-label fw-semibold">Souhaitez-vous solliciter une réduction moindre que le maximum ?</label>
-                                                <div class="d-flex gap-3">
-                                                    <div class="form-check">
-                                                        <input class="form-check-input" type="radio" name="reduction_moindre" id="reduction_moindre_non" value="0"/>
-                                                        <label class="form-check-label" for="reduction_moindre_non">Non</label>
-                                                    </div>
-                                                    <div class="form-check">
-                                                        <input class="form-check-input" type="radio" name="reduction_moindre" id="reduction_moindre_oui" value="1"/>
-                                                        <label class="form-check-label" for="reduction_moindre_oui">Oui</label>
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            <div id="block_reduction_moindre" style="display:none;" class="col-12">
-                                                <label class="form-label fw-semibold">
-                                                            Compte tenu de votre situation personnelle, vous sollicitez une réduction moindre, indiquez le pourcentage <span class="text-danger">*</span>
-                                                </label>
-                                                <div class="input-group">
-                                                    <input type="number" class="form-control" name="requested_discount" id="requested_discount" min="0" step="0.1" t-att-value="dossier.requested_discount or 0"/>
-                                                    <span class="input-group-text">%</span>
-                                                </div>
-                                                <div class="form-text text-muted">Ce pourcentage doit rester inférieur au maximum possible.</div>
-                                            </div>
-
-                                            <div class="col-12">
-                                                <label class="form-label fw-semibold">Total mensuel après votre réduction (CHF)</label>
-                                                <input type="text" class="form-control bg-light" readonly="readonly" id="monthly_fee_after_requested_display"/>
-                                                <div class="form-text text-muted">Zone non modifiable</div>
-                                            </div>
-                                        </div>
+                                    <div class="col-12">
+                                        <label class="form-label fw-semibold">Total mensuel après réduction(s) (enfants et/ou ancienneté)</label>
+                                        <input type="text" class="form-control bg-light" readonly="readonly" id="monthly_fee_after_requested_display"/>
+                                        <div class="form-text text-muted">Montant calculé selon les réductions activées.</div>
                                     </div>
                                 </div>
+
 
                             </div>
+
+
                             <!-- Fin bloc réductions -->
 
-                            <!-- Réduction complémentaire -->
-                            <div id="block_reduction_complementaire_question" class="card mb-4">
+                            <!-- ========== SOLIDARITÉ ========== -->
+                            <div class="card mb-4">
+                                <div class="card-header fw-semibold bg-light">
+                                    <i class="fa fa-heart me-2 text-danger"/>
+Solidarité
+                                </div>
+                                <div class="card-body">
+                                    <label class="form-label fw-semibold">Notre situation personnelle (fortune, revenu familial) nous permet d'honorer des écolages supérieurs et nous souhaitons contribuer au fonds de solidarité de l'école.</label>
+                                    <div class="d-flex gap-3 mt-2">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio" name="solidarity_request" id="solidarity_no" value="no" t-att-checked="dossier.solidarity_request == 'no' or not dossier.solidarity_request"/>
+                                            <label class="form-check-label" for="solidarity_no">Non</label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio" name="solidarity_request" id="solidarity_yes" value="yes" t-att-checked="dossier.solidarity_request == 'yes'"/>
+                                            <label class="form-check-label" for="solidarity_yes">Oui</label>
+                                        </div>
+                                    </div>
+                                    <!-- Bloc Solidarité – options supplémentaires (visible si oui) -->
+                                    <div id="block_solidarity_yes" class="mt-3" t-att-style="'display:' + ('block' if dossier.solidarity_request == 'yes' else 'none')">
+                                        <div class="row g-3">
+                                            <div class="col-md-6">
+                                                <label class="form-label fw-semibold">J'augmente mon tarif mensuel de</label>
+                                                <div class="input-group">
+                                                    <input type="number" class="form-control" name="solidarity_percentage" id="solidarity_percentage" min="0" step="0.1" t-att-value="dossier.solidarity_percentage or 0"/>
+                                                    <span class="input-group-text">%</span>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label class="form-label fw-semibold">Total tarif mensuel après solidarité (CHF)</label>
+                                                <input type="text" class="form-control bg-light" readonly="readonly" id="solidarity_total_amount" t-att-value="dossier.solidarity_total_amount or 0"/>
+                                                <div class="form-text text-muted">Zone non modifiable</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- ========== RÉDUCTION COMPLÉMENTAIRE ========== -->
+                            <!-- Masquée si solidarity_request == 'yes' -->
+                            <div id="block_reduction_complementaire_question" class="card mb-4" t-att-style="'display:' + ('block' if dossier.solidarity_request != 'yes' else 'none')">
                                 <div class="card-header fw-semibold bg-light">
                                     <i class="fa fa-plus-circle me-2"/>
 Réduction complémentaire
@@ -935,15 +927,15 @@ Réduction complémentaire
 
                             <!-- Bloc réduction complémentaire (visible si oui) -->
                             <div id="block_additional_reduction" t-att-style="'display:' + ('block' if dossier.additional_reduction_request else 'none')">
-
+                                <!-- Toute la partie déjà existante : alertes, situation financière, justificatifs, etc. -->
                                 <div class="alert alert-info">
                                     <i class="fa fa-info-circle me-2"/>
-Merci de prendre impérativement connaissance de ce document :
+                    Merci de prendre impérativement connaissance de ce document :
                                     <a href="/ersge_portal_ecolage/static/src/Procedure-demande-reduction-ecolage-2025-26.pdf" target="_blank">Demande de réduction d'écolage</a>
                                 </div>
                                 <div class="alert alert-warning">
                                     <i class="fa fa-info-circle me-2"/>
-En cas d'impossibilité d'envoi de documents numériques, vous pouvez déposer une version papier de ces documents au secrétariat.
+                    En cas d'impossibilité d'envoi de documents numériques, vous pouvez déposer une version papier de ces documents au secrétariat.
                                 </div>
 
                                 <div class="card mb-4">
@@ -959,7 +951,7 @@ Situation financière
                                             </div>
                                             <div class="col-12">
                                                 <label class="form-label fw-semibold">
-                                                            Pourcentage que représente le tarif sur votre revenu annuel familial brut <span class="text-danger">*</span>
+                                    Pourcentage que représente le tarif sur votre revenu annuel familial brut <span class="text-danger">*</span>
                                                 </label>
                                                 <div class="input-group">
                                                     <input type="text" class="form-control bg-light" readonly="readonly" id="income_percentage_display"/>
@@ -1106,31 +1098,38 @@ Budget familial mensuel
                                                                 <div class="col-md-6">
                                                                     <strong>Revenus Madame :</strong>
                                                                     <span id="total_revenus_madame_span" t-out="dossier.total_revenus_madame or 0.00"/>
- CHF</div>
+ CHF
+                                                                </div>
                                                                 <div class="col-md-6">
                                                                     <strong>Revenus Monsieur :</strong>
                                                                     <span id="total_revenus_monsieur_span" t-out="dossier.total_revenus_monsieur or 0.00"/>
- CHF</div>
+ CHF
+                                                                </div>
                                                                 <div class="col-md-6">
                                                                     <strong>Total revenus :</strong>
                                                                     <span id="total_revenus_span" t-out="dossier.total_revenus or 0.00"/>
- CHF</div>
+ CHF
+                                                                </div>
                                                                 <div class="col-md-6">
                                                                     <strong>Charges Madame :</strong>
                                                                     <span id="total_charges_madame_span" t-out="dossier.total_charges_madame or 0.00"/>
- CHF</div>
+ CHF
+                                                                </div>
                                                                 <div class="col-md-6">
                                                                     <strong>Charges Monsieur :</strong>
                                                                     <span id="total_charges_monsieur_span" t-out="dossier.total_charges_monsieur or 0.00"/>
- CHF</div>
+ CHF
+                                                                </div>
                                                                 <div class="col-md-6">
                                                                     <strong>Total charges :</strong>
                                                                     <span id="total_charges_span" t-out="dossier.total_charges or 0.00"/>
- CHF</div>
+ CHF
+                                                                </div>
                                                                 <div class="col-md-6">
                                                                     <strong>Solde :</strong>
                                                                     <span id="solde_span" t-out="dossier.solde or 0.00"/>
- CHF</div>
+ CHF
+                                                                </div>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -1163,7 +1162,6 @@ Merci de préciser
                                         </div>
                                     </div>
                                 </div>
-
                             </div>
                             <!-- Fin bloc réduction complémentaire -->
 
@@ -1353,66 +1351,7 @@ Tarif "Accompagnement cirque"</div>
     </div>
     <!-- Fin Section 6 -->
 
-    <!-- Section 7 : Solidarité -->
-    <div class="accordion-item border mb-3 rounded shadow-sm">
-        <h2 class="accordion-header" id="headingSolidarity">
-            <button class="accordion-button collapsed rounded" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSolidarity" aria-expanded="false" aria-controls="collapseSolidarity">
-                <i class="fa fa-handshake-o me-2 text-primary"/>
-                <strong>Solidarité</strong>
-            </button>
-        </h2>
-        <div id="collapseSolidarity" class="accordion-collapse collapse" aria-labelledby="headingSolidarity">
-            <div class="accordion-body">
-                <div class="card mb-4">
-                    <div class="card-header fw-semibold bg-light">
-                        <i class="fa fa-heart me-2 text-danger"/>
-Solidarité</div>
-                    <div class="card-body">
-                        <label class="form-label fw-semibold">Notre situation personnelle (fortune, revenu familial) nous permet d'honorer des écolages supérieurs et nous souhaitons contribuer au fonds de solidarité de l'école.</label>
-                        <div class="d-flex gap-3 mt-2">
-                            <div class="form-check">
-                                <input class="form-check-input" type="radio" name="solidarity_request" id="solidarity_no" value="no" t-att-checked="dossier.solidarity_request == 'no' or not dossier.solidarity_request"/>
-                                <label class="form-check-label" for="solidarity_no">Non</label>
-                            </div>
-                            <div class="form-check">
-                                <input class="form-check-input" type="radio" name="solidarity_request" id="solidarity_yes" value="yes" t-att-checked="dossier.solidarity_request == 'yes'"/>
-                                <label class="form-check-label" for="solidarity_yes">Oui</label>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div id="block_solidarity_yes" t-att-style="'display:' + ('block' if dossier.solidarity_request == 'yes' else 'none')">
-                    <div class="card mb-4">
-                        <div class="card-header fw-semibold bg-light">
-                            <i class="fa fa-money me-2 text-success"/>
-Soutenez l'école</div>
-                        <div class="card-body">
-                            <div class="row g-3">
-                                <div class="col-12">
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="checkbox" name="apply_solidarity_increase" id="apply_solidarity_increase" value="1" t-att-checked="dossier.apply_solidarity_increase"/>
-                                        <label class="form-check-label fw-semibold" for="apply_solidarity_increase">Je souhaite contribuer au fonds de solidarité de l'école</label>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label fw-semibold">J'augmente mon tarif mensuel en %</label>
-                                    <div class="input-group">
-                                        <input type="number" class="form-control" name="solidarity_percentage" id="solidarity_percentage" min="0" step="0.1" t-att-value="dossier.solidarity_percentage or 0"/>
-                                        <span class="input-group-text">%</span>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label fw-semibold">Total tarif mensuel (CHF)</label>
-                                    <input type="text" class="form-control bg-light" readonly="readonly" id="solidarity_total_amount" t-att-value="dossier.solidarity_total_amount or 0"/>
-                                    <div class="form-text text-muted">Zone non modifiable</div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+
 
     <!-- Section 8 : Échanges entre parents -->
     <div class="accordion-item border mb-3 rounded shadow-sm">

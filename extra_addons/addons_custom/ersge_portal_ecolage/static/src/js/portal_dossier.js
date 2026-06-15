@@ -199,27 +199,24 @@ function validateRequiredAndFormat(root) {
     }
 
    // ==================== 6. Nouveaux élèves ====================
-const newStudents = root.querySelectorAll('.new-student');
-newStudents.forEach((line, idx) => {
-    const first = line.querySelector('input[name^="new_student_firstname"]');
-    const last = line.querySelector('input[name^="new_student_lastname"]');
-    const birth = line.querySelector('input[name^="new_student_birthdate"]');
-    
-    // Vérifier si tous les champs obligatoires sont vides
-    const firstNameVal = first ? first.value.trim() : '';
-    const lastNameVal = last ? last.value.trim() : '';
-    const birthVal = birth ? birth.value : '';
-    
-    // Si tous sont vides, ignorer cette ligne (pas d'erreur)
-    if (firstNameVal === '' && lastNameVal === '' && birthVal === '') {
-        return; // passer à la ligne suivante
-    }
-    
-    // Sinon, valider que chaque champ est rempli
-    if (!first || firstNameVal === '') errors.push(`Prénom nouvel élève ${idx+1}`);
-    if (!last || lastNameVal === '') errors.push(`Nom nouvel élève ${idx+1}`);
-    if (!birth || birthVal === '') errors.push(`Date de naissance nouvel élève ${idx+1}`);
-});
+    const newStudents = root.querySelectorAll('.new-student');
+    newStudents.forEach((line, idx) => {
+        const first = line.querySelector('input[name^="new_student_firstname"]');
+        const last = line.querySelector('input[name^="new_student_lastname"]');
+        const birth = line.querySelector('input[name^="new_student_birthdate"]');
+        
+        const firstNameVal = first ? first.value.trim() : '';
+        const lastNameVal = last ? last.value.trim() : '';
+        const birthVal = birth ? birth.value : '';
+        
+        if (firstNameVal === '' && lastNameVal === '' && birthVal === '') {
+            return;
+        }
+        
+        if (!first || firstNameVal === '') errors.push(`Prénom nouvel élève ${idx+1}`);
+        if (!last || lastNameVal === '') errors.push(`Nom nouvel élève ${idx+1}`);
+        if (!birth || birthVal === '') errors.push(`Date de naissance nouvel élève ${idx+1}`);
+    });
 
     // ==================== 7. Forfaits ====================
     const forfaitSelects = root.querySelectorAll('.forfait-select');
@@ -395,6 +392,7 @@ function updateAllDiscounts() {
 
     if (!reductionRequested) {
         updateRecapTotals();
+        updateSolidarityTotal();
         return;
     }
 
@@ -444,6 +442,12 @@ function updateAllDiscounts() {
     const feeAfterRequested = base * (1 - requestedDisc / 100.0);
     setVal('monthly_fee_after_requested_display', feeAfterRequested);
 
+    // Force un événement input pour déclencher la mise à jour de la solidarité
+    const afterReductionField = document.getElementById('monthly_fee_after_requested_display');
+    if (afterReductionField) {
+        afterReductionField.dispatchEvent(new Event('input', { bubbles: true }));
+    }
+
     updateIncomePercentage(feeAtMax);
     updateRecapTotals();
     updateSolidarityTotal();
@@ -462,9 +466,8 @@ function getEcolageAfterDiscount() {
     let base = getEcolageBeforeSolidarity();
     const root = document.getElementById('ecolage_form_root');
     const solidarityYes = root ? getCheckedVal(root, 'solidarity_request') === 'yes' : false;
-    const applyIncrease = document.getElementById('apply_solidarity_increase');
     const percentInput = document.getElementById('solidarity_percentage');
-    if (solidarityYes && applyIncrease && applyIncrease.checked && percentInput) {
+    if (solidarityYes && percentInput) {
         const percent = parseFloat(percentInput.value) || 0;
         if (percent > 0) base = base * (1 + percent / 100);
     }
@@ -478,18 +481,27 @@ function updateSolidarityTotal() {
     const blockSolidarity = root.querySelector('#block_solidarity_yes');
     if (blockSolidarity) blockSolidarity.style.display = solidarityYes ? 'block' : 'none';
 
-    const applyIncrease = document.getElementById('apply_solidarity_increase');
     const percentInput = document.getElementById('solidarity_percentage');
     const totalField = document.getElementById('solidarity_total_amount');
     if (!totalField) return;
 
-    const base = getEcolageBeforeSolidarity();
-    const isChecked = applyIncrease && applyIncrease.checked;
+    // Récupérer la base : d'abord le montant après réduction, sinon le total mensuel hors réduction
+    let base = 0;
+    const afterReductionField = document.getElementById('monthly_fee_after_requested_display');
+    if (afterReductionField && afterReductionField.value) {
+        base = parseFloat(afterReductionField.value) || 0;
+    }
+    if (base === 0) {
+        const totalMonthlyField = document.getElementById('total_monthly_fee');
+        if (totalMonthlyField && totalMonthlyField.innerText) {
+            base = parseFloat(totalMonthlyField.innerText) || 0;
+        }
+    }
+
     const percent = percentInput ? (parseFloat(percentInput.value) || 0) : 0;
-    const total = (isChecked && percent > 0) ? base * (1 + percent / 100) : 0;
+    const total = (solidarityYes && percent > 0) ? base * (1 + percent / 100) : base;
     totalField.value = total.toFixed(2);
 }
-
 // Récapitulatif
 function updateRecapTotals() {
     const ecolageMonthly = getEcolageAfterDiscount();
@@ -855,6 +867,15 @@ function toggleMultiBilling(root) {
     }
 }
 
+// --- Toggle Réduction complémentaire selon Solidarité (ajout) ---
+function toggleComplementaryReduction() {
+    const solidarityYes = document.querySelector('input[name="solidarity_request"]:checked')?.value === 'yes';
+    const reductionComplementBlock = document.getElementById('block_reduction_complementaire_question');
+    if (reductionComplementBlock) {
+        reductionComplementBlock.style.display = solidarityYes ? 'none' : 'block';
+    }
+}
+
 // =====================================================================
 // INITIALISATION GLOBALE
 // =====================================================================
@@ -902,6 +923,12 @@ function initForm(root) {
     });
     // Mise à jour initiale des required conditionnels
     updateConditionalRequired(root);
+    // Initialisation de l'affichage de la réduction complémentaire selon solidarité
+    toggleComplementaryReduction();
+    // Forcer la mise à jour de la solidarité après un court délai pour être sûr que les champs existent
+    setTimeout(function() {
+        updateSolidarityTotal();
+    }, 100);
 }
 
 function attachDelegatedEvents(root) {
@@ -962,8 +989,9 @@ function attachDelegatedEvents(root) {
         if (target.name === 'solidarity_request') {
             updateSolidarityTotal();
             updateRecapTotals();
+            toggleComplementaryReduction();
         }
-        if (target.id === 'apply_solidarity_increase' || target.id === 'solidarity_percentage') {
+        if (target.id === 'solidarity_percentage') {
             updateSolidarityTotal();
             updateRecapTotals();
         }
@@ -998,8 +1026,7 @@ function attachDelegatedEvents(root) {
                 if (studentLineId) updateAfterSchoolMontant(studentLineId);
             }
         }
-
-        // Le bloc toggle_linked_families a été supprimé ici car désormais géré dans initForm
+        // Le bloc toggle_linked_families est déjà traité dans initForm
     });
 
     root.addEventListener('input', function(e) {
@@ -1025,6 +1052,13 @@ function attachDelegatedEvents(root) {
                 if (feedback) feedback.style.display = 'none';
             }
             updateAllDiscounts();
+        }
+        if (e.target.id === 'solidarity_percentage') {
+            updateSolidarityTotal();
+            updateRecapTotals();
+        }
+        if (e.target.id === 'monthly_fee_after_requested_display') {
+            updateSolidarityTotal();
         }
     });
 
@@ -1119,8 +1153,16 @@ function generateRecap(form) {
             const last = stud.querySelector('input[name^="student_lastname_"]')?.value || '';
             const birth = stud.querySelector('input[name^="student_birthdate_"]')?.value || '';
             const gender = stud.querySelector('select[name^="student_gender_"]')?.value === 'M' ? 'Masculin' : (stud.querySelector('select[name^="student_gender_"]')?.value === 'F' ? 'Féminin' : '');
-            const imageCheckbox = stud.querySelector('input[type="checkbox"][name^="student_image_rights_"]');
-            const imageRights = imageCheckbox ? (imageCheckbox.checked ? '✅ Accord' : '❌ Refus') : 'Non spécifié';
+            // Récupération du droit à l'image (radio)
+            let imageRightValue = '';
+            const radioChecked = stud.querySelector('input[type="radio"][name^="student_image_rights_"]:checked');
+            if (radioChecked) {
+                const val = radioChecked.value;
+                if (val === 'no') imageRightValue = '❌ Refus';
+                else if (val === 'internal') imageRightValue = '✅ Accord (interne)';
+                else if (val === 'internal_external') imageRightValue = '✅ Accord (interne et externe)';
+            }
+            const imageRights = imageRightValue || 'Non spécifié';
             html += `<li><strong>${first} ${last}</strong> (né(e) le ${birth}, ${gender}) - Droit à l'image : ${imageRights}</li>`;
         });
         html += `</ul></div>`;
@@ -1432,7 +1474,6 @@ document.addEventListener('DOMContentLoaded', function () {
             checkbox.addEventListener('change', update);
             update();
         } else {
-            // Réessayer si les éléments ne sont pas encore chargés
             setTimeout(initLinkedFamiliesToggle, 200);
         }
     }
