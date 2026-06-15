@@ -320,12 +320,8 @@ class PortalEcolage(http.Controller):
                         line_id = int(params.get(key))
                         line = request.env['ersge.dossier.student.line'].sudo().browse(line_id)
                         if line.exists() and line.dossier_id.id == dossier.id:
-                            checkbox_key = f'student_image_rights_{line_id}'
-                            hidden_key = f'student_image_rights_hidden_{line_id}'
-                            if checkbox_key in params:
-                                image_rights = params.get(checkbox_key) == '1'
-                            else:
-                                image_rights = params.get(hidden_key, '0') == '1'
+                            # Récupération de la valeur du radio (no, internal, internal_external)
+                            image_rights = params.get(f'student_image_rights_{line_id}', 'internal_external')
 
                             line.student_id.sudo().write({
                                 'firstname': params.get(f'student_firstname_{line_id}', ''),
