@@ -209,6 +209,17 @@ class DossierFamille(models.Model):
     other_profession = fields.Char(string="Profession autre représentant")
     other_employeur = fields.Char(string="Employeur autre représentant")
 
+    # === LIEN AVEC D'AUTRES FAMILLES (FAMILLE RECOMPOSÉE) ===
+    linked_families_comment = fields.Boolean(
+        string="Famille recomposée / liée à une autre famille",
+        help="Cocher si ce dossier est lié à une autre famille (ex: garde partagée)"
+    )
+
+    linked_families_comment_text = fields.Text(
+        string="Précisions sur la situation familiale",
+        help="Indiquez les liens avec d'autres familles, les enfants concernés, etc."
+    )
+
     # === CURRENCY ===
     currency_id = fields.Many2one(
         "res.currency",

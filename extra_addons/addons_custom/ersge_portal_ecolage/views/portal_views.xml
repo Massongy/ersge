@@ -296,9 +296,16 @@
                             </div>
                             <div class="mb-3">
                                 <label for="role" class="form-label">Rôle à attribuer</label>
-                                <select name="role" id="role" class="form-control">
-                                    <option value="parent2">Parent 2</option>
-                                    <option value="tutor">Tuteur</option>
+                                <select name="role" class="form-select">
+                                    <t t-if="current_role != 'parent1'">
+                                        <option value="parent1">Parent 1</option>
+                                    </t>
+                                    <t t-if="current_role != 'parent2'">
+                                        <option value="parent2">Parent 2</option>
+                                    </t>
+                                    <t t-if="current_role != 'tutor'">
+                                        <option value="tutor">Tuteur / Représentant légal</option>
+                                    </t>
                                 </select>
                             </div>
 

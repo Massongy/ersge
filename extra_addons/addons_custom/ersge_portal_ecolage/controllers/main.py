@@ -119,10 +119,8 @@ class PortalEcolage(http.Controller):
             # Ajout de l'accès direct pour le créateur
             new_dossier.add_acces(partner, role=role)
 
-            if role in ['parent1', 'parent2']:
-                return request.redirect(f'/my/ecolage/{new_dossier.id}/acces?just_created=1')
-            else:
-                return request.redirect(f'/my/ecolage/edit/{new_dossier.id}')
+            # Redirection après création
+            return request.redirect(f'/my/ecolage/{new_dossier.id}/acces?just_created=1')
 
         # GET : afficher le formulaire de choix
         existing_families = self._get_partner_families(partner)
@@ -146,6 +144,8 @@ class PortalEcolage(http.Controller):
     def portal_dossier_acces(self, dossier_id, **kwargs):
         partner = request.env.user.partner_id
         dossier = request.env['ersge.dossier.famille'].sudo().browse(dossier_id)
+        acces_courant = dossier.acces_ids.filtered(lambda a: a.partner_id == partner)
+        current_role = acces_courant.role if acces_courant else 'parent1'
 
         if not dossier.exists() or not self._check_dossier_access(dossier, partner):
             return request.redirect('/my/ecolage')
@@ -175,6 +175,7 @@ class PortalEcolage(http.Controller):
             'success':       success,
             'just_created':  just_created,
             'csrf_token':    request.csrf_token(),
+            'current_role':  current_role,
         })
 
     # ==================== ACCEPTER UNE INVITATION ====================
@@ -392,6 +393,11 @@ class PortalEcolage(http.Controller):
                     dossier_vals['comments'] = params.get('comments')
                 if 'signature_text' in params:
                     dossier_vals['signature_text'] = params.get('signature_text')
+
+                # ----- GESTION DES FAMILLES LIÉES -----
+                dossier_vals['linked_families_comment'] = params.get('has_linked_families') == '1'
+                if 'linked_families_comment_text' in params:
+                    dossier_vals['linked_families_comment_text'] = params.get('linked_families_comment_text')
 
                 # Facturation divisée
                 try:
@@ -766,7 +772,6 @@ class PortalEcolage(http.Controller):
         if dossier_id:
             return request.redirect(f'/my/ecolage/{dossier_id}/acces')
         return request.redirect('/my/ecolage')
-    
 
     @http.route('/my/ecolage/families', type='http', auth='user', website=True)
     def my_families(self, **kwargs):

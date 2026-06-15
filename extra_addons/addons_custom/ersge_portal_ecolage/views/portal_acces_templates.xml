@@ -133,12 +133,26 @@
                                         Rôle
                                     </label>
                                     <select name="role" class="form-select">
-                                        <option value="parent2">
-                                            Parent 2
-                                        </option>
-                                        <option value="tutor">
-                                            Tuteur / Autre
-                                        </option>
+                                        <!-- Si l'utilisateur est parent1, il peut inviter parent2 ou tuteur -->
+                                        <t t-if="current_role == 'parent1'">
+                                            <option value="parent2">Parent 2</option>
+                                            <option value="tutor">Tuteur / Autre</option>
+                                        </t>
+                                        <!-- Si l'utilisateur est parent2, il peut inviter parent1 ou tuteur -->
+                                        <t t-elif="current_role == 'parent2'">
+                                            <option value="parent1">Parent 1</option>
+                                            <option value="tutor">Tuteur / Autre</option>
+                                        </t>
+                                        <!-- Si l'utilisateur est tuteur, il peut inviter parent1 ou parent2 -->
+                                        <t t-elif="current_role == 'tutor'">
+                                            <option value="parent1">Parent 1</option>
+                                            <option value="parent2">Parent 2</option>
+                                        </t>
+                                        <!-- Fallback (au cas où) -->
+                                        <t t-else="">
+                                            <option value="parent2">Parent 2</option>
+                                            <option value="tutor">Tuteur / Autre</option>
+                                        </t>
                                     </select>
                                 </div>
                                 <div class="col-md-2 d-flex

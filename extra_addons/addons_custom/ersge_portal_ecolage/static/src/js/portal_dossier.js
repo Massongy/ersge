@@ -879,6 +879,21 @@ function initForm(root) {
         if (textarea.value !== v) textarea.value = v;
     });
     checkStudentInfoMsg();
+
+    // Toggle familles liées (initialisation + écouteur direct)
+    const toggleLinked = document.getElementById('toggle_linked_families');
+    const blockLinked  = document.getElementById('block_linked_families');
+    if (toggleLinked && blockLinked) {
+        blockLinked.style.display = toggleLinked.checked ? 'block' : 'none';
+        toggleLinked.addEventListener('change', function() {
+            blockLinked.style.display = this.checked ? 'block' : 'none';
+            if (!this.checked) {
+                const textarea = document.querySelector('textarea[name="linked_families_comment_text"]');
+                if (textarea) textarea.value = '';
+            }
+        });
+    }
+
     // Forfaits existants
     root.querySelectorAll('.forfait-select').forEach(function(select) {
         const lineId = select.getAttribute('data-line-id');
@@ -983,6 +998,8 @@ function attachDelegatedEvents(root) {
                 if (studentLineId) updateAfterSchoolMontant(studentLineId);
             }
         }
+
+        // Le bloc toggle_linked_families a été supprimé ici car désormais géré dans initForm
     });
 
     root.addEventListener('input', function(e) {
@@ -1398,4 +1415,27 @@ document.addEventListener('DOMContentLoaded', function () {
     }
     waitForForm();
 });
+
+// Toggle indépendant pour les familles liées
+(function() {
+    function initLinkedFamiliesToggle() {
+        var checkbox = document.getElementById('toggle_linked_families');
+        var block = document.getElementById('block_linked_families');
+        if (checkbox && block) {
+            function update() {
+                block.style.display = checkbox.checked ? 'block' : 'none';
+                if (!checkbox.checked) {
+                    var textarea = document.querySelector('textarea[name="linked_families_comment_text"]');
+                    if (textarea) textarea.value = '';
+                }
+            }
+            checkbox.addEventListener('change', update);
+            update();
+        } else {
+            // Réessayer si les éléments ne sont pas encore chargés
+            setTimeout(initLinkedFamiliesToggle, 200);
+        }
+    }
+    initLinkedFamiliesToggle();
+})();
 console.log("portal_dossier.js chargé - en attente du formulaire");

@@ -46,6 +46,42 @@
                         </div>
                     </div>
 
+                    <!-- Lien familles pour calcul écolage partagé -->
+                    <div class="card mb-4 border-info">
+                        <div class="card-header bg-info bg-opacity-10 fw-semibold">
+                            <i class="fa fa-link me-2 text-info"/>
+        Calcul de l'écolage partagé entre familles
+                        </div>
+                        <div class="card-body">
+                            <div class="alert alert-info mb-3">
+                                <i class="fa fa-info-circle me-2"/>
+            Si vos enfants sont répartis dans <strong>plusieurs familles</strong>
+            (situation de famille recomposée, garde partagée…), le calcul des
+            réductions liées au nombre d'enfants peut tenir compte de l'ensemble
+            des fratries. <strong>Remplissez votre dossier normalement</strong> —
+            le calcul final sera effectué directement avec la comptabilité de l'école.
+                            </div>
+
+                            <div class="form-check form-switch mb-3">
+                                <input class="form-check-input" type="checkbox" role="switch" id="toggle_linked_families" name="has_linked_families" value="1" t-att-checked="dossier.linked_families_comment"/>
+                                <label class="form-check-label fw-semibold" for="toggle_linked_families">
+                Lier ce dossier à d'autres familles pour le calcul des frais d'écolage
+                                </label>
+                            </div>
+
+                            <div id="block_linked_families" t-att-style="'display:' + ('block' if dossier.linked_families_comment else 'none')">
+                                <label class="form-label fw-semibold">
+                Précisez la ou les autre(s) famille(s) concernée(s)
+                                    <span class="text-danger">*</span>
+                                </label>
+                                <textarea class="form-control" name="linked_families_comment_text" rows="3" placeholder="Ex : Famille Martin (enfants Paul et Léa), dossier année 2025-2026…" t-att-data-initial="dossier.linked_families_comment_text or ''"></textarea>
+                                <div class="form-text text-muted">
+                La comptabilité prendra contact avec vous pour finaliser le calcul.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- ACCORDÉON -->
                     <div class="accordion mb-4" id="dossierAccordion">
 
