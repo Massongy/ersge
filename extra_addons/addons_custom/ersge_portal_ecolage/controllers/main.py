@@ -297,22 +297,22 @@ class PortalEcolage(http.Controller):
                 new_birthdates = form.getlist('new_student_birthdate[]')
                 new_genders = form.getlist('new_student_gender[]')
                 raw_image_rights = form.getlist('new_student_image_rights[]')
-
                 for i in range(len(new_firstnames)):
                     if new_firstnames[i] or new_lastnames[i]:
-                        vals_ir = (raw_image_rights[2 * i + 1] == '1' if (2 * i + 1) < len(raw_image_rights) else False)
+                        image_rights_val = raw_image_rights[i] if i < len(raw_image_rights) else 'no'
                         student = request.env['ersge.student'].sudo().create({
                             'firstname': new_firstnames[i],
                             'lastname': new_lastnames[i],
                             'birthdate': new_birthdates[i] or False,
                             'gender': new_genders[i],
-                            'image_rights': vals_ir,
+                            'image_rights': image_rights_val,
                             'family_id': dossier.family_id.id,
                         })
                         request.env['ersge.dossier.student.line'].sudo().create({
                             'dossier_id': dossier.id,
                             'student_id': student.id,
                         })
+                   
 
                 # ===== 2. MISE À JOUR ÉLÈVES EXISTANTS =====
                 for key in list(params.keys()):

@@ -23,7 +23,11 @@ class ErsgeStudent(models.Model):
         ],
         string="Sexe",
     )
-    image_rights = fields.Boolean(string="Droit à l'image", default=True)
+    image_rights = fields.Selection([
+        ('no', 'Non'),
+        ('internal', 'Oui, usage interne uniquement'),
+        ('internal_external', 'Oui, usage interne et externe'),
+    ], string="Droit à l'image", default='internal_external', required=True)
     pronote_id = fields.Char(string="Identifiant ProNote")
 
     family_id = fields.Many2one(

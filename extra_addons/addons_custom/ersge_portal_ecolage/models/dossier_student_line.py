@@ -15,8 +15,11 @@ class DossierStudentLine(models.Model):
     nom = fields.Char(string='Nom', related='student_id.lastname', store=True, readonly=False)
     date_naissance = fields.Date(string='Date de naissance', related='student_id.birthdate', store=True, readonly=False)
     sexe = fields.Selection([('M', 'Masculin'), ('F', 'Féminin')], string='Sexe', related='student_id.gender', store=True, readonly=False)
-    image_rights = fields.Boolean(string="Droit à l'image", related='student_id.image_rights', store=True, readonly=False)
-    
+    image_rights = fields.Selection([
+    ('no', 'Non'),
+    ('internal', 'Oui, usage interne uniquement'),
+    ('internal_external', 'Oui, usage interne et externe'),
+], string="Droit à l'image", default='no', required=True)
     classe = fields.Char(string='Classe')
     forfait_id = fields.Many2one('ersge.forfait', string='Forfait')
     forfait_montant_mensuel = fields.Float(related='forfait_id.montant_mensuel', store=True, readonly=True)

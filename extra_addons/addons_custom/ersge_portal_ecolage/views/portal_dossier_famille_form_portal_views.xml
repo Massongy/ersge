@@ -441,7 +441,7 @@ Dépôt
 
                                     <div class="alert alert-info">
                                         <i class="fa fa-info-circle me-2"/>
-                                        Lors de diverses activités organisées par l'école, les élèves peuvent être amenés à être photographiés ou filmés. Dans le cas de votre accord au droit à l'image, ces images pourront être utilisées à des fins pédagogiques ou pour notre communication (site internet, feuille d'info, rapport d'activité, espace parent, réseaux sociaux de l'école…) en toute vigilance et respect pour les élèves.
+                                    Lors de diverses activités organisées par l'école, les élèves peuvent être amenés à être photographiés ou filmés. Dans le cas de votre accord au droit à l'image, ces images pourront être utilisées à des fins pédagogiques ou pour notre communication (site internet, feuille d'info, rapport d'activité, espace parent, réseaux sociaux de l'école…) en toute vigilance et respect pour les élèves.
                                     </div>
 
                                     <!-- Élèves existants -->
@@ -480,11 +480,23 @@ Dépôt
                                                                 <option value="F" t-att-selected="line.student_id.gender == 'F'">Féminin</option>
                                                             </select>
                                                         </div>
-                                                        <div class="col-md-6 d-flex align-items-end">
-                                                            <div class="form-check form-switch">
-                                                                <input type="hidden" t-att-name="'student_image_rights_hidden_' + str(line.id)" value="0"/>
-                                                                <input class="form-check-input" type="checkbox" role="switch" t-att-name="'student_image_rights_' + str(line.id)" value="1" t-att-checked="line.student_id.image_rights"/>
-                                                                <label class="form-check-label fw-semibold">Droit à l'image</label>
+                                                        <div class="col-md-12">
+                                                            <label class="form-label fw-semibold">Droit à l'image</label>
+
+                                                            <div class="d-flex flex-wrap gap-3">
+                                                                <div class="form-check">
+
+                                                                    <input class="form-check-input" type="radio" t-att-name="'student_image_rights_' + str(line.id)" id="img_no_{line.id}" value="no" t-att-checked="line.student_id.image_rights == 'no'"/>
+                                                                    <label class="form-check-label" t-att-for="'img_no_' + str(line.id)">Non</label>
+                                                                </div>
+                                                                <div class="form-check">
+                                                                    <input class="form-check-input" type="radio" t-att-name="'student_image_rights_' + str(line.id)" id="img_int_{line.id}" value="internal" t-att-checked="line.student_id.image_rights == 'internal'"/>
+                                                                    <label class="form-check-label" t-att-for="'img_int_' + str(line.id)">Oui, usage interne uniquement</label>
+                                                                </div>
+                                                                <div class="form-check">
+                                                                    <input class="form-check-input" type="radio" t-att-name="'student_image_rights_' + str(line.id)" id="img_ext_{line.id}" value="internal_external" t-att-checked="line.student_id.image_rights == 'internal_external'"/>
+                                                                    <label class="form-check-label" t-att-for="'img_ext_' + str(line.id)">Oui, usage interne et externe</label>
+                                                                </div>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -505,9 +517,7 @@ Ajouter un élève
                                     <div id="new_student_info" class="alert alert-info mt-3" style="display: none;">
                                         <i class="fa fa-info-circle me-2"/>
                                         <strong>Attention :</strong> Les élèves que vous venez d'ajouter ne seront pris en compte qu'après avoir <strong>enregistré le dossier</strong>.
-                                        <button type="submit" name="form_action" value="save_and_stay" id="btn_save_and_reload" class="btn btn-sm btn-primary ms-3">
-    Enregistrer maintenant
-                                        </button>
+                                        <button type="submit" name="form_action" value="save_and_stay" id="btn_save_and_reload" class="btn btn-sm btn-primary ms-3">Enregistrer maintenant</button>
                                     </div>
 
                                     <!-- Template nouvel élève (caché) -->
@@ -543,22 +553,22 @@ Nouvel élève</span>
                                                             <option value="F">Féminin</option>
                                                         </select>
                                                     </div>
-                                                    <div class="col-md-6 d-flex align-items-end">
-                                                        <div class="form-check form-switch">
-                                                            <!-- Hidden input pour garantir la valeur 0 si décoché -->
-                                                            <input type="hidden" name="new_student_image_rights[]" value="0"/>
-                                                            <input class="form-check-input" type="checkbox" role="switch" name="new_student_image_rights[]" value="1" checked="checked"/>
-                                                            <label class="form-check-label fw-semibold">Droit à l'image</label>
-                                                        </div>
+                                                    <div class="col-md-12">
+                                                        <label class="form-label fw-semibold">Droit à l'image</label>
+                                                        <select class="form-select" name="new_student_image_rights[]">
+                                                            <option value="no">Non</option>
+                                                            <option value="internal">Oui, usage interne uniquement</option>
+                                                            <option value="internal_external" selected="selected">Oui, usage interne et externe</option>
+                                                        </select>
                                                     </div>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
 
-                                </div>
-                            </div>
-                        </div>
+                                </div>                                <!-- fermeture accordion-body -->
+                            </div>                            <!-- fermeture collapse -->
+                        </div>                        <!-- fermeture accordion-item -->
                         <!-- Fin Section 2 -->
 
                         <!-- Section 3 : Aide employeur -->
