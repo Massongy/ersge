@@ -502,6 +502,32 @@ function updateSolidarityTotal() {
     const total = (solidarityYes && percent > 0) ? base * (1 + percent / 100) : base;
     totalField.value = total.toFixed(2);
 }
+
+// ---------- Fonctions pour l'option CEF / proposition simple ----------
+function toggleCefOrProposal() {
+    const isCef = document.getElementById('cef_agreement')?.checked;
+    const blockSimple = document.getElementById('block_proposal_simple');
+    const blockCef = document.getElementById('block_cef_agreement');
+    if (blockSimple) blockSimple.style.display = isCef ? 'none' : 'block';
+    if (blockCef) blockCef.style.display = isCef ? 'block' : 'none';
+}
+
+function updateCefIncrease() {
+    const previous = parseFloat(document.getElementById('previous_monthly_fee')?.value || 0);
+    const proposed = parseFloat(document.getElementById('proposed_monthly_fee_cef')?.value || 0);
+    const infoSpan = document.getElementById('cef_increase_info');
+    if (infoSpan && previous > 0 && proposed > 0) {
+        const increase = ((proposed / previous) - 1) * 100;
+        if (increase >= 6) {
+            infoSpan.innerHTML = `<span class="text-success">✓ Augmentation de ${increase.toFixed(2)}% (≥6% requis).</span>`;
+        } else {
+            infoSpan.innerHTML = `<span class="text-danger">✗ L'augmentation doit être d'au moins 6% (actuellement ${increase.toFixed(2)}%).</span>`;
+        }
+    } else if (infoSpan) {
+        infoSpan.innerHTML = '';
+    }
+}
+
 // Récapitulatif
 function updateRecapTotals() {
     const ecolageMonthly = getEcolageAfterDiscount();
@@ -925,6 +951,9 @@ function initForm(root) {
     updateConditionalRequired(root);
     // Initialisation de l'affichage de la réduction complémentaire selon solidarité
     toggleComplementaryReduction();
+    // Initialisation des blocs CEF / proposition simple
+    toggleCefOrProposal();
+    updateCefIncrease();
     // Forcer la mise à jour de la solidarité après un court délai pour être sûr que les champs existent
     setTimeout(function() {
         updateSolidarityTotal();
@@ -995,6 +1024,13 @@ function attachDelegatedEvents(root) {
             updateSolidarityTotal();
             updateRecapTotals();
         }
+        // Gestion CEF
+        if (target.name === 'cef_or_proposal') {
+            toggleCefOrProposal();
+        }
+        if (target.id === 'previous_monthly_fee' || target.id === 'proposed_monthly_fee_cef') {
+            updateCefIncrease();
+        }
         if (target.name === 'payment_terms' || target.name === 'additional_reduction_request') {
             updateRecapTotals();
         }
@@ -1059,6 +1095,9 @@ function attachDelegatedEvents(root) {
         }
         if (e.target.id === 'monthly_fee_after_requested_display') {
             updateSolidarityTotal();
+        }
+        if (e.target.id === 'previous_monthly_fee' || e.target.id === 'proposed_monthly_fee_cef') {
+            updateCefIncrease();
         }
     });
 

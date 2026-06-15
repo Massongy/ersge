@@ -382,6 +382,11 @@ class DossierFamille(models.Model):
         string="Montant mensuel proposé", currency_field="currency_id"
     )
 
+    # === ACCORD CEF ANNÉE PRÉCÉDENTE ===
+    previous_cef_agreement = fields.Boolean(string="J'avais un accord CEF l'année dernière")
+    previous_monthly_fee = fields.Monetary(string="Tarif mensuel de l'année dernière", currency_field="currency_id")
+    proposed_monthly_fee_cef = fields.Monetary(string="Nouveau montant mensuel proposé", currency_field="currency_id")
+
     # Parascolaire
     after_school_request = fields.Selection(
         [("yes", "Oui"), ("no", "Non")], string="Demande parascolaire", default="no"

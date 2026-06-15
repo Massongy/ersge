@@ -312,7 +312,6 @@ class PortalEcolage(http.Controller):
                             'dossier_id': dossier.id,
                             'student_id': student.id,
                         })
-                   
 
                 # ===== 2. MISE À JOUR ÉLÈVES EXISTANTS =====
                 for key in list(params.keys()):
@@ -395,6 +394,20 @@ class PortalEcolage(http.Controller):
                 if 'linked_families_comment_text' in params:
                     dossier_vals['linked_families_comment_text'] = params.get('linked_families_comment_text')
 
+                # ----- GESTION CEF (Accord année précédente) -----
+                if 'previous_cef_agreement' in params:
+                    dossier_vals['previous_cef_agreement'] = params.get('previous_cef_agreement') == '1'
+                if 'previous_monthly_fee' in params:
+                    try:
+                        dossier_vals['previous_monthly_fee'] = float(params.get('previous_monthly_fee') or 0)
+                    except ValueError:
+                        dossier_vals['previous_monthly_fee'] = 0.0
+                if 'proposed_monthly_fee_cef' in params:
+                    try:
+                        dossier_vals['proposed_monthly_fee_cef'] = float(params.get('proposed_monthly_fee_cef') or 0)
+                    except ValueError:
+                        dossier_vals['proposed_monthly_fee_cef'] = 0.0
+
                 # Facturation divisée
                 try:
                     p1 = float(params.get('parent1_billing_amount', '0').replace(',', '.'))
@@ -439,14 +452,13 @@ class PortalEcolage(http.Controller):
                     existing = request.env['res.partner'].sudo().search([
                         ('firstname', '=', parent1_vals['firstname']),
                         ('lastname', '=', parent1_vals['lastname']),
-                        ('family_ids', 'in', dossier.family_id.id),  # Many2many
+                        ('family_ids', 'in', dossier.family_id.id),
                     ], limit=1)
                     if existing:
                         existing.sudo().write(parent1_vals)
                         dossier.sudo().write({'parent1_id': existing.id})
                     else:
                         np1 = request.env['res.partner'].sudo().create(parent1_vals)
-                        # Ajouter ce nouveau partenaire à la famille
                         dossier.family_id.write({'partner_ids': [(4, np1.id)]})
                         dossier.sudo().write({'parent1_id': np1.id})
 
@@ -786,19 +798,16 @@ class PortalEcolage(http.Controller):
         """Supprimer une famille si elle n'a pas de dossier."""
         partner = request.env.user.partner_id
         family = request.env['ersge.family'].sudo().browse(family_id)
-        
-        # Vérifier que le partenaire est bien membre de cette famille
+
         if partner not in family.partner_ids:
             return request.redirect('/my/ecolage/families?error=Vous n\'avez pas accès à cette famille.')
-        
-        # Vérifier que la famille n'a pas de dossiers associés
+
         if family.dossier_ids:
             return request.redirect('/my/ecolage/families?error=Impossible de supprimer une famille qui a des dossiers.')
-        
-        # Supprimer la famille
+
         family.unlink()
         return request.redirect('/my/ecolage/families?success=Famille supprimée avec succès.')
-    
+
     @http.route(['/my/ecolage/dossier/<int:dossier_id>/recap_html'], type='http', auth='user', website=True)
     def dossier_recap_html(self, dossier_id):
         dossier = request.env['ersge.dossier.famille'].sudo().browse(dossier_id)
