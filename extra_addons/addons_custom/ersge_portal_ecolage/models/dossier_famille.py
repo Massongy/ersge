@@ -214,7 +214,6 @@ class DossierFamille(models.Model):
         string="Famille recomposée / liée à une autre famille",
         help="Cocher si ce dossier est lié à une autre famille (ex: garde partagée)"
     )
-
     linked_families_comment_text = fields.Text(
         string="Précisions sur la situation familiale",
         help="Indiquez les liens avec d'autres familles, les enfants concernés, etc."
@@ -378,15 +377,29 @@ class DossierFamille(models.Model):
         store=True,
         widget="percentage",
     )
+
+    # === PROPOSITION D'ÉCOLAGE (UN SEUL MONTANT STOCKÉ) ===
+    proposal_type = fields.Selection([
+        ('simple', 'Proposition simple'),
+        ('cef', 'Accord CEF'),
+    ], string="Type de proposition", default='simple')
     proposed_monthly_amount = fields.Monetary(
         string="Montant mensuel proposé", currency_field="currency_id"
     )
+    proposal_annual_income = fields.Float(
+        string="Revenu annuel global (CHF)",
+        help="Revenu annuel total du ménage utilisé pour le calcul du pourcentage de l'écolage proposé."
+    )
 
-    # === ACCORD CEF ANNÉE PRÉCÉDENTE ===
+    # === ACCORD CEF ANNÉE PRÉCÉDENTE (informations complémentaires, non stockées comme montant principal) ===
     previous_cef_agreement = fields.Boolean(string="J'avais un accord CEF l'année dernière")
     previous_monthly_fee = fields.Monetary(string="Tarif mensuel de l'année dernière", currency_field="currency_id")
-    proposed_monthly_fee_cef = fields.Monetary(string="Nouveau montant mensuel proposé", currency_field="currency_id")
-
+    # Champ utilisé uniquement dans le formulaire pour saisir le nouveau montant, mais c'est proposed_monthly_amount qui est stocké
+    proposed_monthly_fee_cef = fields.Monetary(
+        string="Nouveau montant mensuel proposé",
+        currency_field="currency_id",
+        store=True  # <-- AJOUTER
+)
     # Parascolaire
     after_school_request = fields.Selection(
         [("yes", "Oui"), ("no", "Non")], string="Demande parascolaire", default="no"
@@ -494,7 +507,7 @@ class DossierFamille(models.Model):
         string="Revenus Monsieur",
         currency_field="currency_id",
         compute="_compute_budget_totals",
-        store=True,  # stocké pour la recherche et l'affichage rapide
+        store=True,
     )
     total_revenus_madame = fields.Monetary(
         string="Revenus Madame",
@@ -596,11 +609,8 @@ class DossierFamille(models.Model):
             lambda a: a.invite_email == email or (a.partner_id and a.partner_id.email == email)
         )
         if existing:
-            # Option : retourner l'existant ou lever une erreur
-            # Ici on retourne l'existant pour ne pas dupliquer
             return existing
         
-        # Création d'un accès toujours en attente, sans lier directement le partenaire
         acces_vals = {
             'dossier_id': self.id,
             'role': role,
@@ -802,7 +812,6 @@ class DossierFamille(models.Model):
     def _compute_solidarity_total(self):
         for rec in self:
             if rec.apply_solidarity_increase and rec.solidarity_percentage:
-                # Base = total mensuel après réduction (écolage) + parascolaire
                 base = (rec.monthly_fee_after_requested if rec.reduction_requested else rec.total_monthly_tuition) + rec.total_monthly_after_school
                 rec.solidarity_total_amount = base * (1 + rec.solidarity_percentage / 100.0)
             else:
@@ -900,6 +909,8 @@ class DossierFamille(models.Model):
                 defaults["same_address_as_parent1"] = (
                     dernier_dossier.same_address_as_parent1
                 )
+                defaults['proposal_annual_income'] = dernier_dossier.proposal_annual_income
+                defaults['proposal_type'] = dernier_dossier.proposal_type or 'simple'
 
                 # --- Copie des lignes budget depuis l'ancien dossier ---
                 if dernier_dossier.budget_line_ids:
@@ -1013,174 +1024,174 @@ class DossierFamille(models.Model):
         defaults["prefilled_from_previous"] = bool(dernier_dossier)
         return defaults
 
-        # -------------------------------------------------------------------------
-        # CRUD
-        # -------------------------------------------------------------------------
+    # -------------------------------------------------------------------------
+    # CRUD
+    # -------------------------------------------------------------------------
     @api.model_create_multi
     def create(self, vals_list):
-            _logger.warning("=== METHODE CREATE EXECUTEE ===")
-            for vals in vals_list:
-                if vals.get("name", "New") == "New":
-                    vals["name"] = (
-                        self.env["ir.sequence"].next_by_code("ersge.dossier.famille")
-                        or "New"
+        _logger.warning("=== METHODE CREATE EXECUTEE ===")
+        for vals in vals_list:
+            if vals.get("name", "New") == "New":
+                vals["name"] = (
+                    self.env["ir.sequence"].next_by_code("ersge.dossier.famille")
+                    or "New"
+                )
+            # Nettoyer les lignes budget sans category_id
+            if "budget_line_ids" in vals:
+                vals["budget_line_ids"] = [
+                    cmd
+                    for cmd in vals["budget_line_ids"]
+                    if not (cmd[0] == 0 and not cmd[2].get("category_id"))
+                ]
+            # ✅ Nettoyer les lignes parascolaires sans student_id
+            if "after_school_line_ids" in vals:
+                vals["after_school_line_ids"] = [
+                    cmd
+                    for cmd in vals["after_school_line_ids"]
+                    if not (cmd[0] == 0 and not cmd[2].get("student_id"))
+                ]
+
+        records = super().create(vals_list)
+
+        for record in records:
+            # Budget
+            record._init_budget_lines()
+
+            # Parents
+            if (
+                record.family_id
+                and record.parent1_firstname
+                and record.parent1_lastname
+            ):
+                partner1 = self.env["res.partner"].search(
+                    [
+                        ("firstname", "=", record.parent1_firstname),
+                        ("lastname", "=", record.parent1_lastname),
+                        ("family_id", "=", record.family_id.id),
+                    ],
+                    limit=1,
+                )
+                if not partner1:
+                    partner1 = self.env["res.partner"].create(
+                        {
+                            "name": f"{record.parent1_firstname} {record.parent1_lastname}",
+                            "firstname": record.parent1_firstname,
+                            "lastname": record.parent1_lastname,
+                            "email": record.parent1_email,
+                            "phone": record.parent1_phone,
+                            "phone_fixed": record.parent1_phone_fixed,
+                            "phone_pro": record.parent1_phone_pro,
+                            "street": record.parent1_street,
+                            "zip": record.parent1_zip,
+                            "city": record.parent1_city,
+                            "country_id": (
+                                record.parent1_country_id.id
+                                if record.parent1_country_id
+                                else False
+                            ),
+                            "profession": record.parent1_profession,
+                            "employer_name": record.parent1_employeur,
+                            "is_parent": True,
+                            "family_id": record.family_id.id,
+                        }
                     )
-                # Nettoyer les lignes budget sans category_id
-                if "budget_line_ids" in vals:
-                    vals["budget_line_ids"] = [
-                        cmd
-                        for cmd in vals["budget_line_ids"]
-                        if not (cmd[0] == 0 and not cmd[2].get("category_id"))
-                    ]
-                # ✅ Nettoyer les lignes parascolaires sans student_id
-                if "after_school_line_ids" in vals:
-                    vals["after_school_line_ids"] = [
-                        cmd
-                        for cmd in vals["after_school_line_ids"]
-                        if not (cmd[0] == 0 and not cmd[2].get("student_id"))
-                    ]
+                else:
+                    partner1.write(
+                        {
+                            "email": record.parent1_email,
+                            "phone": record.parent1_phone,
+                            "phone_fixed": record.parent1_phone_fixed,
+                            "phone_pro": record.parent1_phone_pro,
+                            "street": record.parent1_street,
+                            "zip": record.parent1_zip,
+                            "city": record.parent1_city,
+                            "country_id": (
+                                record.parent1_country_id.id
+                                if record.parent1_country_id
+                                else False
+                            ),
+                            "profession": record.parent1_profession,
+                            "employer_name": record.parent1_employeur,
+                        }
+                    )
+                record.parent1_id = partner1.id
 
-            records = super().create(vals_list)
-
-            for record in records:
-                # Budget
-                record._init_budget_lines()
-
-                # Parents
-                if (
-                    record.family_id
-                    and record.parent1_firstname
-                    and record.parent1_lastname
-                ):
-                    partner1 = self.env["res.partner"].search(
+                if record.parent2_firstname and record.parent2_lastname:
+                    partner2 = self.env["res.partner"].search(
                         [
-                            ("firstname", "=", record.parent1_firstname),
-                            ("lastname", "=", record.parent1_lastname),
+                            ("firstname", "=", record.parent2_firstname),
+                            ("lastname", "=", record.parent2_lastname),
                             ("family_id", "=", record.family_id.id),
                         ],
                         limit=1,
                     )
-                    if not partner1:
-                        partner1 = self.env["res.partner"].create(
+                    if not partner2:
+                        partner2 = self.env["res.partner"].create(
                             {
-                                "name": f"{record.parent1_firstname} {record.parent1_lastname}",
-                                "firstname": record.parent1_firstname,
-                                "lastname": record.parent1_lastname,
-                                "email": record.parent1_email,
-                                "phone": record.parent1_phone,
-                                "phone_fixed": record.parent1_phone_fixed,
-                                "phone_pro": record.parent1_phone_pro,
-                                "street": record.parent1_street,
-                                "zip": record.parent1_zip,
-                                "city": record.parent1_city,
+                                "name": f"{record.parent2_firstname} {record.parent2_lastname}",
+                                "firstname": record.parent2_firstname,
+                                "lastname": record.parent2_lastname,
+                                "email": record.parent2_email,
+                                "phone": record.parent2_phone,
+                                "phone_fixed": record.parent2_phone_fixed,
+                                "phone_pro": record.parent2_phone_pro,
+                                "street": record.parent2_street,
+                                "zip": record.parent2_zip,
+                                "city": record.parent2_city,
                                 "country_id": (
-                                    record.parent1_country_id.id
-                                    if record.parent1_country_id
+                                    record.parent2_country_id.id
+                                    if record.parent2_country_id
                                     else False
                                 ),
-                                "profession": record.parent1_profession,
-                                "employer_name": record.parent1_employeur,
+                                "profession": record.parent2_profession,
+                                "employer_name": record.parent2_employeur,
                                 "is_parent": True,
                                 "family_id": record.family_id.id,
                             }
                         )
                     else:
-                        partner1.write(
+                        partner2.write(
                             {
-                                "email": record.parent1_email,
-                                "phone": record.parent1_phone,
-                                "phone_fixed": record.parent1_phone_fixed,
-                                "phone_pro": record.parent1_phone_pro,
-                                "street": record.parent1_street,
-                                "zip": record.parent1_zip,
-                                "city": record.parent1_city,
+                                "email": record.parent2_email,
+                                "phone": record.parent2_phone,
+                                "phone_fixed": record.parent2_phone_fixed,
+                                "phone_pro": record.parent2_phone_pro,
+                                "street": record.parent2_street,
+                                "zip": record.parent2_zip,
+                                "city": record.parent2_city,
                                 "country_id": (
-                                    record.parent1_country_id.id
-                                    if record.parent1_country_id
+                                    record.parent2_country_id.id
+                                    if record.parent2_country_id
                                     else False
                                 ),
-                                "profession": record.parent1_profession,
-                                "employer_name": record.parent1_employeur,
+                                "profession": record.parent2_profession,
+                                "employer_name": record.parent2_employeur,
                             }
                         )
-                    record.parent1_id = partner1.id
+                    record.parent2_id = partner2.id
 
-                    if record.parent2_firstname and record.parent2_lastname:
-                        partner2 = self.env["res.partner"].search(
-                            [
-                                ("firstname", "=", record.parent2_firstname),
-                                ("lastname", "=", record.parent2_lastname),
-                                ("family_id", "=", record.family_id.id),
-                            ],
-                            limit=1,
-                        )
-                        if not partner2:
-                            partner2 = self.env["res.partner"].create(
-                                {
-                                    "name": f"{record.parent2_firstname} {record.parent2_lastname}",
-                                    "firstname": record.parent2_firstname,
-                                    "lastname": record.parent2_lastname,
-                                    "email": record.parent2_email,
-                                    "phone": record.parent2_phone,
-                                    "phone_fixed": record.parent2_phone_fixed,
-                                    "phone_pro": record.parent2_phone_pro,
-                                    "street": record.parent2_street,
-                                    "zip": record.parent2_zip,
-                                    "city": record.parent2_city,
-                                    "country_id": (
-                                        record.parent2_country_id.id
-                                        if record.parent2_country_id
-                                        else False
-                                    ),
-                                    "profession": record.parent2_profession,
-                                    "employer_name": record.parent2_employeur,
-                                    "is_parent": True,
-                                    "family_id": record.family_id.id,
-                                }
-                            )
-                        else:
-                            partner2.write(
-                                {
-                                    "email": record.parent2_email,
-                                    "phone": record.parent2_phone,
-                                    "phone_fixed": record.parent2_phone_fixed,
-                                    "phone_pro": record.parent2_phone_pro,
-                                    "street": record.parent2_street,
-                                    "zip": record.parent2_zip,
-                                    "city": record.parent2_city,
-                                    "country_id": (
-                                        record.parent2_country_id.id
-                                        if record.parent2_country_id
-                                        else False
-                                    ),
-                                    "profession": record.parent2_profession,
-                                    "employer_name": record.parent2_employeur,
-                                }
-                            )
-                        record.parent2_id = partner2.id
+            # Lignes parascolaires
+            if not record.after_school_line_ids and record.student_line_ids:
+                lines = [
+                    (
+                        0,
+                        0,
+                        {
+                            "student_id": line.student_id.id,
+                            "selected": False,
+                            "accueil_type": "jardin",
+                        },
+                    )
+                    for line in record.student_line_ids
+                    if line.student_id
+                ]
+                if lines:
+                    record.write({"after_school_line_ids": lines})
+                    _logger.warning(
+                        f"create(): {len(lines)} lignes parascolaires créées"
+                    )
 
-                # Lignes parascolaires
-                if not record.after_school_line_ids and record.student_line_ids:
-                    lines = [
-                        (
-                            0,
-                            0,
-                            {
-                                "student_id": line.student_id.id,
-                                "selected": False,
-                                "accueil_type": "jardin",
-                            },
-                        )
-                        for line in record.student_line_ids
-                        if line.student_id
-                    ]
-                    if lines:
-                        record.write({"after_school_line_ids": lines})
-                        _logger.warning(
-                            f"create(): {len(lines)} lignes parascolaires créées"
-                        )
-
-            return records    
+        return records    
     
     # -------------------------------------------------------------------------
     # Onchange methods
@@ -1198,7 +1209,6 @@ class DossierFamille(models.Model):
             students = self.env["ersge.student"].search(
                 [("family_id", "=", self.family_id.id)]
             )
-            # Construire TOUTE la liste en une seule fois
             lines = [
                 (
                     0,
@@ -1212,9 +1222,8 @@ class DossierFamille(models.Model):
                 for student in students
             ]
             if lines:
-                self.after_school_line_ids = lines  # assignation directe en onchange
+                self.after_school_line_ids = lines
         elif self.after_school_request == "no":
-            # Optionnel : vider les lignes si on repasse à "non"
             self.after_school_line_ids = [(5, 0, 0)]
 
     # -------------------------------------------------------------------------
@@ -1280,7 +1289,6 @@ class DossierFamille(models.Model):
         return result
 
     def web_read(self, specification):
-        # D'abord créer les lignes manquantes
         for record in self:
             if record.student_line_ids and not record.after_school_line_ids:
                 lines = [
@@ -1301,6 +1309,5 @@ class DossierFamille(models.Model):
                     _logger.warning(
                         f"web_read(): {len(lines)} lignes créées pour dossier {record.id}"
                     )
-        # Ensuite lire — les lignes sont maintenant en base
         result = super().web_read(specification)
         return result

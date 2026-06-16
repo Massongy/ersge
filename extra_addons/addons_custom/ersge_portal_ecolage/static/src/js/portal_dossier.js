@@ -510,6 +510,18 @@ function toggleCefOrProposal() {
     const blockCef = document.getElementById('block_cef_agreement');
     if (blockSimple) blockSimple.style.display = isCef ? 'none' : 'block';
     if (blockCef) blockCef.style.display = isCef ? 'block' : 'none';
+    
+        // Vider le champ opposé
+    if (isCef) {
+        document.getElementById('proposed_monthly_amount').value = '';
+    } else {
+        document.getElementById('proposed_monthly_fee_cef').value = '';
+    }
+    // Masquer le warning de la proposition simple lorsqu'on bascule sur CEF
+    const warningBlock = document.getElementById('proposal_warning_block');
+    if (warningBlock) warningBlock.style.display = 'none';
+    // Recalculer le pourcentage de la proposition (si un champ est rempli)
+    updateProposalPercentage();
 }
 
 function updateCefIncrease() {
@@ -525,6 +537,35 @@ function updateCefIncrease() {
         }
     } else if (infoSpan) {
         infoSpan.innerHTML = '';
+    }
+}
+
+// ---------- Fonction pour le calcul du pourcentage de la proposition ----------
+function updateProposalPercentage() {
+    // Déterminer quel champ de montant est actif (CEF ou simple)
+    const isCef = document.getElementById('cef_agreement')?.checked;
+    let monthly = 0;
+    if (isCef) {
+        monthly = parseFloat(document.getElementById('proposed_monthly_fee_cef')?.value || 0);
+    } else {
+        monthly = parseFloat(document.getElementById('proposed_monthly_amount')?.value || 0);
+    }
+    const annualIncome = parseFloat(document.getElementById('proposal_annual_income')?.value || 0);
+    const percentageDisplay = document.getElementById('proposal_percentage_display');
+    const warningBlock = document.getElementById('proposal_warning_block');
+
+    if (percentageDisplay) {
+        if (annualIncome > 0 && monthly > 0) {
+            const annualProposal = monthly * 12;
+            const percentage = (annualProposal / annualIncome) * 100;
+            percentageDisplay.value = percentage.toFixed(2);
+            if (warningBlock) {
+                warningBlock.style.display = percentage < 14 ? 'block' : 'none';
+            }
+        } else {
+            percentageDisplay.value = '0.00';
+            if (warningBlock) warningBlock.style.display = 'none';
+        }
     }
 }
 
@@ -954,6 +995,8 @@ function initForm(root) {
     // Initialisation des blocs CEF / proposition simple
     toggleCefOrProposal();
     updateCefIncrease();
+    // Initialisation du calcul du pourcentage de la proposition
+    updateProposalPercentage();
     // Forcer la mise à jour de la solidarité après un court délai pour être sûr que les champs existent
     setTimeout(function() {
         updateSolidarityTotal();
@@ -1098,6 +1141,10 @@ function attachDelegatedEvents(root) {
         }
         if (e.target.id === 'previous_monthly_fee' || e.target.id === 'proposed_monthly_fee_cef') {
             updateCefIncrease();
+        }
+        // Mise à jour du pourcentage de la proposition
+        if (e.target.id === 'proposed_monthly_amount' || e.target.id === 'proposal_annual_income' || e.target.id === 'proposed_monthly_fee_cef') {
+            updateProposalPercentage();
         }
     });
 

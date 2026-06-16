@@ -291,6 +291,8 @@ class PortalEcolage(http.Controller):
                 params = request.params
                 form = request.httprequest.form
 
+                _logger.info("=== DÉBUT POST dossier %s ===", dossier_id)
+
                 # ===== 1. NOUVEAUX ÉLÈVES =====
                 new_firstnames = form.getlist('new_student_firstname[]')
                 new_lastnames = form.getlist('new_student_lastname[]')
@@ -394,19 +396,61 @@ class PortalEcolage(http.Controller):
                 if 'linked_families_comment_text' in params:
                     dossier_vals['linked_families_comment_text'] = params.get('linked_families_comment_text')
 
-                # ----- GESTION CEF (Accord année précédente) -----
-                if 'previous_cef_agreement' in params:
-                    dossier_vals['previous_cef_agreement'] = params.get('previous_cef_agreement') == '1'
-                if 'previous_monthly_fee' in params:
+                # =================================================================
+                # GESTION DE LA PROPOSITION D'ÉCOLAGE (exclusif: simple ou CEF)
+                # =================================================================
+                _logger.info("=== GESTION CEF / PROPOSITION ===")
+                _logger.info("cef_or_proposal = %s", params.get('cef_or_proposal'))
+                _logger.info("proposed_monthly_amount (reçu) = %s", params.get('proposed_monthly_amount'))
+                _logger.info("proposed_monthly_fee_cef (reçu) = %s", params.get('proposed_monthly_fee_cef'))
+                _logger.info("previous_monthly_fee (reçu) = %s", params.get('previous_monthly_fee'))
+                _logger.info("proposal_annual_income (reçu) = %s", params.get('proposal_annual_income'))
+
+                # Récupérer le type de proposition depuis le formulaire
+                cef_or_proposal = params.get('cef_or_proposal', 'simple')
+
+                if cef_or_proposal == 'cef':
+                    # Stocker le montant CEF dans son champ dédié
+                    cef_amount = params.get('proposed_monthly_fee_cef', '0')
                     try:
-                        dossier_vals['previous_monthly_fee'] = float(params.get('previous_monthly_fee') or 0)
-                    except ValueError:
-                        dossier_vals['previous_monthly_fee'] = 0.0
-                if 'proposed_monthly_fee_cef' in params:
-                    try:
-                        dossier_vals['proposed_monthly_fee_cef'] = float(params.get('proposed_monthly_fee_cef') or 0)
+                        dossier_vals['proposed_monthly_fee_cef'] = float(cef_amount) if cef_amount else 0.0
                     except ValueError:
                         dossier_vals['proposed_monthly_fee_cef'] = 0.0
+                    # Vider le champ "proposition simple" (exclusif)
+                    dossier_vals['proposed_monthly_amount'] = 0.0
+                    # Infos CEF
+                    dossier_vals['previous_cef_agreement'] = True
+                    dossier_vals['proposal_type'] = 'cef'
+                    if 'previous_monthly_fee' in params:
+                        try:
+                            dossier_vals['previous_monthly_fee'] = float(params.get('previous_monthly_fee') or 0)
+                        except ValueError:
+                            dossier_vals['previous_monthly_fee'] = 0.0
+
+                else:
+                    # Stocker le montant simple dans son champ dédié
+                    # (déjà récupéré via simple_fields, mais on s'assure qu'il est présent)
+                    if 'proposed_monthly_amount' not in dossier_vals:
+                        dossier_vals['proposed_monthly_amount'] = 0.0
+                    # Vider le champ CEF (exclusif)
+                    dossier_vals['proposed_monthly_fee_cef'] = 0.0
+                    dossier_vals['proposal_type'] = 'simple'
+                    dossier_vals['previous_cef_agreement'] = False
+                    dossier_vals['previous_monthly_fee'] = 0.0
+
+                # ----- REVENU ANNUEL POUR LE CALCUL DU POURCENTAGE DE LA PROPOSITION -----
+                if 'proposal_annual_income' in params:
+                    try:
+                        dossier_vals['proposal_annual_income'] = float(params.get('proposal_annual_income') or 0)
+                    except ValueError:
+                        dossier_vals['proposal_annual_income'] = 0.0
+
+                _logger.info("dossier_vals après gestion CEF: %s", dossier_vals)
+                _logger.info("=== LOGS CEF ===")
+                _logger.info("cef_or_proposal = %s", params.get('cef_or_proposal'))
+                _logger.info("proposed_monthly_fee_cef reçu = %s", params.get('proposed_monthly_fee_cef'))
+                _logger.info("proposed_monthly_amount reçu = %s", params.get('proposed_monthly_amount'))
+                _logger.info("dossier_vals avant écriture = %s", dossier_vals)
 
                 # Facturation divisée
                 try:
@@ -423,7 +467,11 @@ class PortalEcolage(http.Controller):
                     dossier_vals['parent2_billing_amount'] = 0.0
 
                 if dossier_vals:
+                    _logger.info("=== ÉCRITURE DE dossier_vals ===")
                     dossier.sudo().write(dossier_vals)
+                    _logger.info("Écriture terminée.")
+                else:
+                    _logger.warning("Aucune valeur à écrire pour dossier_vals")
 
                 # ===== 4. PARENT 1 =====
                 parent1_vals = {

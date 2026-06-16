@@ -1013,8 +1013,8 @@ Budget familial mensuel
                                                                     <thead class="table-light">
                                                                         <tr>
                                                                             <th>Catégorie</th>
-                                                                            <th style="width: 120px">Madame (CHF)</th>
-                                                                            <th style="width: 120px">Monsieur (CHF)</th>
+                                                                            <th style="width: 120px">Parent 1 (CHF)</th>
+                                                                            <th style="width: 120px">Parent 2 (CHF)</th>
                                                                         </tr>
                                                                     </thead>
                                                                     <tbody>
@@ -1043,8 +1043,8 @@ Budget familial mensuel
                                                                     <thead class="table-light">
                                                                         <tr>
                                                                             <th>Catégorie</th>
-                                                                            <th style="width: 120px">Madame (CHF)</th>
-                                                                            <th style="width: 120px">Monsieur (CHF)</th>
+                                                                            <th style="width: 120px">Parent 1 (CHF)</th>
+                                                                            <th style="width: 120px">Parent 2 (CHF)</th>
                                                                         </tr>
                                                                     </thead>
                                                                     <tbody>
@@ -1072,12 +1072,12 @@ Budget familial mensuel
                                                             <h4 class="mt-3">Totaux</h4>
                                                             <div class="row">
                                                                 <div class="col-md-6">
-                                                                    <strong>Revenus Madame :</strong>
+                                                                    <strong>Revenus Parent 1 :</strong>
                                                                     <span id="total_revenus_madame_span" t-out="dossier.total_revenus_madame or 0.00"/>
  CHF
                                                                 </div>
                                                                 <div class="col-md-6">
-                                                                    <strong>Revenus Monsieur :</strong>
+                                                                    <strong>Revenus Parent 2 :</strong>
                                                                     <span id="total_revenus_monsieur_span" t-out="dossier.total_revenus_monsieur or 0.00"/>
  CHF
                                                                 </div>
@@ -1087,12 +1087,12 @@ Budget familial mensuel
  CHF
                                                                 </div>
                                                                 <div class="col-md-6">
-                                                                    <strong>Charges Madame :</strong>
+                                                                    <strong>Charges Parent 1 :</strong>
                                                                     <span id="total_charges_madame_span" t-out="dossier.total_charges_madame or 0.00"/>
  CHF
                                                                 </div>
                                                                 <div class="col-md-6">
-                                                                    <strong>Charges Monsieur :</strong>
+                                                                    <strong>Charges Parent 2 :</strong>
                                                                     <span id="total_charges_monsieur_span" t-out="dossier.total_charges_monsieur or 0.00"/>
  CHF
                                                                 </div>
@@ -1115,6 +1115,7 @@ Budget familial mensuel
                                     </div>
                                 </div>
 
+                                <!-- ========== MERCI DE PRÉCISER (avec persistance des radios) ========== -->
                                 <div class="card mb-4">
                                     <div class="card-header fw-semibold bg-light">
                                         <i class="fa fa-handshake-o me-2"/>
@@ -1124,7 +1125,7 @@ Merci de préciser
                                         <!-- Option 1 : Proposition simple -->
                                         <div class="mb-4">
                                             <div class="form-check">
-                                                <input class="form-check-input" type="radio" name="cef_or_proposal" id="proposal_simple" value="simple" checked="checked"/>
+                                                <input class="form-check-input" type="radio" name="cef_or_proposal" id="proposal_simple" value="simple" t-att-checked="dossier.proposal_type == 'simple' or not dossier.proposal_type"/>
                                                 <label class="form-check-label fw-semibold" for="proposal_simple">Je propose un montant mensuel</label>
                                             </div>
                                             <div id="block_proposal_simple" class="mt-2 ps-4">
@@ -1133,13 +1134,30 @@ Merci de préciser
                                                         <label class="form-label fw-semibold">Merci d'indiquer l'écolage mensuel que vous proposez <span class="text-danger">*</span>
                                                         </label>
                                                         <div class="input-group">
-                                                            <input type="number" class="form-control" name="proposed_monthly_amount" t-att-value="dossier.proposed_monthly_amount or ''"/>
+                                                            <input type="number" class="form-control" name="proposed_monthly_amount" id="proposed_monthly_amount" step="0.01" lang="fr" t-att-value="dossier.proposed_monthly_amount or ''"/>
                                                             <span class="input-group-text">CHF</span>
                                                         </div>
                                                     </div>
                                                     <div class="col-md-6">
-                                                        <label class="form-label fw-semibold">Total proposé (CHF)</label>
-                                                        <input type="text" class="form-control bg-light" readonly="readonly" t-att-value="dossier.proposed_monthly_amount or 0"/>
+                                                        <label class="form-label fw-semibold">Revenu annuel global de la famille <span class="text-danger">*</span>
+                                                        </label>
+                                                        <div class="input-group">
+                                                            <input type="number" class="form-control" name="proposal_annual_income" id="proposal_annual_income" step="0.01" lang="fr" t-att-value="dossier.proposal_annual_income or ''"/>
+                                                            <span class="input-group-text">CHF</span>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-12" id="proposal_percentage_block">
+                                                        <label class="form-label fw-semibold">Pourcentage du revenu</label>
+                                                        <div class="input-group">
+                                                            <input type="text" class="form-control bg-light" readonly="readonly" id="proposal_percentage_display" value="0.00"/>
+                                                            <span class="input-group-text">%</span>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-12" id="proposal_warning_block" style="display:none;">
+                                                        <div class="alert alert-warning" role="alert">
+                                                            <i class="fa fa-exclamation-triangle me-2"></i>
+                                                            <strong>Attention :</strong> L'expérience nous a montré qu'un écolage représentant <strong>14%</strong> du revenu global de la famille est un point de départ.
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>
@@ -1148,10 +1166,10 @@ Merci de préciser
                                         <!-- Option 2 : Accord CEF -->
                                         <div>
                                             <div class="form-check">
-                                                <input class="form-check-input" type="radio" name="cef_or_proposal" id="cef_agreement" value="cef"/>
+                                                <input class="form-check-input" type="radio" name="cef_or_proposal" id="cef_agreement" value="cef" t-att-checked="dossier.proposal_type == 'cef'"/>
                                                 <label class="form-check-label fw-semibold" for="cef_agreement">J’ai eu un accord CEF l’année dernière – j’augmente mon écolage de 6% minimum</label>
                                             </div>
-                                            <div id="block_cef_agreement" class="mt-2 ps-4" style="display:none;">
+                                            <div id="block_cef_agreement" class="mt-2 ps-4" t-att-style="'display:' + ('block' if dossier.proposal_type == 'cef' else 'none')">
                                                 <div class="alert alert-info" role="alert">
                                                     <i class="fa fa-info-circle me-2"></i>
                     Si votre situation financière familiale n'a pas évoluée, vous pouvez contribuer pour un montant d'écolage dont l'augmentation doit être <strong>au minimum 6%</strong>, pour tenir compte du changement de classe.<br/>
@@ -1208,7 +1226,10 @@ Merci de préciser
 Inscription au parascolaire
                             </div>
                             <div class="card-body">
-                                <label class="form-label fw-semibold">Souhaitez-vous inscrire votre enfant au parascolaire ?</label>
+                                <label class="form-label fw-semibold">
+    Souhaitez-vous inscrire votre enfant au parascolaire ?
+                                    <span class="badge bg-info ms-2" style="font-size: 0.8rem;">en complément d’un forfait</span>
+                                </label>
                                 <div class="d-flex gap-3">
                                     <div class="form-check">
                                         <input class="form-check-input" type="radio" name="after_school_request" id="after_school_yes" value="yes" t-att-checked="dossier.after_school_request == 'yes'"/>
