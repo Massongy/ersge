@@ -50,33 +50,31 @@
                     <div class="card mb-4 border-info">
                         <div class="card-header bg-info bg-opacity-10 fw-semibold">
                             <i class="fa fa-link me-2 text-info"/>
-        Calcul de l'écolage partagé entre familles
+                            Calcul de l'écolage partagé entre familles
                         </div>
                         <div class="card-body">
                             <div class="alert alert-info mb-3">
                                 <i class="fa fa-info-circle me-2"/>
-            Si vos enfants sont répartis dans <strong>plusieurs familles</strong>
-            (situation de famille recomposée, garde partagée…), le calcul des
-            réductions liées au nombre d'enfants peut tenir compte de l'ensemble
-            des fratries. <strong>Remplissez votre dossier normalement</strong> —
-            le calcul final sera effectué directement avec la comptabilité de l'école.
+                                Si vos enfants sont répartis dans <strong>plusieurs familles</strong>
+                                (situation de famille recomposée, garde partagée…), le calcul des
+                                réductions liées au nombre d'enfants peut tenir compte de l'ensemble
+                                des fratries. <strong>Remplissez votre dossier normalement</strong> —
+                                le calcul final sera effectué directement avec la comptabilité de l'école.
                             </div>
-
                             <div class="form-check form-switch mb-3">
                                 <input class="form-check-input" type="checkbox" role="switch" id="toggle_linked_families" name="has_linked_families" value="1" t-att-checked="dossier.linked_families_comment"/>
                                 <label class="form-check-label fw-semibold" for="toggle_linked_families">
-                Lier ce dossier à d'autres familles pour le calcul des frais d'écolage
+                                    Lier ce dossier à d'autres familles pour le calcul des frais d'écolage
                                 </label>
                             </div>
-
                             <div id="block_linked_families" t-att-style="'display:' + ('block' if dossier.linked_families_comment else 'none')">
                                 <label class="form-label fw-semibold">
-                Précisez la ou les autre(s) famille(s) concernée(s)
+                                    Précisez la ou les autre(s) famille(s) concernée(s)
                                     <span class="text-danger">*</span>
                                 </label>
                                 <textarea class="form-control" name="linked_families_comment_text" rows="3" placeholder="Ex : Famille Martin (enfants Paul et Léa), dossier année 2025-2026…" t-att-data-initial="dossier.linked_families_comment_text or ''"></textarea>
                                 <div class="form-text text-muted">
-                La comptabilité prendra contact avec vous pour finaliser le calcul.
+                                    La comptabilité prendra contact avec vous pour finaliser le calcul.
                                 </div>
                             </div>
                         </div>
@@ -85,7 +83,7 @@
                     <!-- ACCORDÉON -->
                     <div class="accordion mb-4" id="dossierAccordion">
 
-                        <!-- Section 1 : Informations parents -->
+                        <!-- SECTION 1 : Informations parents -->
                         <div class="accordion-item border mb-3 rounded shadow-sm">
                             <h2 class="accordion-header" id="headingParents">
                                 <button class="accordion-button rounded" type="button" data-bs-toggle="collapse" data-bs-target="#collapseParents" aria-expanded="true" aria-controls="collapseParents">
@@ -95,12 +93,11 @@
                             </h2>
                             <div id="collapseParents" class="accordion-collapse collapse show" aria-labelledby="headingParents">
                                 <div class="accordion-body">
-
                                     <!-- Représentant légal -->
                                     <div class="card mb-4">
                                         <div class="card-header fw-semibold bg-light">
                                             <i class="fa fa-gavel me-2"/>
-Représentant légal
+                                            Représentant légal
                                         </div>
                                         <div class="card-body">
                                             <label class="form-label fw-semibold">Qui exerce la représentation légale ? <span class="text-danger">*</span>
@@ -125,12 +122,11 @@ Représentant légal
                                             </div>
                                         </div>
                                     </div>
-
                                     <!-- Cotisation annuelle -->
                                     <div class="card mb-2">
                                         <div class="card-header fw-semibold bg-light">
                                             <i class="fa fa-university me-2"/>
-Cotisation annuelle
+                                            Cotisation annuelle
                                         </div>
                                         <div class="card-body">
                                             <div class="alert alert-info">
@@ -143,13 +139,12 @@ Cotisation annuelle
                                             </div>
                                         </div>
                                     </div>
-
-                                    <!-- Bloc Autre représentant -->
+                                    <!-- Autre représentant -->
                                     <div id="block_other" t-att-style="'display:' + ('block' if dossier.legal_representation == 'other' else 'none')">
                                         <div class="card mb-4">
                                             <div class="card-header fw-semibold bg-light">
                                                 <i class="fa fa-user me-2 text-warning"/>
-Autre représentant légal
+                                                Autre représentant légal
                                             </div>
                                             <div class="card-body">
                                                 <div class="row g-3">
@@ -226,13 +221,12 @@ Autre représentant légal
                                             </div>
                                         </div>
                                     </div>
-
-                                    <!-- Bloc Parent 1 -->
+                                    <!-- Parent 1 -->
                                     <div id="block_parent1" t-att-style="'display:' + ('block' if dossier.legal_representation in ('both', 'father_only') else 'none')">
                                         <div class="card mb-4">
                                             <div class="card-header fw-semibold bg-light">
                                                 <i class="fa fa-user me-2 text-primary"/>
-Parent 1
+                                                Parent 1
                                             </div>
                                             <div class="card-body">
                                                 <div class="row g-3">
@@ -304,13 +298,12 @@ Parent 1
                                             </div>
                                         </div>
                                     </div>
-
-                                    <!-- Bloc Parent 2 -->
+                                    <!-- Parent 2 -->
                                     <div id="block_parent2" t-att-style="'display:' + ('block' if dossier.legal_representation in ('both', 'mother_only') else 'none')">
                                         <div class="card mb-4">
                                             <div class="card-header fw-semibold bg-light">
                                                 <i class="fa fa-user me-2 text-success"/>
-Parent 2
+                                                Parent 2
                                             </div>
                                             <div class="card-body">
                                                 <div class="row g-3">
@@ -353,7 +346,6 @@ Parent 2
                                                             <label class="form-check-label fw-semibold" for="same_address_as_parent1">Même adresse que le parent 1</label>
                                                         </div>
                                                     </div>
-                                                    <!-- Adresse parent 2 (masquée si même adresse) -->
                                                     <div id="block_parent2_address" class="col-12" t-att-style="'display:' + ('none' if dossier.same_address_as_parent1 else 'block')">
                                                         <div class="row g-3">
                                                             <div class="col-12">
@@ -370,7 +362,6 @@ Parent 2
                                                             </div>
                                                         </div>
                                                     </div>
-                                                    <!-- Pays parent 2 : masqué si même adresse que parent 1 -->
                                                     <div id="block_parent2_country" class="col-md-6" t-att-style="'display:' + ('none' if dossier.same_address_as_parent1 else 'block')">
                                                         <label class="form-label fw-semibold">Pays</label>
                                                         <select class="form-select" name="parent2_country_id">
@@ -394,12 +385,11 @@ Parent 2
                                             </div>
                                         </div>
                                     </div>
-
                                     <!-- Dépôt -->
                                     <div class="card mb-2">
                                         <div class="card-header fw-semibold bg-light">
                                             <i class="fa fa-university me-2"/>
-Dépôt
+                                            Dépôt
                                         </div>
                                         <div class="card-body">
                                             <div class="alert alert-info">
@@ -422,13 +412,11 @@ Dépôt
                                             </div>
                                         </div>
                                     </div>
-
                                 </div>
                             </div>
                         </div>
-                        <!-- Fin Section 1 -->
 
-                        <!-- Section 2 : Élèves -->
+                        <!-- SECTION 2 : Élèves -->
                         <div class="accordion-item border mb-3 rounded shadow-sm">
                             <h2 class="accordion-header" id="headingStudents">
                                 <button class="accordion-button collapsed rounded" type="button" data-bs-toggle="collapse" data-bs-target="#collapseStudents" aria-expanded="false" aria-controls="collapseStudents">
@@ -438,13 +426,10 @@ Dépôt
                             </h2>
                             <div id="collapseStudents" class="accordion-collapse collapse" aria-labelledby="headingStudents">
                                 <div class="accordion-body">
-
                                     <div class="alert alert-info">
                                         <i class="fa fa-info-circle me-2"/>
-                                    Lors de diverses activités organisées par l'école, les élèves peuvent être amenés à être photographiés ou filmés. Dans le cas de votre accord au droit à l'image, ces images pourront être utilisées à des fins pédagogiques ou pour notre communication (site internet, feuille d'info, rapport d'activité, espace parent, réseaux sociaux de l'école…) en toute vigilance et respect pour les élèves.
+                                        Lors de diverses activités organisées par l'école, les élèves peuvent être amenés à être photographiés ou filmés. Dans le cas de votre accord au droit à l'image, ces images pourront être utilisées à des fins pédagogiques ou pour notre communication (site internet, feuille d'info, rapport d'activité, espace parent, réseaux sociaux de l'école…) en toute vigilance et respect pour les élèves.
                                     </div>
-
-                                    <!-- Élèves existants -->
                                     <div id="students_list">
                                         <t t-foreach="dossier.student_line_ids" t-as="line">
                                             <div class="card mb-3 student-line" t-att-data-line-id="line.id">
@@ -482,10 +467,8 @@ Dépôt
                                                         </div>
                                                         <div class="col-md-12">
                                                             <label class="form-label fw-semibold">Droit à l'image</label>
-
                                                             <div class="d-flex flex-wrap gap-3">
                                                                 <div class="form-check">
-
                                                                     <input class="form-check-input" type="radio" t-att-name="'student_image_rights_' + str(line.id)" id="img_no_{line.id}" value="no" t-att-checked="line.student_id.image_rights == 'no'"/>
                                                                     <label class="form-check-label" t-att-for="'img_no_' + str(line.id)">Non</label>
                                                                 </div>
@@ -504,29 +487,24 @@ Dépôt
                                             </div>
                                         </t>
                                     </div>
-
-                                    <!-- Bouton ajouter -->
                                     <div class="mt-2">
                                         <button type="button" class="btn btn-outline-primary" id="btn_add_student">
                                             <i class="fa fa-plus me-2"/>
 Ajouter un élève
                                         </button>
                                     </div>
-
-                                    <!-- Message info + bouton d'enregistrement -->
                                     <div id="new_student_info" class="alert alert-info mt-3" style="display: none;">
                                         <i class="fa fa-info-circle me-2"/>
                                         <strong>Attention :</strong> Les élèves que vous venez d'ajouter ne seront pris en compte qu'après avoir <strong>enregistré le dossier</strong>.
                                         <button type="submit" name="form_action" value="save_and_stay" id="btn_save_and_reload" class="btn btn-sm btn-primary ms-3">Enregistrer maintenant</button>
                                     </div>
-
-                                    <!-- Template nouvel élève (caché) -->
                                     <div id="new_student_template" style="display:none;">
                                         <div class="card mb-3 student-line new-student">
                                             <div class="card-header fw-semibold bg-light d-flex justify-content-between align-items-center">
                                                 <span>
                                                     <i class="fa fa-user-circle me-2 text-success"/>
-Nouvel élève</span>
+                                                    Nouvel élève
+                                                </span>
                                                 <button type="button" class="btn btn-sm btn-outline-danger btn-remove-new-student">
                                                     <i class="fa fa-trash"/>
                                                 </button>
@@ -565,13 +543,11 @@ Nouvel élève</span>
                                             </div>
                                         </div>
                                     </div>
+                                </div>
+                            </div>
+                        </div>
 
-                                </div>                                <!-- fermeture accordion-body -->
-                            </div>                            <!-- fermeture collapse -->
-                        </div>                        <!-- fermeture accordion-item -->
-                        <!-- Fin Section 2 -->
-
-                        <!-- Section 3 : Aide employeur -->
+                        <!-- SECTION 3 : Aide employeur -->
                         <div class="accordion-item border mb-3 rounded shadow-sm">
                             <h2 class="accordion-header" id="headingFinances">
                                 <button class="accordion-button collapsed rounded" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFinances" aria-expanded="false" aria-controls="collapseFinances">
@@ -602,7 +578,7 @@ Nouvel élève</span>
                                             <div class="card mb-3">
                                                 <div class="card-header fw-semibold bg-light">
                                                     <i class="fa fa-building me-2"/>
-Coordonnées de l'employeur
+                                                    Coordonnées de l'employeur
                                                 </div>
                                                 <div class="card-body">
                                                     <div class="row g-3">
@@ -645,9 +621,8 @@ Coordonnées de l'employeur
                                 </div>
                             </div>
                         </div>
-                        <!-- Fin Section 3 -->
 
-                        <!-- Section 4 : Forfaits -->
+                        <!-- SECTION 4 : Forfaits -->
                         <div class="accordion-item border mb-3 rounded shadow-sm">
                             <h2 class="accordion-header" id="headingForfaits">
                                 <button class="accordion-button collapsed rounded" type="button" data-bs-toggle="collapse" data-bs-target="#collapseForfaits" aria-expanded="false" aria-controls="collapseForfaits">
@@ -669,26 +644,20 @@ Coordonnées de l'employeur
                             <div class="alert alert-warning mt-2" role="alert">
                                 <i class="fa fa-exclamation-triangle me-2"></i>
                                 <strong>Note :</strong> Les forfaits proposés sont calculés en fonction de l’âge de votre enfant ou de sa situation de l’année dernière.<br/>
-    En cas de situation particulière, merci de contacter directement l’école.
+                                        En cas de situation particulière, merci de contacter directement l’école.
                             </div>
-
                             <t t-if="not dossier.student_line_ids">
-                                <div class="alert alert-info">
-                                            Aucun élève inscrit. Veuillez d'abord renseigner la section "Élèves".
-                                </div>
-
+                                <div class="alert alert-info">Aucun élève inscrit. Veuillez d'abord renseigner la section "Élèves".</div>
                             </t>
                             <t t-else="">
                                 <div id="forfaits_list">
                                     <t t-foreach="dossier.student_line_ids" t-as="line">
-                                        <!-- Âge et classe précédente -->
                                         <t t-set="student_age" t-value="line.student_id.age or 0"/>
                                         <t t-set="last_class_str" t-value="line.student_id.last_class_level or ''"/>
                                         <t t-set="last_number" t-value="0"/>
                                         <t t-if="last_class_str and 'classe' in last_class_str">
                                             <t t-set="last_number" t-value="int(''.join([c for c in last_class_str.split('classe')[0] if c.isdigit()]))"/>
                                         </t>
-
                                         <div class="card mb-3 forfait-line" t-att-data-line-id="line.id">
                                             <div class="card-header fw-semibold bg-light">
                                                 <span>
@@ -705,13 +674,11 @@ Coordonnées de l'employeur
                                                             <option value="">-- Aucun forfait --</option>
                                                             <t t-foreach="forfaits" t-as="f">
                                                                 <t t-set="afficher" t-value="False"/>
-                                                                <!-- Forfaits jardins (class_number == 0) : selon âge -->
                                                                 <t t-if="f.class_number == 0">
                                                                     <t t-if="(f.age_min == 0 or student_age &gt;= f.age_min) and (f.age_max == 0 or student_age &lt;= f.age_max)">
                                                                         <t t-set="afficher" t-value="True"/>
                                                                     </t>
                                                                 </t>
-                                                                <!-- Forfaits de classe (class_number > 0) : uniquement si élève a déjà une classe ou âge > 6 -->
                                                                 <t t-else="">
                                                                     <t t-if="(last_number != 0 or student_age &gt; 6) and (last_number == 0 or f.class_number in [last_number, last_number+1])">
                                                                         <t t-set="afficher" t-value="True"/>
@@ -744,9 +711,8 @@ Coordonnées de l'employeur
                         </div>
                     </div>
                 </div>
-                <!-- Fin Section 4 -->
 
-                <!-- Section 5 : Réductions & Solidarité -->
+                <!-- SECTION 5 : Réductions & Solidarité -->
                 <div class="accordion-item border mb-3 rounded shadow-sm">
                     <h2 class="accordion-header" id="headingReductions">
                         <button class="accordion-button collapsed rounded" type="button" data-bs-toggle="collapse" data-bs-target="#collapseReductions" aria-expanded="false" aria-controls="collapseReductions">
@@ -756,12 +722,11 @@ Coordonnées de l'employeur
                     </h2>
                     <div id="collapseReductions" class="accordion-collapse collapse" aria-labelledby="headingReductions">
                         <div class="accordion-body">
-
-                            <!-- ========== DEMANDE DE RÉDUCTION (nombre d'enfants / ancienneté) ========== -->
+                            <!-- Demande de réduction -->
                             <div class="card mb-4">
                                 <div class="card-header fw-semibold bg-light">
                                     <i class="fa fa-scissors me-2"/>
-Demande de réduction
+                                            Demande de réduction
                                 </div>
                                 <div class="card-body">
                                     <label class="form-label fw-semibold">Je sollicite une réduction en raison du nombre d'enfants inscrit à l'école et/ou une réduction d'ancienneté</label>
@@ -777,15 +742,12 @@ Demande de réduction
                                     </div>
                                 </div>
                             </div>
-
-                            <!-- Bloc réductions (visible si oui) -->
                             <div id="block_reduction_yes" t-att-style="'display:' + ('block' if dossier.reduction_requested else 'none')">
-
                                 <!-- Réduction enfants -->
                                 <div class="card mb-4">
                                     <div class="card-header fw-semibold bg-light">
                                         <i class="fa fa-child me-2"/>
-Demande de réduction en raison du nombre d'enfants
+                                                Demande de réduction en raison du nombre d'enfants
                                     </div>
                                     <div class="card-body">
                                         <div class="row g-3">
@@ -811,12 +773,11 @@ Demande de réduction en raison du nombre d'enfants
                                         </div>
                                     </div>
                                 </div>
-
                                 <!-- Réduction ancienneté -->
                                 <div class="card mb-4">
                                     <div class="card-header fw-semibold bg-light">
                                         <i class="fa fa-clock-o me-2"/>
-Demande de réduction selon l'ancienneté
+                                                Demande de réduction selon l'ancienneté
                                     </div>
                                     <div class="card-body">
                                         <div class="row g-3">
@@ -858,18 +819,12 @@ Demande de réduction selon l'ancienneté
                                         <div class="form-text text-muted">Montant calculé selon les réductions activées.</div>
                                     </div>
                                 </div>
-
-
                             </div>
-
-
-                            <!-- Fin bloc réductions -->
-
-                            <!-- ========== SOLIDARITÉ ========== -->
+                            <!-- Solidarité -->
                             <div class="card mb-4">
                                 <div class="card-header fw-semibold bg-light">
                                     <i class="fa fa-heart me-2 text-danger"/>
-Solidarité
+                                            Solidarité
                                 </div>
                                 <div class="card-body">
                                     <label class="form-label fw-semibold">Notre situation personnelle (fortune, revenu familial) nous permet d'honorer des écolages supérieurs et nous souhaitons contribuer au fonds de solidarité de l'école.</label>
@@ -883,7 +838,6 @@ Solidarité
                                             <label class="form-check-label" for="solidarity_yes">Oui</label>
                                         </div>
                                     </div>
-                                    <!-- Bloc Solidarité – options supplémentaires (visible si oui) -->
                                     <div id="block_solidarity_yes" class="mt-3" t-att-style="'display:' + ('block' if dossier.solidarity_request == 'yes' else 'none')">
                                         <div class="row g-3">
                                             <div class="col-md-6">
@@ -902,13 +856,11 @@ Solidarité
                                     </div>
                                 </div>
                             </div>
-
-                            <!-- ========== RÉDUCTION COMPLÉMENTAIRE ========== -->
-                            <!-- Masquée si solidarity_request == 'yes' -->
+                            <!-- Réduction complémentaire -->
                             <div id="block_reduction_complementaire_question" class="card mb-4" t-att-style="'display:' + ('block' if dossier.solidarity_request != 'yes' else 'none')">
                                 <div class="card-header fw-semibold bg-light">
                                     <i class="fa fa-plus-circle me-2"/>
-Réduction complémentaire
+                                            Réduction complémentaire
                                 </div>
                                 <div class="card-body">
                                     <label class="form-label fw-semibold">Je sollicite une demande de réduction complémentaire</label>
@@ -924,25 +876,21 @@ Réduction complémentaire
                                     </div>
                                 </div>
                             </div>
-
-                            <!-- Bloc réduction complémentaire (visible si oui) -->
                             <div id="block_additional_reduction" t-att-style="'display:' + ('block' if dossier.additional_reduction_request else 'none')">
-                                <!-- Toute la partie déjà existante : alertes, situation financière, justificatifs, etc. -->
+                                <!-- tout le contenu de la réduction complémentaire (alertes, justificatifs, budget, etc.) -->
                                 <div class="alert alert-info">
                                     <i class="fa fa-info-circle me-2"/>
-                    Merci de prendre impérativement connaissance de ce document :
+                                            Merci de prendre impérativement connaissance de ce document :
                                     <a href="/ersge_portal_ecolage/static/src/Procedure-demande-reduction-ecolage-2025-26.pdf" target="_blank">Demande de réduction d'écolage</a>
                                 </div>
                                 <div class="alert alert-warning">
                                     <i class="fa fa-info-circle me-2"/>
-                    En cas d'impossibilité d'envoi de documents numériques, vous pouvez déposer une version papier de ces documents au secrétariat.
+                                            En cas d'impossibilité d'envoi de documents numériques, vous pouvez déposer une version papier de ces documents au secrétariat.
                                 </div>
-
                                 <div class="card mb-4">
                                     <div class="card-header fw-semibold bg-light">
                                         <i class="fa fa-bar-chart me-2"/>
-
-Justificatifs
+                                                Justificatifs
                                     </div>
                                     <div class="card-body">
                                         <div class="row g-3">
@@ -956,12 +904,11 @@ Justificatifs
                                                 <input type="file" class="form-control" name="payslip_ids" accept=".pdf" multiple="multiple"/>
                                                 <div class="form-text text-muted">Taille de fichier maximale : 8MB — Vous pouvez télécharger plusieurs fichiers.</div>
                                             </div>
-
                                             <!-- Lettre explicative -->
                                             <div class="card mb-4">
                                                 <div class="card-header fw-semibold bg-light">
                                                     <i class="fa fa-file-text-o me-2"/>
-Lettre explicative de la situation familiale
+                                                            Lettre explicative de la situation familiale
                                                 </div>
                                                 <div class="card-body">
                                                     <div class="d-flex flex-column gap-2 mb-3">
@@ -983,12 +930,11 @@ Lettre explicative de la situation familiale
                                                     </div>
                                                 </div>
                                             </div>
-
-                                            <!-- Budget familial mensuel -->
+                                            <!-- Budget familial -->
                                             <div class="card mb-4">
                                                 <div class="card-header fw-semibold bg-light">
                                                     <i class="fa fa-line-chart me-2"/>
-Budget familial mensuel
+                                                            Budget familial mensuel
                                                 </div>
                                                 <div class="card-body">
                                                     <div class="d-flex flex-column gap-2 mb-3">
@@ -1006,6 +952,7 @@ Budget familial mensuel
                                                         <div class="form-text text-muted">Taille de fichier maximale : 4MB</div>
                                                     </div>
                                                     <div id="block_budget_online" t-att-style="'display:' + ('block' if dossier.budget_method == 'online' else 'none')">
+                                                        <!-- contenu du budget en ligne (tableaux, totaux) -->
                                                         <div class="mb-4">
                                                             <h5 class="fw-semibold text-success mb-2">Revenus</h5>
                                                             <div class="table-responsive">
@@ -1114,15 +1061,13 @@ Budget familial mensuel
                                         </div>
                                     </div>
                                 </div>
-
-                                <!-- ========== MERCI DE PRÉCISER (avec persistance des radios) ========== -->
+                                <!-- Merci de préciser (CEF / proposition) -->
                                 <div class="card mb-4">
                                     <div class="card-header fw-semibold bg-light">
                                         <i class="fa fa-handshake-o me-2"/>
-Merci de préciser
+                                                Merci de préciser
                                     </div>
                                     <div class="card-body">
-                                        <!-- Option 1 : Proposition simple -->
                                         <div class="mb-4">
                                             <div class="form-check">
                                                 <input class="form-check-input" type="radio" name="cef_or_proposal" id="proposal_simple" value="simple" t-att-checked="dossier.proposal_type == 'simple' or not dossier.proposal_type"/>
@@ -1162,8 +1107,6 @@ Merci de préciser
                                                 </div>
                                             </div>
                                         </div>
-
-                                        <!-- Option 2 : Accord CEF -->
                                         <div>
                                             <div class="form-check">
                                                 <input class="form-check-input" type="radio" name="cef_or_proposal" id="cef_agreement" value="cef" t-att-checked="dossier.proposal_type == 'cef'"/>
@@ -1172,7 +1115,7 @@ Merci de préciser
                                             <div id="block_cef_agreement" class="mt-2 ps-4" t-att-style="'display:' + ('block' if dossier.proposal_type == 'cef' else 'none')">
                                                 <div class="alert alert-info" role="alert">
                                                     <i class="fa fa-info-circle me-2"></i>
-                    Si votre situation financière familiale n'a pas évoluée, vous pouvez contribuer pour un montant d'écolage dont l'augmentation doit être <strong>au minimum 6%</strong>, pour tenir compte du changement de classe.<br/>
+                                                            Si votre situation financière familiale n'a pas évoluée, vous pouvez contribuer pour un montant d'écolage dont l'augmentation doit être <strong>au minimum 6%</strong>, pour tenir compte du changement de classe.<br/>
                                                 <strong>Deux cas seront traités spécifiquement ; veuillez contacter la CEF (<a href="mailto:cef@ersge.ch">cef@ersge.ch</a>) dans chacun de ces cas :</strong>
                                                 <ul class="mt-2 mb-0">
                                                     <li>L’arrivée ou le départ d’un enfant de la même fratrie dans l’école.</li>
@@ -1203,14 +1146,11 @@ Merci de préciser
                                 </div>
                             </div>
                         </div>
-                        <!-- Fin bloc réduction complémentaire -->
-
                     </div>
                 </div>
             </div>
-            <!-- Fin Section 5 -->
 
-            <!-- Section 6 : Parascolaire -->
+            <!-- SECTION 6 : Parascolaire -->
             <div class="accordion-item border mb-3 rounded shadow-sm">
                 <h2 class="accordion-header" id="headingAfterSchool">
                     <button class="accordion-button collapsed rounded" type="button" data-bs-toggle="collapse" data-bs-target="#collapseAfterSchool" aria-expanded="false" aria-controls="collapseAfterSchool">
@@ -1223,11 +1163,11 @@ Merci de préciser
                         <div class="card mb-4">
                             <div class="card-header fw-semibold bg-light">
                                 <i class="fa fa-question-circle me-2"/>
-Inscription au parascolaire
+                                            Inscription au parascolaire
                             </div>
                             <div class="card-body">
                                 <label class="form-label fw-semibold">
-    Souhaitez-vous inscrire votre enfant au parascolaire ?
+                                                Souhaitez-vous inscrire votre enfant au parascolaire ?
                                     <span class="badge bg-info ms-2" style="font-size: 0.8rem;">en complément d’un forfait</span>
                                 </label>
                                 <div class="d-flex gap-3">
@@ -1242,7 +1182,6 @@ Inscription au parascolaire
                                 </div>
                             </div>
                         </div>
-
                         <div id="block_after_school_yes" t-att-style="'display:' + ('block' if dossier.after_school_request == 'yes' else 'none')">
                             <div class="alert alert-warning" role="alert">
                                 <i class="fa fa-exclamation-triangle me-2"/>
@@ -1251,11 +1190,10 @@ Inscription au parascolaire
                                             Si nécessaire, vous pourrez modifier ultérieurement les jours et horaires de vos inscriptions au parascolaire.<br/>
                     <a href="https://ersge.ch/emploi-du-temps/" target="_blank">Au besoin, cliquez ici pour voir les horaires de classe</a>
                 </div>
-
                 <div class="card mb-4">
                     <div class="card-header fw-semibold bg-light">
                         <i class="fa fa-users me-2"/>
-        Inscriptions par élève
+                                                Inscriptions par élève
                     </div>
                     <div class="card-body">
                         <t t-foreach="dossier.student_line_ids" t-as="student_line">
@@ -1300,7 +1238,6 @@ Inscription au parascolaire
                                             <div class="col-12">
                                                 <label class="form-label fw-semibold">Prestations souhaitées</label>
                                                 <div class="d-flex flex-wrap gap-2">
-                                                    <!-- Filtrage par âge -->
                                                     <t t-set="student_age" t-value="student_line.student_id.age"/>
                                                     <t t-foreach="after_school_prestations" t-as="prestation">
                                                         <t t-if="(prestation.age_min == 0 or student_age &gt;= prestation.age_min) and (prestation.age_max == 0 or student_age &lt;= prestation.age_max)">
@@ -1324,21 +1261,20 @@ Inscription au parascolaire
                             </div>
                         </t>
                         <div t-if="not dossier.student_line_ids" class="alert alert-info">
-            Aucun élève inscrit. Veuillez d'abord renseigner la section "Élèves".
+                                                    Aucun élève inscrit. Veuillez d'abord renseigner la section "Élèves".
                         </div>
                     </div>
                 </div>
-
                 <div class="alert alert-info mt-3">
                     <strong>Total mensuel parascolaire :</strong>
                     <span id="after_school_total_amount">0.00</span> CHF
                 </div>
-
-                <!-- Descriptif Jardin d'accueil -->
+                <!-- Descriptifs Jardin et Classe d'accueil -->
                 <div class="card mb-4">
                     <div class="card-header fw-semibold bg-light">
                         <i class="fa fa-tree me-2"/>
-Jardin d'accueil</div>
+                                                Jardin d'accueil
+                    </div>
                     <div class="card-body">
                         <p>
                             <em>pour les enfants des jardins d'enfants - 3 à 6 ans</em>
@@ -1354,12 +1290,11 @@ Jardin d'accueil</div>
                         </ul>
                     </div>
                 </div>
-
-                <!-- Descriptif Classe d'accueil -->
                 <div class="card mb-4">
                     <div class="card-header fw-semibold bg-light">
                         <i class="fa fa-graduation-cap me-2"/>
-Classe d'accueil</div>
+                                                Classe d'accueil
+                    </div>
                     <div class="card-body">
                         <p>
                             <em>pour les enfants du primaire - 6 à 12 ans</em>
@@ -1369,12 +1304,11 @@ Classe d'accueil</div>
                         <p>De la 5<sup>ème</sup> à la 9<sup>ème</sup> classe, les élèves bénéficient d'études surveillées de 15h30 à 17h, le lundi, mardi &amp; jeudi.</p>
                     </div>
                 </div>
-
-                <!-- Tarif Accompagnement cirque -->
                 <div class="card mb-4">
                     <div class="card-header fw-semibold bg-light">
                         <i class="fa fa-magic me-2"/>
-Tarif "Accompagnement cirque"</div>
+                                                Tarif "Accompagnement cirque"
+                    </div>
                     <div class="card-body">
                         <p>Le tarif "accompagnement cirque" ne comprend pas l'inscription aux cours de cirque, ni le paiement aux cours de cirque, dispensés par l'association Cirque Rustelli Confetti. Vous pouvez vous inscrire à leurs cours par e-mail <a href="mailto:info@rustelli-confetti.ch">info@rustelli-confetti.ch</a> ou sur leur site : <a href="https://www.rustelliconfetticirque.com" target="_blank">www.rustelliconfetticirque.com</a>.
                         </p>
@@ -1387,16 +1321,12 @@ Tarif "Accompagnement cirque"</div>
                         </ul>
                     </div>
                 </div>
-
             </div>
         </div>
     </div>
 </div>
-<!-- Fin Section 6 -->
 
-
-
-<!-- Section 8 : Échanges entre parents -->
+<!-- SECTION 8 : Échanges entre parents -->
 <div class="accordion-item border mb-3 rounded shadow-sm">
     <h2 class="accordion-header" id="headingParentExchange">
         <button class="accordion-button collapsed rounded" type="button" data-bs-toggle="collapse" data-bs-target="#collapseParentExchange" aria-expanded="false" aria-controls="collapseParentExchange">
@@ -1409,10 +1339,11 @@ Tarif "Accompagnement cirque"</div>
             <div class="card mb-4">
                 <div class="card-header fw-semibold bg-light">
                     <i class="fa fa-users me-2"/>
-Carnet d'adresse des parents</div>
+                                            Carnet d'adresse des parents
+                </div>
                 <div class="card-body">
                     <p class="text-muted">Afin de faciliter les échanges, contacts et liens entre parents et leurs enfants (covoiturage, sorties, événements…), il est pratique que les coordonnées (e-mail, adresse postale, téléphone, prénom des enfants et classe) apparaissent dans le « Carnet d'adresse des parents ».<br/>
-Ce carnet est accessible uniquement avec identifiants et mots de passe dans « l'espace parent » du site.</p>
+                                            Ce carnet est accessible uniquement avec identifiants et mots de passe dans « l'espace parent » du site.</p>
                     <div class="form-check">
                         <input type="hidden" name="address_book_optin" value="0"/>
                         <input class="form-check-input" type="checkbox" name="address_book_optin" id="address_book_optin" value="1" t-att-checked="dossier.address_book_optin"/>
@@ -1424,8 +1355,9 @@ Ce carnet est accessible uniquement avec identifiants et mots de passe dans « l
     </div>
 </div>
 
-<!-- Section 9 : Récapitulatif -->
-<!-- Section 9 : Récapitulatif -->
+<!-- ============================================================ -->
+<!-- SECTION 9 : RÉCAPITULATIF (CORRIGÉE)                           -->
+<!-- ============================================================ -->
 <div class="accordion-item border mb-3 rounded shadow-sm">
     <h2 class="accordion-header" id="headingRecap">
         <button class="accordion-button collapsed rounded" type="button" data-bs-toggle="collapse" data-bs-target="#collapseRecap" aria-expanded="false" aria-controls="collapseRecap">
@@ -1440,7 +1372,7 @@ Ce carnet est accessible uniquement avec identifiants et mots de passe dans « l
             <div class="card mb-4 border-primary">
                 <div class="card-header fw-semibold bg-primary bg-opacity-10">
                     <i class="fa fa-flag-checkered me-2 text-primary"/>
-                    Montant de base &amp; réductions standard
+                                            Montant de base &amp; réductions standard
                 </div>
                 <div class="card-body">
                     <div class="row g-3">
@@ -1484,36 +1416,32 @@ Ce carnet est accessible uniquement avec identifiants et mots de passe dans « l
             <div class="card mb-4 border-secondary">
                 <div class="card-header fw-semibold bg-secondary bg-opacity-10">
                     <i class="fa fa-asterisk me-2 text-secondary"/>
-                    Cas particuliers (exclusifs)
+                                            Cas particuliers (exclusifs)
                 </div>
                 <div class="card-body">
-                    <!-- Solidarité -->
                     <div id="final_amount_solidarity_block" class="alert alert-info mb-3" style="display:none;">
-                        <i class="fa fa-heart me-2 text-danger"></i>
+                        <i class="fa fa-heart me-2 text-danger"/>
                         <strong>Total mensuel après solidarité : </strong>
                         <span id="final_amount_solidarity_value">0.00</span> CHF / mois
                     </div>
-                    <!-- Proposition simple -->
                     <div id="final_amount_proposal_simple_block" class="alert alert-warning mb-3" style="display:none;">
-                        <i class="fa fa-handshake-o me-2"></i>
+                        <i class="fa fa-handshake-o me-2"/>
                         <strong>Montant écolage proposé (réduction complémentaire) : </strong>
                         <span id="final_amount_proposal_simple_value">0.00</span> CHF / mois
                     </div>
-                    <!-- Proposition CEF -->
                     <div id="final_amount_proposal_cef_block" class="alert alert-warning mb-3" style="display:none;">
-                        <i class="fa fa-handshake-o me-2"></i>
+                        <i class="fa fa-handshake-o me-2"/>
                         <strong>Nouveau montant CEF proposé (+6% minimum) : </strong>
                         <span id="final_amount_proposal_cef_value">0.00</span> CHF / mois
                     </div>
-                    <!-- Aucun cas particulier -->
                     <div id="final_amount_no_particular_block" class="text-muted">
                         <i class="fa fa-info-circle me-2"></i>
-                        Aucune solidarité ni réduction complémentaire demandée.
+                                                Aucune solidarité ni réduction complémentaire demandée.
                     </div>
                 </div>
             </div>
 
-            <!-- 3. TOTAL MENSUEL (écolage + parascolaire) -->
+            <!-- 3. TOTAL MENSUEL -->
             <div class="card mb-4">
                 <div class="card-header fw-semibold bg-light">TOTAL MENSUEL (écolage + parascolaire)</div>
                 <div class="card-body">
@@ -1531,7 +1459,7 @@ Ce carnet est accessible uniquement avec identifiants et mots de passe dans « l
                 </div>
             </div>
 
-            <!-- 4. TOTAL ANNUEL -->
+            <!-- 4. TOTAL ANNUEL + DÉDUCTION 2% -->
             <div class="card mb-4">
                 <div class="card-header fw-semibold bg-light">TOTAL ANNUEL</div>
                 <div class="card-body">
@@ -1558,25 +1486,249 @@ Ce carnet est accessible uniquement avec identifiants et mots de passe dans « l
                             <div class="form-text text-muted">Écolage + Parascolaire + Cotisation + Dépôt</div>
                         </div>
                     </div>
+                    <div id="total_with_discount_block" class="mt-3" style="display: none;">
+                        <div class="alert alert-success p-3">
+                            <div class="row align-items-center">
+                                <div class="col-md-6">
+                                    <strong class="fs-5">TOTAL ANNUEL + DÉDUCTION 2%</strong>
+                                    <br/>
+                                    <span class="text-muted small">Paiement avant le 30 septembre</span>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="input-group">
+                                        <input type="text" class="form-control bg-white fs-4 fw-bold text-success text-end" readonly="readonly" id="recap_total_annual_discounted" value="0.00"/>
+                                        <span class="input-group-text fs-5">CHF</span>
+                                    </div>
+                                    <div class="form-text text-muted text-end">Zone non modifiable</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <!-- 5. DÉDUCTION 2% (si applicable) -->
-            <div id="total_with_discount_block" class="col-12 mt-3" style="display: none;">
-                <div class="alert alert-success p-3">
-                    <div class="row align-items-center">
-                        <div class="col-md-6">
-                            <strong class="fs-5">TOTAL ANNUEL + DÉDUCTION 2%</strong>
-                            <br/>
-                            <span class="text-muted small">Paiement avant le 30 septembre</span>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="input-group">
-                                <input type="text" class="form-control bg-white fs-4 fw-bold text-success text-end" readonly="readonly" id="recap_total_annual_discounted" value="0.00"/>
-                                <span class="input-group-text fs-5">CHF</span>
+            <!-- 5. Parrainage & Facturation -->
+            <div class="card mb-4">
+                <div class="card-header fw-semibold bg-light">Parrainage &amp; Facturation</div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <label class="form-label fw-semibold">Parrainage : je bénéficie de parrainage (familial/amical/fondation)</label>
+                            <div class="d-flex gap-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="sponsorship_request" id="sponsorship_no" value="no" t-att-checked="dossier.sponsorship_request == 'no' or not dossier.sponsorship_request"/>
+                                    <label class="form-check-label" for="sponsorship_no">Non</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="sponsorship_request" id="sponsorship_yes" value="yes" t-att-checked="dossier.sponsorship_request == 'yes'"/>
+                                    <label class="form-check-label" for="sponsorship_yes">Oui</label>
+                                </div>
                             </div>
-                            <div class="form-text text-muted text-end">Zone non modifiable</div>
                         </div>
+                        <div class="col-12" id="block_sponsorship_yes" t-att-style="'display:' + ('block' if dossier.sponsorship_request == 'yes' else 'none')">
+                            <div class="card mt-3">
+                                <div class="card-header fw-semibold bg-light">
+                                    <i class="fa fa-handshake-o me-2"/>
+                                                            Informations parrainage
+                                </div>
+                                <div class="card-body">
+                                    <div class="alert alert-info" role="alert">
+                                        <i class="fa fa-info-circle me-2"/>
+                                                                Quelqu'un souhaite vous parrainer ou vous souhaitez lui proposer de le faire ?
+                                                                Partagez-lui le formulaire :
+                                        <a href="https://ersge.ch/parrainer-un-enfant/" target="_blank">https://ersge.ch/parrainer-un-enfant/</a>
+                                    </div>
+                                    <div id="sponsorship_list">
+                                        <t t-foreach="dossier.sponsorship_ids" t-as="sp">
+                                            <div class="card mb-3 border sponsorship-item">
+                                                <div class="card-body">
+                                                    <input type="hidden" t-att-name="'sp_id_' + str(sp.id)" t-att-value="sp.id"/>
+                                                    <div class="row g-3">
+                                                        <div class="col-md-6">
+                                                            <label class="form-label fw-semibold">Prénom <span class="text-danger">*</span>
+                                                            </label>
+                                                            <input type="text" class="form-control" t-att-name="'sp_firstname_' + str(sp.id)" t-att-value="sp.firstname or ''"/>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <label class="form-label fw-semibold">Nom <span class="text-danger">*</span>
+                                                            </label>
+                                                            <input type="text" class="form-control" t-att-name="'sp_lastname_' + str(sp.id)" t-att-value="sp.lastname or ''"/>
+                                                        </div>
+                                                        <div class="col-12">
+                                                            <label class="form-label fw-semibold">Adresse</label>
+                                                            <input type="text" class="form-control" t-att-name="'sp_street_' + str(sp.id)" t-att-value="sp.street or ''"/>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <label class="form-label fw-semibold">Code Postal</label>
+                                                            <input type="text" class="form-control" t-att-name="'sp_zip_' + str(sp.id)" t-att-value="sp.zip or ''"/>
+                                                        </div>
+                                                        <div class="col-md-8">
+                                                            <label class="form-label fw-semibold">Ville</label>
+                                                            <input type="text" class="form-control" t-att-name="'sp_city_' + str(sp.id)" t-att-value="sp.city or ''"/>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <label class="form-label fw-semibold">Pays</label>
+                                                            <select class="form-select" t-att-name="'sp_country_id_' + str(sp.id)">
+                                                                <option value="">-- Sélectionner --</option>
+                                                                <t t-foreach="countries" t-as="country">
+                                                                    <option t-att-value="country.id" t-att-selected="sp.country_id.id == country.id">
+                                                                        <t t-out="country.name"/>
+                                                                    </option>
+                                                                </t>
+                                                            </select>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <label class="form-label fw-semibold">Montant à facturer /mois <span class="text-danger">*</span>
+                                                            </label>
+                                                            <div class="input-group">
+                                                                <span class="input-group-text">CHF</span>
+                                                                <input type="number" class="form-control" t-att-name="'sp_amount_' + str(sp.id)" t-att-value="sp.amount or ''" step="0.01"/>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-12">
+                                                            <button type="button" class="btn btn-sm btn-outline-danger btn-remove-sponsorship" t-att-data-sp-id="sp.id">
+                                                                <i class="fa fa-trash me-1"/>
+Supprimer
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </t>
+                                    </div>
+                                    <div id="new_sponsorship_template" style="display:none;">
+                                        <div class="card mb-3 border new-sponsorship">
+                                            <div class="card-body">
+                                                <div class="row g-3">
+                                                    <div class="col-md-6">
+                                                        <label class="form-label fw-semibold">Prénom <span class="text-danger">*</span>
+                                                        </label>
+                                                        <input type="text" class="form-control" name="new_sp_firstname[]"/>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <label class="form-label fw-semibold">Nom <span class="text-danger">*</span>
+                                                        </label>
+                                                        <input type="text" class="form-control" name="new_sp_lastname[]"/>
+                                                    </div>
+                                                    <div class="col-12">
+                                                        <label class="form-label fw-semibold">Adresse</label>
+                                                        <input type="text" class="form-control" name="new_sp_street[]"/>
+                                                    </div>
+                                                    <div class="col-md-4">
+                                                        <label class="form-label fw-semibold">Code Postal</label>
+                                                        <input type="text" class="form-control" name="new_sp_zip[]"/>
+                                                    </div>
+                                                    <div class="col-md-8">
+                                                        <label class="form-label fw-semibold">Ville</label>
+                                                        <input type="text" class="form-control" name="new_sp_city[]"/>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <label class="form-label fw-semibold">Pays</label>
+                                                        <select class="form-select" name="new_sp_country_id[]">
+                                                            <option value="">-- Sélectionner --</option>
+                                                            <t t-foreach="countries" t-as="country">
+                                                                <option t-att-value="country.id">
+                                                                    <t t-out="country.name"/>
+                                                                </option>
+                                                            </t>
+                                                        </select>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <label class="form-label fw-semibold">Montant à facturer /mois <span class="text-danger">*</span>
+                                                        </label>
+                                                        <div class="input-group">
+                                                            <span class="input-group-text">CHF</span>
+                                                            <input type="number" class="form-control" name="new_sp_amount[]" step="0.01"/>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-12">
+                                                        <button type="button" class="btn btn-sm btn-outline-danger btn-remove-new-sponsorship">
+                                                            <i class="fa fa-trash me-1"/>
+Supprimer
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <button type="button" class="btn btn-outline-primary mt-2" id="btn_add_sponsorship">
+                                        <i class="fa fa-plus me-2"/>
+Ajouter un parrainage
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Division facturation -->
+                        <div class="col-12">
+                            <label class="form-label fw-semibold">Je souhaite que la facturation soit divisée entre plusieurs personnes (hors parrainage)</label>
+                            <div class="d-flex gap-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="multi_billing_request" id="multi_no" value="0" t-att-checked="not dossier.multi_billing_request"/>
+                                    <label class="form-check-label" for="multi_no">Non</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="multi_billing_request" id="multi_yes" value="1" t-att-checked="dossier.multi_billing_request"/>
+                                    <label class="form-check-label" for="multi_yes">Oui</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="billing_amounts_container" class="row mt-3" style="display: none;">
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold" for="parent1_billing_amount">
+                                                            Père (Parent 1), indiquez un montant annuel *
+                                </label>
+                                <div class="input-group">
+                                    <input type="number" name="parent1_billing_amount" id="parent1_billing_amount" class="form-control" step="any" t-att-value="dossier.parent1_billing_amount"/>
+                                    <span class="input-group-text">CHF</span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold" for="parent2_billing_amount">
+                                                            Mère (Parent 2), indiquez un montant annuel *
+                                </label>
+                                <div class="input-group">
+                                    <input type="number" name="parent2_billing_amount" id="parent2_billing_amount" class="form-control" step="any" t-att-value="dossier.parent2_billing_amount"/>
+                                    <span class="input-group-text">CHF</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label fw-semibold">Le versement se fera : <span class="text-danger">*</span>
+                            </label>
+                            <div class="d-flex flex-column gap-2">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="payment_terms" id="payment_monthly" value="monthly" t-att-checked="dossier.payment_terms == 'monthly'"/>
+                                    <label class="form-check-label" for="payment_monthly">Avant le 10 de chaque mois</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="payment_terms" id="payment_yearly" value="annually" t-att-checked="dossier.payment_terms == 'annually'"/>
+                                    <label class="form-check-label" for="payment_yearly">La totalité avant le 30 septembre, droit à déduction de 2%</label>
+                                </div>
+                                <div class="form-text text-muted">La réduction de 2% n'est pas applicable si une "Demande de réduction complémentaire" est sollicitée.</div>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label fw-semibold">Commentaires</label>
+                            <textarea class="form-control" name="comments" rows="3" t-att-data-initial="dossier.comments or ''"></textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 6. Conditions générales -->
+            <div class="card mb-4">
+                <div class="card-header fw-semibold bg-light">Conditions générales</div>
+                <div class="card-body">
+                    <div class="form-check mb-3">
+                        <input class="form-check-input" type="checkbox" name="terms_accepted" id="terms_accepted" value="1" t-att-checked="dossier.terms_accepted"/>
+                        <label class="form-check-label fw-semibold" for="terms_accepted">
+                                                    J'ai pris connaissance et j'accepte le contrat parent-école, la convention parent-école et les procédures de scolarisation <span class="text-danger">*</span>
+                        </label>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Signature des parents ou du/des représentant/s légal/aux <span class="text-danger">*</span>
+                        </label>
+                        <input type="text" class="form-control" name="signature_text" id="signature_text" t-att-value="dossier.signature_text or ''" placeholder="Nom et prénom du signataire"/>
                     </div>
                 </div>
             </div>
@@ -1584,21 +1736,22 @@ Ce carnet est accessible uniquement avec identifiants et mots de passe dans « l
         </div>        <!-- fin accordion-body -->
     </div>    <!-- fin collapse -->
 </div><!-- fin accordion-item -->
+
 </div><!-- fin accordéon -->
 
 <!-- Boutons -->
 <div class="d-flex gap-2 mt-3">
 <button type="submit" name="form_action" value="save_and_exit" class="btn btn-primary btn-lg">
     <i class="fa fa-save me-2"/>
-Enregistrer
+                            Enregistrer
 </button>
 <button type="submit" name="form_action" value="submit_dossier" class="btn btn-success btn-lg">
     <i class="fa fa-paper-plane me-2"/>
-Envoyer le dossier
+                            Envoyer le dossier
 </button>
 <a href="/my/ecolage" class="btn btn-outline-secondary btn-lg">
     <i class="fa fa-arrow-left me-2"/>
-Annuler
+                            Annuler
 </a>
 </div>
 </form>
@@ -1615,7 +1768,6 @@ Annuler
     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fermer"></button>
 </div>
 <div class="modal-body" id="recapModalBody">
-    <!-- Le contenu sera généré par JavaScript -->
     <div class="text-center p-5">
         <i class="fa fa-spinner fa-spin fa-2x"></i>
         <p>Chargement du récapitulatif...</p>
@@ -1644,12 +1796,13 @@ Annuler
 <div class="card-header">
 <h5 class="mb-0">
     <i class="fa fa-home me-2 text-primary"/>
-Créer votre famille</h5>
+                            Créer votre famille
+</h5>
 </div>
 <div class="card-body">
 <div class="alert alert-info mb-4" role="alert">
     <i class="fa fa-info-circle me-2"/>
-Pour déposer un dossier d'écolage, vous devez d'abord <strong>créer votre famille</strong>. Cette étape est rapide et ne prend qu'une minute.
+                            Pour déposer un dossier d'écolage, vous devez d'abord <strong>créer votre famille</strong>. Cette étape est rapide et ne prend qu'une minute.
 </div>
 <t t-if="error">
     <div class="alert alert-danger mb-4" role="alert">
@@ -1681,16 +1834,17 @@ Pour déposer un dossier d'écolage, vous devez d'abord <strong>créer votre fam
     <div class="d-flex gap-2 mt-4 pt-3 border-top">
         <button type="submit" class="btn btn-primary btn-lg">
             <i class="fa fa-check me-2"/>
-Créer ma famille et continuer</button>
+                                    Créer ma famille et continuer
+        </button>
         <a href="/my/ecolage" class="btn btn-outline-secondary btn-lg">
             <i class="fa fa-arrow-left me-2"/>
-Annuler</a>
+                                    Annuler
+        </a>
     </div>
 </form>
 </div>
 </div>
 </div>
-
 </t>
 </template>
 
