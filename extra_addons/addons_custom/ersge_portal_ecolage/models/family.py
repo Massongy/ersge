@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
-from odoo import models, fields
+from odoo import models, fields, _
+from odoo.exceptions import UserError
+
 
 class ErsgeFamily(models.Model):
     _name = 'ersge.family'
@@ -7,12 +9,12 @@ class ErsgeFamily(models.Model):
 
     name = fields.Char(string='Nom de la famille', required=True)
     partner_ids = fields.Many2many(
-            'res.partner',
-            'ersge_family_partner_rel',   # même table de relation que dans res.partner
-            'family_id',
-            'partner_id',
-            string='Membres de la famille'
-        )
+        'res.partner',
+        'ersge_family_partner_rel',   # même table de relation que dans res.partner
+        'family_id',
+        'partner_id',
+        string='Membres de la famille'
+    )
     is_teacher = fields.Boolean(string="Famille enseignante", default=False)
     student_ids = fields.One2many('ersge.student', 'family_id', string='Élèves')
     dossier_ids = fields.One2many('ersge.dossier.famille', 'family_id', string='Dossiers')
@@ -45,5 +47,22 @@ class ErsgeFamily(models.Model):
     def _compute_email(self):
         for family in self:
             family.email = family.partner_ids[:1].email if family.partner_ids else False
+
+    def unlink(self):
+        for family in self:
+            if family.student_ids:
+                noms_eleves = ", ".join(family.student_ids.mapped('display_name'))
+                raise UserError(_(
+                    "Impossible de supprimer la famille « %(name)s » : "
+                    "elle est encore associée à %(count)d élève(s) (%(students)s).\n\n"
+                    "Veuillez d'abord retirer ou réaffecter ces élèves à une autre "
+                    "famille, ou contactez l'administration de l'école si vous "
+                    "pensez qu'il s'agit d'une erreur."
+                ) % {
+                    'name': family.name,
+                    'count': len(family.student_ids),
+                    'students': noms_eleves,
+                })
+        return super().unlink()
 
     # Méthode pour générer un token (dans le contrôleur)

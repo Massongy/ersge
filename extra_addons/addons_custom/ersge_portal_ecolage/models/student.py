@@ -12,7 +12,6 @@ class ErsgeStudent(models.Model):
         compute="_compute_display_name",
         store=True,
     )
-
     firstname = fields.Char(string="Prénom", required=False)
     lastname = fields.Char(string="Nom", required=False)
     birthdate = fields.Date(string="Date de naissance")
@@ -29,46 +28,29 @@ class ErsgeStudent(models.Model):
         ('internal_external', 'Oui, usage interne et externe'),
     ], string="Droit à l'image", default='internal_external', required=True)
     pronote_id = fields.Char(string="Identifiant ProNote")
-
     family_id = fields.Many2one(
         "ersge.family", string="Famille", required=True, ondelete="restrict"
     )
-
     last_class_level = fields.Char(string="Dernière classe suivie")
-    
     active = fields.Boolean(default=True)
-
     # Nouveau champ âge calculé
     age = fields.Integer(string="Âge", compute="_compute_age", store=True)
-
-    def name_get(self):
-        result = []
-        for student in self:
-            name = f"{student.firstname} {student.lastname}".strip()
-            if not name:
-                name = "Nouvel élève"
-            result.append((student.id, name))
-        return result
 
     @api.model
     def create(self, vals_list):
         if isinstance(vals_list, dict):
             vals_list = [vals_list]
-
         for vals in vals_list:
             # Récupérer family_id depuis vals ou depuis le contexte
             family_id = vals.get("family_id")
             if not family_id and self.env.context.get("default_family_id"):
                 family_id = self.env.context.get("default_family_id")
-
             if not vals.get("lastname") and family_id:
                 family = self.env["ersge.family"].browse(family_id)
                 vals["lastname"] = family.name
-
             # Si firstname est vide mais pas lastname, on peut mettre un placeholder
             if not vals.get("firstname") and vals.get("lastname"):
                 vals["firstname"] = "Nouvel élève"
-
         return super().create(vals_list)
 
     @api.depends("firstname", "lastname")
@@ -82,6 +64,8 @@ class ErsgeStudent(models.Model):
         today = date.today()
         for student in self:
             if student.birthdate:
-                student.age = today.year - student.birthdate.year - ((today.month, today.day) < (student.birthdate.month, student.birthdate.day))
+                student.age = today.year - student.birthdate.year - (
+                    (today.month, today.day) < (student.birthdate.month, student.birthdate.day)
+                )
             else:
                 student.age = 0

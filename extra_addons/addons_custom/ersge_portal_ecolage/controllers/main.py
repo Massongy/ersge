@@ -5,6 +5,7 @@ from odoo import http, fields
 from odoo.http import request
 from odoo.exceptions import AccessError
 import logging
+from urllib.parse import quote
 
 _logger = logging.getLogger(__name__)
 
@@ -853,8 +854,11 @@ class PortalEcolage(http.Controller):
         if family.dossier_ids:
             return request.redirect('/my/ecolage/families?error=Impossible de supprimer une famille qui a des dossiers.')
 
-        family.unlink()
-        return request.redirect('/my/ecolage/families?success=Famille supprimée avec succès.')
+        try:
+            family.unlink()
+            return request.redirect('/my/ecolage/families?success=Famille supprimée avec succès.')
+        except Exception as e:
+            return request.redirect(f'/my/ecolage/families?error={quote(str(e))}')
 
     @http.route(['/my/ecolage/dossier/<int:dossier_id>/recap_html'], type='http', auth='user', website=True)
     def dossier_recap_html(self, dossier_id):
