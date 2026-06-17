@@ -254,6 +254,7 @@ function validateRequiredAndFormat(root) {
 
     return errors;
 }
+
 // =====================================================================
 // FONCTIONS DE MISE À JOUR (toute la logique métier)
 // =====================================================================
@@ -329,6 +330,7 @@ function updateTotalMensuel() {
         if (!isNaN(val)) total += val;
     });
     setInner('total_monthly_fee', total);
+    setInner('base_monthly_fee_display', total);   // <-- AJOUT pour le champ sans réduction
     updateAllDiscounts();
 }
 
@@ -569,6 +571,69 @@ function updateProposalPercentage() {
     }
 }
 
+// =====================================================================
+// MISE À JOUR DU BLOC MONTANT FINAL (récapitulatif)
+// =====================================================================
+function updateFinalAmountBlock() {
+    const root = document.getElementById('ecolage_form_root');
+    if (!root) return;
+
+    // 1. Montant après réduction standard (enfants + ancienneté)
+    const afterReductionField = document.getElementById('monthly_fee_after_requested_display');
+    let standardMonthly = afterReductionField ? parseFloat(afterReductionField.value) || 0 : 0;
+    // Si aucune réduction demandée, on prend le total mensuel de base
+    const reductionRequested = getCheckedVal(root, 'reduction_requested') === '1';
+    if (!reductionRequested) {
+        const totalMonthlyField = document.getElementById('total_monthly_fee');
+        standardMonthly = totalMonthlyField ? parseFloat(totalMonthlyField.innerText) || 0 : 0;
+    }
+    setVal('final_amount_after_standard_reduction', standardMonthly);
+
+    // 2. Solidarité ou réduction complémentaire (exclusifs)
+    const solidarityYes = getCheckedVal(root, 'solidarity_request') === 'yes';
+    const additionalReduction = getCheckedVal(root, 'additional_reduction_request') === '1';
+
+    // Cacher tous les blocs d'abord
+    const solidarityBlock = document.getElementById('final_amount_solidarity_block');
+    const simpleBlock = document.getElementById('final_amount_proposal_simple_block');
+    const cefBlock = document.getElementById('final_amount_proposal_cef_block');
+    const noBlock = document.getElementById('final_amount_no_particular_block');
+    if (solidarityBlock) solidarityBlock.style.display = 'none';
+    if (simpleBlock) simpleBlock.style.display = 'none';
+    if (cefBlock) cefBlock.style.display = 'none';
+    if (noBlock) noBlock.style.display = 'block'; // visible par défaut
+
+    if (solidarityYes) {
+        // Solidarité : afficher le montant après solidarité
+        const solidarityTotalField = document.getElementById('solidarity_total_amount');
+        const solidarityValue = solidarityTotalField ? parseFloat(solidarityTotalField.value) || 0 : 0;
+        const valueSpan = document.getElementById('final_amount_solidarity_value');
+        if (valueSpan) valueSpan.innerText = solidarityValue.toFixed(2);
+        if (solidarityBlock) solidarityBlock.style.display = 'block';
+        if (noBlock) noBlock.style.display = 'none';
+    } else if (additionalReduction) {
+        // Réduction complémentaire : proposition simple ou CEF
+        const proposalType = root.querySelector('input[name="cef_or_proposal"]:checked')?.value;
+        if (proposalType === 'simple') {
+            const proposedAmount = document.getElementById('proposed_monthly_amount');
+            const val = proposedAmount ? parseFloat(proposedAmount.value) || 0 : 0;
+            const valueSpan = document.getElementById('final_amount_proposal_simple_value');
+            if (valueSpan) valueSpan.innerText = val.toFixed(2);
+            if (simpleBlock) simpleBlock.style.display = 'block';
+            if (noBlock) noBlock.style.display = 'none';
+        } else if (proposalType === 'cef') {
+            const proposedCef = document.getElementById('proposed_monthly_fee_cef');
+            const val = proposedCef ? parseFloat(proposedCef.value) || 0 : 0;
+            const valueSpan = document.getElementById('final_amount_proposal_cef_value');
+            if (valueSpan) valueSpan.innerText = val.toFixed(2);
+            if (cefBlock) cefBlock.style.display = 'block';
+            if (noBlock) noBlock.style.display = 'none';
+        }
+        // si proposalType ni simple ni cef (par ex. non sélectionné), on laisse noBlock visible
+    }
+    // Sinon, aucun bloc supplémentaire n'est affiché (seulement le standard)
+}
+
 // Récapitulatif
 function updateRecapTotals() {
     const ecolageMonthly = getEcolageAfterDiscount();
@@ -592,6 +657,9 @@ function updateRecapTotals() {
     setVal('recap_deposit', deposit);
     setVal('recap_total_annual', totalAnnual);
 
+    // Mise à jour du total hors réduction (base)
+    setInner('base_monthly_fee_display', getBaseMensuel());   // <-- AJOUT
+
     const root = document.getElementById('ecolage_form_root');
     const paymentTerms = root ? getCheckedVal(root, 'payment_terms') : null;
     const additionalReduction = root ? getCheckedVal(root, 'additional_reduction_request') : null;
@@ -605,6 +673,8 @@ function updateRecapTotals() {
     } else {
         if (discountBlock) discountBlock.style.display = 'none';
     }
+
+    updateFinalAmountBlock();
 }
 
 // Parascolaire
@@ -988,6 +1058,7 @@ function initForm(root) {
         const montantInput = root.querySelector('.montant-mensuel[data-line-id="' + lineId + '"]');
         if (montantInput) updateForfaitMontant(select, montantInput);
     });
+
     // Mise à jour initiale des required conditionnels
     updateConditionalRequired(root);
     // Initialisation de l'affichage de la réduction complémentaire selon solidarité
@@ -997,7 +1068,16 @@ function initForm(root) {
     updateCefIncrease();
     // Initialisation du calcul du pourcentage de la proposition
     updateProposalPercentage();
-    // Forcer la mise à jour de la solidarité après un court délai pour être sûr que les champs existent
+    // Mise à jour du bloc final
+    updateFinalAmountBlock();
+
+    // FORCER LA MISE À JOUR DES TOTAUX APRÈS CHARGEMENT DES FORFAITS
+    setTimeout(function() {
+        updateTotalMensuel();     // Met à jour base_monthly_fee_display
+        updateRecapTotals();      // Met à jour tous les récapitulatifs
+    }, 300);
+
+    // Forcer la mise à jour de la solidarité après un court délai
     setTimeout(function() {
         updateSolidarityTotal();
     }, 100);
@@ -1070,6 +1150,7 @@ function attachDelegatedEvents(root) {
         // Gestion CEF
         if (target.name === 'cef_or_proposal') {
             toggleCefOrProposal();
+            updateFinalAmountBlock();   // <-- AJOUT
         }
         if (target.id === 'previous_monthly_fee' || target.id === 'proposed_monthly_fee_cef') {
             updateCefIncrease();
@@ -1145,6 +1226,7 @@ function attachDelegatedEvents(root) {
         // Mise à jour du pourcentage de la proposition
         if (e.target.id === 'proposed_monthly_amount' || e.target.id === 'proposal_annual_income' || e.target.id === 'proposed_monthly_fee_cef') {
             updateProposalPercentage();
+            updateFinalAmountBlock();   // <-- AJOUT
         }
     });
 

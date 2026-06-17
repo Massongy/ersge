@@ -1425,6 +1425,7 @@ Ce carnet est accessible uniquement avec identifiants et mots de passe dans « l
 </div>
 
 <!-- Section 9 : Récapitulatif -->
+<!-- Section 9 : Récapitulatif -->
 <div class="accordion-item border mb-3 rounded shadow-sm">
     <h2 class="accordion-header" id="headingRecap">
         <button class="accordion-button collapsed rounded" type="button" data-bs-toggle="collapse" data-bs-target="#collapseRecap" aria-expanded="false" aria-controls="collapseRecap">
@@ -1434,14 +1435,89 @@ Ce carnet est accessible uniquement avec identifiants et mots de passe dans « l
     </h2>
     <div id="collapseRecap" class="accordion-collapse collapse" aria-labelledby="headingRecap">
         <div class="accordion-body">
-            <div class="card mb-4">
-                <div class="card-header fw-semibold bg-light">TOTAL MENSUEL</div>
+
+            <!-- 1. Montant de base & réductions standard -->
+            <div class="card mb-4 border-primary">
+                <div class="card-header fw-semibold bg-primary bg-opacity-10">
+                    <i class="fa fa-flag-checkered me-2 text-primary"/>
+                    Montant de base &amp; réductions standard
+                </div>
                 <div class="card-body">
                     <div class="row g-3">
-                        <div class="col-md-6">
-                            <label class="form-label fw-semibold">Total mensuel écolage (CHF)</label>
-                            <input type="text" class="form-control bg-light" readonly="readonly" id="recap_monthly_tuition" t-att-value="dossier.total_monthly_tuition or 0"/>
+                        <div class="col-12">
+                            <label class="form-label fw-semibold">Total mensuel écolage (hors réduction) :</label>
+                            <div class="input-group">
+                                <span class="input-group-text">CHF</span>
+                                <span class="form-control bg-light" id="base_monthly_fee_display">0.00</span>
+                            </div>
                         </div>
+                    </div>
+                    <hr/>
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Rabais nombre d'enfants (max) :</label>
+                            <div class="input-group">
+                                <input type="text" class="form-control bg-light" readonly="readonly" id="max_children_discount_display" t-att-value="dossier.max_children_discount"/>
+                                <span class="input-group-text">%</span>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Rabais ancienneté (max) :</label>
+                            <div class="input-group">
+                                <input type="text" class="form-control bg-light" readonly="readonly" id="max_seniority_discount_display"/>
+                                <span class="input-group-text">%</span>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Total après réductions standard :</label>
+                            <div class="input-group">
+                                <span class="input-group-text">CHF</span>
+                                <input type="text" class="form-control bg-light" readonly="readonly" id="final_amount_after_standard_reduction" value="0.00"/>
+                            </div>
+                            <div class="form-text text-muted">Montant calculé selon les réductions activées (enfants et/ou ancienneté).</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2. Cas particuliers exclusifs -->
+            <div class="card mb-4 border-secondary">
+                <div class="card-header fw-semibold bg-secondary bg-opacity-10">
+                    <i class="fa fa-asterisk me-2 text-secondary"/>
+                    Cas particuliers (exclusifs)
+                </div>
+                <div class="card-body">
+                    <!-- Solidarité -->
+                    <div id="final_amount_solidarity_block" class="alert alert-info mb-3" style="display:none;">
+                        <i class="fa fa-heart me-2 text-danger"></i>
+                        <strong>Total mensuel après solidarité : </strong>
+                        <span id="final_amount_solidarity_value">0.00</span> CHF / mois
+                    </div>
+                    <!-- Proposition simple -->
+                    <div id="final_amount_proposal_simple_block" class="alert alert-warning mb-3" style="display:none;">
+                        <i class="fa fa-handshake-o me-2"></i>
+                        <strong>Montant écolage proposé (réduction complémentaire) : </strong>
+                        <span id="final_amount_proposal_simple_value">0.00</span> CHF / mois
+                    </div>
+                    <!-- Proposition CEF -->
+                    <div id="final_amount_proposal_cef_block" class="alert alert-warning mb-3" style="display:none;">
+                        <i class="fa fa-handshake-o me-2"></i>
+                        <strong>Nouveau montant CEF proposé (+6% minimum) : </strong>
+                        <span id="final_amount_proposal_cef_value">0.00</span> CHF / mois
+                    </div>
+                    <!-- Aucun cas particulier -->
+                    <div id="final_amount_no_particular_block" class="text-muted">
+                        <i class="fa fa-info-circle me-2"></i>
+                        Aucune solidarité ni réduction complémentaire demandée.
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3. TOTAL MENSUEL (écolage + parascolaire) -->
+            <div class="card mb-4">
+                <div class="card-header fw-semibold bg-light">TOTAL MENSUEL (écolage + parascolaire)</div>
+                <div class="card-body">
+                    <div class="row g-3">
                         <div class="col-md-6">
                             <label class="form-label fw-semibold">Total mensuel parascolaire (CHF)</label>
                             <input type="text" class="form-control bg-light" readonly="readonly" id="recap_monthly_after_school" t-att-value="dossier.total_monthly_after_school or 0"/>
@@ -1449,11 +1525,13 @@ Ce carnet est accessible uniquement avec identifiants et mots de passe dans « l
                         <div class="col-md-6">
                             <label class="form-label fw-semibold">TOTAL MENSUEL (CHF)</label>
                             <input type="text" class="form-control bg-light" readonly="readonly" id="recap_total_monthly" t-att-value="dossier.total_monthly or 0"/>
-                            <div class="form-text text-muted">Écolage + Parascolaire</div>
+                            <div class="form-text text-muted">Écolage (après cas particulier) + Parascolaire</div>
                         </div>
                     </div>
                 </div>
             </div>
+
+            <!-- 4. TOTAL ANNUEL -->
             <div class="card mb-4">
                 <div class="card-header fw-semibold bg-light">TOTAL ANNUEL</div>
                 <div class="card-body">
@@ -1483,268 +1561,32 @@ Ce carnet est accessible uniquement avec identifiants et mots de passe dans « l
                 </div>
             </div>
 
-            <div class="card mb-4">
-                <div class="card-header fw-semibold bg-light">Parrainage &amp; Facturation</div>
-                <div class="card-body">
-                    <div class="row g-3">
-                        <div class="col-12">
-                            <label class="form-label fw-semibold">Parrainage : je bénéficie de parrainage (familial/amical/fondation)</label>
-                            <div class="d-flex gap-3">
-                                <div class="form-check">
-                                    <input class="form-check-input" type="radio" name="sponsorship_request" id="sponsorship_no" value="no" t-att-checked="dossier.sponsorship_request == 'no' or not dossier.sponsorship_request"/>
-                                    <label class="form-check-label" for="sponsorship_no">Non</label>
-                                </div>
-                                <div class="form-check">
-                                    <input class="form-check-input" type="radio" name="sponsorship_request" id="sponsorship_yes" value="yes" t-att-checked="dossier.sponsorship_request == 'yes'"/>
-                                    <label class="form-check-label" for="sponsorship_yes">Oui</label>
-                                </div>
-                            </div>
+            <!-- 5. DÉDUCTION 2% (si applicable) -->
+            <div id="total_with_discount_block" class="col-12 mt-3" style="display: none;">
+                <div class="alert alert-success p-3">
+                    <div class="row align-items-center">
+                        <div class="col-md-6">
+                            <strong class="fs-5">TOTAL ANNUEL + DÉDUCTION 2%</strong>
+                            <br/>
+                            <span class="text-muted small">Paiement avant le 30 septembre</span>
                         </div>
-
-                        <!-- Bloc parrainage (visible si oui) -->
-
-
-                        <div class="col-12" id="block_sponsorship_yes" t-att-style="'display:' + ('block' if dossier.sponsorship_request == 'yes' else 'none')">
-                            <div class="card mt-3">
-                                <div class="card-header fw-semibold bg-light">
-                                    <i class="fa fa-handshake-o me-2"/>
-Informations parrainage
-                                </div>
-                                <div class="card-body">
-                                    <div class="alert alert-info" role="alert">
-                                        <i class="fa fa-info-circle me-2"/>
-                Quelqu'un souhaite vous parrainer ou vous souhaitez lui proposer de le faire ?
-                Partagez-lui le formulaire :
-                                        <a href="https://ersge.ch/parrainer-un-enfant/" target="_blank">https://ersge.ch/parrainer-un-enfant/</a>
-                                    </div>
-
-                                    <div id="sponsorship_list">
-                                        <t t-foreach="dossier.sponsorship_ids" t-as="sp">
-                                            <div class="card mb-3 border sponsorship-item">
-                                                <div class="card-body">
-                                                    <input type="hidden" t-att-name="'sp_id_' + str(sp.id)" t-att-value="sp.id"/>
-                                                    <div class="row g-3">
-                                                        <div class="col-md-6">
-                                                            <label class="form-label fw-semibold">Prénom <span class="text-danger">*</span>
-                                                            </label>
-                                                            <input type="text" class="form-control" t-att-name="'sp_firstname_' + str(sp.id)" t-att-value="sp.firstname or ''"/>
-                                                        </div>
-                                                        <div class="col-md-6">
-                                                            <label class="form-label fw-semibold">Nom <span class="text-danger">*</span>
-                                                            </label>
-                                                            <input type="text" class="form-control" t-att-name="'sp_lastname_' + str(sp.id)" t-att-value="sp.lastname or ''"/>
-                                                        </div>
-                                                        <div class="col-12">
-                                                            <label class="form-label fw-semibold">Adresse</label>
-                                                            <input type="text" class="form-control" t-att-name="'sp_street_' + str(sp.id)" t-att-value="sp.street or ''"/>
-                                                        </div>
-                                                        <div class="col-md-4">
-                                                            <label class="form-label fw-semibold">Code Postal</label>
-                                                            <input type="text" class="form-control" t-att-name="'sp_zip_' + str(sp.id)" t-att-value="sp.zip or ''"/>
-                                                        </div>
-                                                        <div class="col-md-8">
-                                                            <label class="form-label fw-semibold">Ville</label>
-                                                            <input type="text" class="form-control" t-att-name="'sp_city_' + str(sp.id)" t-att-value="sp.city or ''"/>
-                                                        </div>
-                                                        <div class="col-md-6">
-                                                            <label class="form-label fw-semibold">Pays</label>
-                                                            <select class="form-select" t-att-name="'sp_country_id_' + str(sp.id)">
-                                                                <option value="">-- Sélectionner --</option>
-                                                                <t t-foreach="countries" t-as="country">
-                                                                    <option t-att-value="country.id" t-att-selected="sp.country_id.id == country.id">
-                                                                        <t t-out="country.name"/>
-                                                                    </option>
-                                                                </t>
-                                                            </select>
-                                                        </div>
-                                                        <div class="col-md-6">
-                                                            <label class="form-label fw-semibold">Montant à facturer /mois <span class="text-danger">*</span>
-                                                            </label>
-                                                            <div class="input-group">
-                                                                <span class="input-group-text">CHF</span>
-                                                                <input type="number" class="form-control" t-att-name="'sp_amount_' + str(sp.id)" t-att-value="sp.amount or ''" step="0.01"/>
-                                                            </div>
-                                                        </div>
-                                                        <div class="col-12">
-                                                            <button type="button" class="btn btn-sm btn-outline-danger btn-remove-sponsorship" t-att-data-sp-id="sp.id">
-                                                                <i class="fa fa-trash me-1"/>
-Supprimer
-                                                            </button>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </t>
-                                    </div>
-
-                                    <!-- Template nouveau parrain -->
-                                    <div id="new_sponsorship_template" style="display:none;">
-                                        <div class="card mb-3 border new-sponsorship">
-                                            <div class="card-body">
-                                                <div class="row g-3">
-                                                    <div class="col-md-6">
-                                                        <label class="form-label fw-semibold">Prénom <span class="text-danger">*</span>
-                                                        </label>
-                                                        <input type="text" class="form-control" name="new_sp_firstname[]"/>
-                                                    </div>
-                                                    <div class="col-md-6">
-                                                        <label class="form-label fw-semibold">Nom <span class="text-danger">*</span>
-                                                        </label>
-                                                        <input type="text" class="form-control" name="new_sp_lastname[]"/>
-                                                    </div>
-                                                    <div class="col-12">
-                                                        <label class="form-label fw-semibold">Adresse</label>
-                                                        <input type="text" class="form-control" name="new_sp_street[]"/>
-                                                    </div>
-                                                    <div class="col-md-4">
-                                                        <label class="form-label fw-semibold">Code Postal</label>
-                                                        <input type="text" class="form-control" name="new_sp_zip[]"/>
-                                                    </div>
-                                                    <div class="col-md-8">
-                                                        <label class="form-label fw-semibold">Ville</label>
-                                                        <input type="text" class="form-control" name="new_sp_city[]"/>
-                                                    </div>
-                                                    <div class="col-md-6">
-                                                        <label class="form-label fw-semibold">Pays</label>
-                                                        <select class="form-select" name="new_sp_country_id[]">
-                                                            <option value="">-- Sélectionner --</option>
-                                                            <t t-foreach="countries" t-as="country">
-                                                                <option t-att-value="country.id">
-                                                                    <t t-out="country.name"/>
-                                                                </option>
-                                                            </t>
-                                                        </select>
-                                                    </div>
-                                                    <div class="col-md-6">
-                                                        <label class="form-label fw-semibold">Montant à facturer /mois <span class="text-danger">*</span>
-                                                        </label>
-                                                        <div class="input-group">
-                                                            <span class="input-group-text">CHF</span>
-                                                            <input type="number" class="form-control" name="new_sp_amount[]" step="0.01"/>
-                                                        </div>
-                                                    </div>
-                                                    <div class="col-12">
-                                                        <button type="button" class="btn btn-sm btn-outline-danger btn-remove-new-sponsorship">
-                                                            <i class="fa fa-trash me-1"/>
-Supprimer
-                                                        </button>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <button type="button" class="btn btn-outline-primary mt-2" id="btn_add_sponsorship">
-                                        <i class="fa fa-plus me-2"/>
-Ajouter un parrainage
-                                    </button>
-                                </div>
+                        <div class="col-md-6">
+                            <div class="input-group">
+                                <input type="text" class="form-control bg-white fs-4 fw-bold text-success text-end" readonly="readonly" id="recap_total_annual_discounted" value="0.00"/>
+                                <span class="input-group-text fs-5">CHF</span>
                             </div>
-                        </div>
-
-                        <!-- Bloc existant : choix Oui/Non -->
-                        <div class="col-12">
-                            <label class="form-label fw-semibold">Je souhaite que la facturation soit divisée entre plusieurs personnes (hors parrainage)</label>
-                            <div class="d-flex gap-3">
-                                <div class="form-check">
-                                    <input class="form-check-input" type="radio" name="multi_billing_request" id="multi_no" value="0" t-att-checked="not dossier.multi_billing_request"/>
-                                    <label class="form-check-label" for="multi_no">Non</label>
-                                </div>
-                                <div class="form-check">
-                                    <input class="form-check-input" type="radio" name="multi_billing_request" id="multi_yes" value="1" t-att-checked="dossier.multi_billing_request"/>
-                                    <label class="form-check-label" for="multi_yes">Oui</label>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Champs de montants (masqués par défaut) -->
-                        <div id="billing_amounts_container" class="row mt-3" style="display: none;">
-                            <div class="col-md-6">
-                                <label class="form-label fw-semibold" for="parent1_billing_amount">
-            Père (Parent 1), indiquez un montant annuel *
-                                </label>
-                                <div class="input-group">
-                                    <input type="number" name="parent1_billing_amount" id="parent1_billing_amount" class="form-control" step="any" t-att-value="dossier.parent1_billing_amount"/>
-                                    <span class="input-group-text">CHF</span>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label fw-semibold" for="parent2_billing_amount">
-            Mère (Parent 2), indiquez un montant annuel *
-                                </label>
-                                <div class="input-group">
-                                    <input type="number" name="parent2_billing_amount" id="parent2_billing_amount" class="form-control" step="any" t-att-value="dossier.parent2_billing_amount"/>
-                                    <span class="input-group-text">CHF</span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-12">
-                            <label class="form-label fw-semibold">Le versement se fera : <span class="text-danger">*</span>
-                            </label>
-                            <div class="d-flex flex-column gap-2">
-                                <div class="form-check">
-                                    <input class="form-check-input" type="radio" name="payment_terms" id="payment_monthly" value="monthly" t-att-checked="dossier.payment_terms == 'monthly'"/>
-                                    <label class="form-check-label" for="payment_monthly">Avant le 10 de chaque mois</label>
-                                </div>
-                                <div class="form-check">
-                                    <input class="form-check-input" type="radio" name="payment_terms" id="payment_yearly" value="annually" t-att-checked="dossier.payment_terms == 'annually'"/>
-                                    <label class="form-check-label" for="payment_yearly">La totalité avant le 30 septembre, droit à déduction de 2%</label>
-                                </div>
-                                <div class="form-text text-muted">La réduction de 2% n'est pas applicable si une "Demande de réduction complémentaire" est sollicitée.</div>
-                            </div>
-                        </div>
-
-                        <!-- Bloc total annuel avec déduction 2% (affiché uniquement si option annuelle ET pas de réduction complémentaire) -->
-                        <div id="total_with_discount_block" class="col-12 mt-3" style="display: none;">
-                            <div class="alert alert-success p-3">
-                                <div class="row align-items-center">
-                                    <div class="col-md-6">
-                                        <strong class="fs-5">TOTAL ANNUEL + DÉDUCTION 2%</strong>
-                                        <br/>
-                                        <span class="text-muted small">Paiement avant le 30 septembre</span>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="input-group">
-                                            <input type="text" class="form-control bg-white fs-4 fw-bold text-success text-end" readonly="readonly" id="recap_total_annual_discounted" value="0.00"/>
-                                            <span class="input-group-text fs-5">CHF</span>
-                                        </div>
-                                        <div class="form-text text-muted text-end">Zone non modifiable</div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-12">
-                            <label class="form-label fw-semibold">Commentaires</label>
-                            <textarea class="form-control" name="comments" rows="3" t-att-data-initial="dossier.comments or ''"></textarea>
+                            <div class="form-text text-muted text-end">Zone non modifiable</div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div class="card mb-4">
-                <div class="card-header fw-semibold bg-light">Conditions générales</div>
-                <div class="card-body">
-                    <div class="form-check mb-3">
-                        <input class="form-check-input" type="checkbox" name="terms_accepted" id="terms_accepted" value="1" t-att-checked="dossier.terms_accepted"/>
-                        <label class="form-check-label fw-semibold" for="terms_accepted">J'ai pris connaissance et j'accepte le contrat parent-école, la convention parent-école et les procédures de scolarisation <span class="text-danger">*</span>
-                        </label>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold">Signature des parents ou du/des représentant/s légal/aux <span class="text-danger">*</span>
-                        </label>
-                        <input type="text" class="form-control" name="signature_text" id="signature_text" t-att-value="dossier.signature_text or ''" placeholder="Nom et prénom du signataire"/>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-</div>
-<!-- Fin accordéon -->
+        </div>        <!-- fin accordion-body -->
+    </div>    <!-- fin collapse -->
+</div><!-- fin accordion-item -->
+</div><!-- fin accordéon -->
 
 <!-- Boutons -->
-
 <div class="d-flex gap-2 mt-3">
 <button type="submit" name="form_action" value="save_and_exit" class="btn btn-primary btn-lg">
     <i class="fa fa-save me-2"/>
@@ -1791,7 +1633,6 @@ Annuler
 </div>
 </div>
 <script src="/ersge_portal_ecolage/static/src/js/portal_dossier.js"></script>
-
 
 </t>
 </template>
