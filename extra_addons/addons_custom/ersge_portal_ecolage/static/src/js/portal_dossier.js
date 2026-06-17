@@ -388,45 +388,61 @@ function updateIncomePercentage(feeAtMax) {
 function updateAllDiscounts() {
     const root = document.getElementById('ecolage_form_root');
     if (!root) return;
+    console.log('=== updateAllDiscounts ===');
     const reductionRequested = getCheckedVal(root, 'reduction_requested') === '1';
+    console.log('reductionRequested :', reductionRequested);
     const blockReduction = root.querySelector('#block_reduction_yes');
     if (blockReduction) blockReduction.style.display = reductionRequested ? 'block' : 'none';
 
+    // Base (total des forfaits)
+    const base = getBaseMensuel();
+    console.log('base :', base);
+
+    // Si réduction non demandée, on réinitialise et on sort
     if (!reductionRequested) {
+        setVal('monthly_fee_after_requested_display', base);
         updateRecapTotals();
         updateSolidarityTotal();
+        updateFinalAmountBlock();
+        console.log('réduction non demandée, monthly_fee_after_requested_display reset à base');
         return;
     }
 
+    // Calcul des réductions max
     const nb = Math.min(getNbStudents(), 4);
     const maxChildrenDisc = CHILDREN_MAP[nb] || 0.0;
+    console.log('maxChildrenDisc :', maxChildrenDisc);
 
     const seniorityEl = document.getElementById('seniority_years');
     const seniorityVal = seniorityEl ? seniorityEl.value : '5';
     const maxSeniorityDisc = SENIORITY_MAP[seniorityVal] || 0.0;
+    console.log('maxSeniorityDisc :', maxSeniorityDisc);
 
+    // État des cases à cocher
     const applyChildrenCb = document.getElementById('apply_children_discount');
     const applySeniorityCb = document.getElementById('apply_seniority_discount');
     const applyChildren = applyChildrenCb ? applyChildrenCb.checked : false;
     const applySeniority = applySeniorityCb ? applySeniorityCb.checked : false;
+    console.log('applyChildren :', applyChildren);
+    console.log('applySeniority :', applySeniority);
 
+    // Réductions effectivement activées (0 si case décochée)
     const childrenDisc = applyChildren ? maxChildrenDisc : 0.0;
     const seniorityDisc = applySeniority ? maxSeniorityDisc : 0.0;
-    const maxTotalDisc = maxChildrenDisc + maxSeniorityDisc;
+    const totalActiveDisc = childrenDisc + seniorityDisc;
+    console.log('childrenDisc :', childrenDisc);
+    console.log('seniorityDisc :', seniorityDisc);
+    console.log('totalActiveDisc :', totalActiveDisc);
 
-    const base = getBaseMensuel();
-
-    const feeAfterChildren = base * (1 - childrenDisc / 100.0);
-    const feeAfterSeniority = base * (1 - seniorityDisc / 100.0);
-    const feeAtMax = base * (1 - maxTotalDisc / 100.0);
-
+    // Affichage des rabais max (pour info)
     setVal('max_children_discount_display', maxChildrenDisc);
-    setVal('monthly_fee_after_children_display', feeAfterChildren);
+    setVal('monthly_fee_after_children_display', base * (1 - childrenDisc / 100.0));
     setVal('max_seniority_discount_display', maxSeniorityDisc);
-    setVal('monthly_fee_after_seniority_display', feeAfterSeniority);
-    setVal('max_total_discount_display', maxTotalDisc);
-    setVal('monthly_fee_at_max_display', feeAtMax);
+    setVal('monthly_fee_after_seniority_display', base * (1 - seniorityDisc / 100.0));
+    setVal('max_total_discount_display', maxChildrenDisc + maxSeniorityDisc);
+    setVal('monthly_fee_at_max_display', base * (1 - (maxChildrenDisc + maxSeniorityDisc) / 100.0));
 
+    // Gestion de la réduction moindre
     const reductionMoindre = getCheckedVal(root, 'reduction_moindre') === '1';
     const blockMoindre = root.querySelector('#block_reduction_moindre');
     if (blockMoindre) blockMoindre.style.display = reductionMoindre ? 'block' : 'none';
@@ -434,25 +450,25 @@ function updateAllDiscounts() {
     let requestedDisc = 0.0;
     if (reductionMoindre) {
         const rdInput = document.getElementById('requested_discount');
-        if (rdInput) {
-            requestedDisc = Math.min(parseFloat(rdInput.value) || 0, maxTotalDisc);
-        }
+        const val = rdInput ? parseFloat(rdInput.value) || 0 : 0;
+        requestedDisc = Math.min(val, totalActiveDisc);
     } else {
-        requestedDisc = maxTotalDisc;
+        requestedDisc = totalActiveDisc;
     }
+    console.log('requestedDisc :', requestedDisc);
 
     const feeAfterRequested = base * (1 - requestedDisc / 100.0);
+    console.log('feeAfterRequested :', feeAfterRequested);
     setVal('monthly_fee_after_requested_display', feeAfterRequested);
 
-    // Force un événement input pour déclencher la mise à jour de la solidarité
-    const afterReductionField = document.getElementById('monthly_fee_after_requested_display');
-    if (afterReductionField) {
-        afterReductionField.dispatchEvent(new Event('input', { bubbles: true }));
-    }
+    // Mise à jour du pourcentage de revenu (si applicable)
+    updateIncomePercentage(base * (1 - (maxChildrenDisc + maxSeniorityDisc) / 100.0));
 
-    updateIncomePercentage(feeAtMax);
+    // Rafraîchir les totaux
     updateRecapTotals();
     updateSolidarityTotal();
+    updateFinalAmountBlock();
+    console.log('fin updateAllDiscounts');
 }
 
 // Solidarité
@@ -578,33 +594,36 @@ function updateFinalAmountBlock() {
     const root = document.getElementById('ecolage_form_root');
     if (!root) return;
 
-    // 1. Montant après réduction standard (enfants + ancienneté)
-    const afterReductionField = document.getElementById('monthly_fee_after_requested_display');
-    let standardMonthly = afterReductionField ? parseFloat(afterReductionField.value) || 0 : 0;
-    // Si aucune réduction demandée, on prend le total mensuel de base
+    // 1. Base (somme des forfaits)
+    const base = getBaseMensuel();
+
+    // 2. Montant après réduction standard
     const reductionRequested = getCheckedVal(root, 'reduction_requested') === '1';
-    if (!reductionRequested) {
-        const totalMonthlyField = document.getElementById('total_monthly_fee');
-        standardMonthly = totalMonthlyField ? parseFloat(totalMonthlyField.innerText) || 0 : 0;
+    let standardMonthly = base;
+    if (reductionRequested) {
+        const afterReductionField = document.getElementById('monthly_fee_after_requested_display');
+        const val = afterReductionField ? parseFloat(afterReductionField.value) : NaN;
+        if (!isNaN(val) && val >= 0) {
+            standardMonthly = val;
+        }
     }
     setVal('final_amount_after_standard_reduction', standardMonthly);
 
-    // 2. Solidarité ou réduction complémentaire (exclusifs)
+    // 3. Cas particuliers (solidarité / propositions)
     const solidarityYes = getCheckedVal(root, 'solidarity_request') === 'yes';
     const additionalReduction = getCheckedVal(root, 'additional_reduction_request') === '1';
 
-    // Cacher tous les blocs d'abord
     const solidarityBlock = document.getElementById('final_amount_solidarity_block');
     const simpleBlock = document.getElementById('final_amount_proposal_simple_block');
     const cefBlock = document.getElementById('final_amount_proposal_cef_block');
     const noBlock = document.getElementById('final_amount_no_particular_block');
+
     if (solidarityBlock) solidarityBlock.style.display = 'none';
     if (simpleBlock) simpleBlock.style.display = 'none';
     if (cefBlock) cefBlock.style.display = 'none';
-    if (noBlock) noBlock.style.display = 'block'; // visible par défaut
+    if (noBlock) noBlock.style.display = 'block';
 
     if (solidarityYes) {
-        // Solidarité : afficher le montant après solidarité
         const solidarityTotalField = document.getElementById('solidarity_total_amount');
         const solidarityValue = solidarityTotalField ? parseFloat(solidarityTotalField.value) || 0 : 0;
         const valueSpan = document.getElementById('final_amount_solidarity_value');
@@ -612,7 +631,6 @@ function updateFinalAmountBlock() {
         if (solidarityBlock) solidarityBlock.style.display = 'block';
         if (noBlock) noBlock.style.display = 'none';
     } else if (additionalReduction) {
-        // Réduction complémentaire : proposition simple ou CEF
         const proposalType = root.querySelector('input[name="cef_or_proposal"]:checked')?.value;
         if (proposalType === 'simple') {
             const proposedAmount = document.getElementById('proposed_monthly_amount');
@@ -629,9 +647,7 @@ function updateFinalAmountBlock() {
             if (cefBlock) cefBlock.style.display = 'block';
             if (noBlock) noBlock.style.display = 'none';
         }
-        // si proposalType ni simple ni cef (par ex. non sélectionné), on laisse noBlock visible
     }
-    // Sinon, aucun bloc supplémentaire n'est affiché (seulement le standard)
 }
 
 // Récapitulatif
@@ -895,6 +911,7 @@ function deleteStudent(lineId, btnElement) {
             updateAfterSchoolTotal();
             updateRecapTotals();
             checkStudentInfoMsg();
+            
         } else {
             const errorMsg = (data.result && data.result.error) || data.error || 'Impossible de supprimer';
             alert('Erreur : ' + errorMsg);
@@ -1037,6 +1054,22 @@ function initForm(root) {
         if (textarea.value !== v) textarea.value = v;
     });
     checkStudentInfoMsg();
+    // Écouteurs explicites pour les cases à cocher de réduction
+const applyChildren = document.getElementById('apply_children_discount');
+const applySeniority = document.getElementById('apply_seniority_discount');
+
+if (applyChildren) {
+    applyChildren.addEventListener('change', function() {
+        console.log('Case enfants changée, checked =', this.checked);
+        updateAllDiscounts();
+    });
+}
+if (applySeniority) {
+    applySeniority.addEventListener('change', function() {
+        console.log('Case ancienneté changée, checked =', this.checked);
+        updateAllDiscounts();
+    });
+}
 
     // Toggle familles liées (initialisation + écouteur direct)
     const toggleLinked = document.getElementById('toggle_linked_families');
