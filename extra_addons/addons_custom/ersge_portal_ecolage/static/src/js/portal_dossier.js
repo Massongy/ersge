@@ -330,7 +330,7 @@ function updateTotalMensuel() {
         if (!isNaN(val)) total += val;
     });
     setInner('total_monthly_fee', total);
-    setInner('base_monthly_fee_display', total);   // <-- AJOUT pour le champ sans réduction
+    setInner('base_monthly_fee_display', total);
     updateAllDiscounts();
 }
 
@@ -648,6 +648,7 @@ function updateFinalAmountBlock() {
             if (noBlock) noBlock.style.display = 'none';
         }
     }
+    updateProposedTotal();
 }
 
 // Récapitulatif
@@ -674,7 +675,7 @@ function updateRecapTotals() {
     setVal('recap_total_annual', totalAnnual);
 
     // Mise à jour du total hors réduction (base)
-    setInner('base_monthly_fee_display', getBaseMensuel());   // <-- AJOUT
+    setInner('base_monthly_fee_display', getBaseMensuel());
 
     const root = document.getElementById('ecolage_form_root');
     const paymentTerms = root ? getCheckedVal(root, 'payment_terms') : null;
@@ -1517,6 +1518,71 @@ function generateRecap(form) {
 
     html += `</div>`;
     return html;
+}
+
+// =====================================================================
+// MISE À JOUR DU BLOC TARIF PROPOSÉ
+// =====================================================================
+function updateProposedTotal() {
+    // Récupérer le montant mensuel retenu (celui affiché dans le bloc "Cas particuliers")
+    const solidarityBlock = document.getElementById('final_amount_solidarity_block');
+    const simpleBlock = document.getElementById('final_amount_proposal_simple_block');
+    const cefBlock = document.getElementById('final_amount_proposal_cef_block');
+    const standardEl = document.getElementById('final_amount_after_standard_reduction');
+
+    let monthlyProposed = 0;
+
+    if (solidarityBlock && solidarityBlock.style.display !== 'none') {
+        const val = document.getElementById('final_amount_solidarity_value');
+        monthlyProposed = val ? parseFloat(val.innerText) || 0 : 0;
+    } else if (cefBlock && cefBlock.style.display !== 'none') {
+        const val = document.getElementById('final_amount_proposal_cef_value');
+        monthlyProposed = val ? parseFloat(val.innerText) || 0 : 0;
+    } else if (simpleBlock && simpleBlock.style.display !== 'none') {
+        const val = document.getElementById('final_amount_proposal_simple_value');
+        monthlyProposed = val ? parseFloat(val.innerText) || 0 : 0;
+    } else {
+        // Standard
+        monthlyProposed = standardEl ? parseFloat(standardEl.value) || 0 : 0;
+    }
+
+    // Récupérer les autres composantes (identiques au standard)
+    const monthlyAfterSchool = parseFloat(document.getElementById('recap_monthly_after_school')?.value || 0);
+    const membership = parseFloat(document.getElementById('recap_annual_membership')?.value || 0);
+    const deposit = parseFloat(document.getElementById('recap_deposit')?.value || 0);
+
+    // Calculs mensuels
+    const monthlyTotal = monthlyProposed + monthlyAfterSchool;
+
+    // Calculs annuels
+    const annualTuition = monthlyProposed * 12;
+    const annualAfter = monthlyAfterSchool * 12;
+    const annualTotal = annualTuition + annualAfter + membership + deposit;
+
+    // Mise à jour des champs du bloc "Tarif proposé"
+    setVal('proposed_monthly_ecolage', monthlyProposed);
+    setVal('proposed_monthly_after_school', monthlyAfterSchool);
+    setVal('proposed_total_monthly', monthlyTotal);
+    setVal('proposed_annual_tuition', annualTuition);
+    setVal('proposed_annual_after_school', annualAfter);
+    setVal('proposed_annual_membership', membership);
+    setVal('proposed_deposit', deposit);
+    setVal('proposed_total_annual_final', annualTotal);
+
+    // Déduction 2% pour le tarif proposé (si applicable)
+    const root = document.getElementById('ecolage_form_root');
+    const paymentTerms = root ? getCheckedVal(root, 'payment_terms') : null;
+    const additionalReduction = root ? getCheckedVal(root, 'additional_reduction_request') : null;
+    const discountApplicable = (paymentTerms === 'annually' && additionalReduction !== '1');
+    const discountBlock = document.getElementById('proposed_discount_block');
+    const discountedInput = document.getElementById('proposed_total_annual_discounted');
+
+    if (discountApplicable) {
+        if (discountBlock) discountBlock.style.display = 'block';
+        if (discountedInput) discountedInput.value = (annualTotal * 0.98).toFixed(2);
+    } else {
+        if (discountBlock) discountBlock.style.display = 'none';
+    }
 }
 
 // =====================================================================
