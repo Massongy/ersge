@@ -288,7 +288,7 @@ class PortalEcolage(http.Controller):
             current_role = acces.role if acces else 'parent1'
 
             if request.httprequest.method == 'POST':
-                # Traitement du formulaire – inchangé dans sa majeure partie
+                # Traitement du formulaire
                 params = request.params
                 form = request.httprequest.form
 
@@ -371,6 +371,8 @@ class PortalEcolage(http.Controller):
                     if val:
                         dossier_vals[field] = val
 
+                # Initialisation de multi_billing_request à False par défaut
+                dossier_vals['multi_billing_request'] = False
                 for field in ['apply_solidarity_increase', 'multi_billing_request']:
                     values = form.getlist(field)
                     if values:
@@ -447,32 +449,63 @@ class PortalEcolage(http.Controller):
                         dossier_vals['proposal_annual_income'] = 0.0
 
                 _logger.info("dossier_vals après gestion CEF: %s", dossier_vals)
-                _logger.info("=== LOGS CEF ===")
-                _logger.info("cef_or_proposal = %s", params.get('cef_or_proposal'))
-                _logger.info("proposed_monthly_fee_cef reçu = %s", params.get('proposed_monthly_fee_cef'))
-                _logger.info("proposed_monthly_amount reçu = %s", params.get('proposed_monthly_amount'))
-                _logger.info("dossier_vals avant écriture = %s", dossier_vals)
 
-                # Facturation divisée
-                try:
-                    p1 = float(params.get('parent1_billing_amount', '0').replace(',', '.'))
-                    p2 = float(params.get('parent2_billing_amount', '0').replace(',', '.'))
-                except ValueError:
-                    p1 = p2 = 0.0
+                # =================================================================
+                # GESTION DES DESTINATAIRES DE FACTURATION (via champ JSON)
+                # =================================================================
+                _logger.info("=== FACTURATION DIVISÉE ===")
+                _logger.info("multi_billing_request reçu = %s", params.get('multi_billing_request'))
 
-                if dossier_vals.get('multi_billing_request'):
-                    dossier_vals['parent1_billing_amount'] = p1
-                    dossier_vals['parent2_billing_amount'] = p2
+                # Récupération explicite de la valeur booléenne
+                multi_billing = dossier_vals.get('multi_billing_request', False)
+                _logger.info("multi_billing (booléen) = %s", multi_billing)
+
+                if multi_billing:
+                    # Récupération des listes du formulaire
+                    names = form.getlist('billing_recipient_name[]')
+                    amounts = form.getlist('billing_recipient_amount[]')
+                    streets = form.getlist('billing_recipient_street[]')
+                    zips = form.getlist('billing_recipient_zip[]')
+                    cities = form.getlist('billing_recipient_city[]')
+                    country_ids = form.getlist('billing_recipient_country_id[]')
+
+                    _logger.info("names = %s", names)
+                    _logger.info("amounts = %s", amounts)
+
+                    recipients = []
+                    for i in range(len(names)):
+                        name = names[i].strip()
+                        if name:  # ignorer les lignes vides
+                            try:
+                                amount = float(amounts[i]) if amounts[i] and amounts[i].strip() else 0.0
+                            except ValueError:
+                                amount = 0.0
+                            recipients.append({
+                                'name': name,
+                                'amount': amount,
+                                'street': streets[i] if i < len(streets) else '',
+                                'zip': zips[i] if i < len(zips) else '',
+                                'city': cities[i] if i < len(cities) else '',
+                                'country_id': int(country_ids[i]) if i < len(country_ids) and country_ids[i] else False,
+                            })
+                    dossier_vals['billing_recipients_data'] = recipients
+                    _logger.info("recipients = %s", recipients)
                 else:
-                    dossier_vals['parent1_billing_amount'] = 0.0
-                    dossier_vals['parent2_billing_amount'] = 0.0
+                    dossier_vals['billing_recipients_data'] = []
+                    _logger.info("Facturation divisée désactivée, données vidées")
 
-                if dossier_vals:
-                    _logger.info("=== ÉCRITURE DE dossier_vals ===")
-                    dossier.sudo().write(dossier_vals)
-                    _logger.info("Écriture terminée.")
-                else:
-                    _logger.warning("Aucune valeur à écrire pour dossier_vals")
+                # Supprimer les anciens champs (plus utilisés)
+                dossier_vals.pop('parent1_billing_amount', None)
+                dossier_vals.pop('parent2_billing_amount', None)
+
+                # =================================================================
+                # GESTION DU PARRAINAGE : suppression explicite si 'no'
+                # =================================================================
+                if params.get('sponsorship_request') == 'no':
+                    dossier.sponsorship_ids.unlink()
+                    _logger.info("Parrainages supprimés car sponsorship_request = no")
+                # Sinon, on laisse la gestion par les IDs (déjà faite plus bas)
+                # Mais on s'assure de bien supprimer ceux qui ne sont pas soumis
 
                 # ===== 4. PARENT 1 =====
                 parent1_vals = {
@@ -626,7 +659,8 @@ class PortalEcolage(http.Controller):
                         if after_line:
                             after_line.sudo().unlink()
 
-                # ===== 10. PARRAINS =====
+                # ===== 10. PARRAINS (mise à jour et suppression) =====
+                # On commence par traiter les parrains existants (modifications)
                 for key in list(params.keys()):
                     if key.startswith('sp_id_'):
                         sp_id = int(params.get(key))
@@ -642,11 +676,14 @@ class PortalEcolage(http.Controller):
                                 'amount': float(params.get(f'sp_amount_{sp_id}') or 0),
                             })
 
+                # Suppression des parrains qui ne sont pas dans la soumission
                 submitted_sp_ids = [int(params.get(k)) for k in params.keys() if k.startswith('sp_id_')]
                 for sp in dossier.sponsorship_ids:
                     if sp.id not in submitted_sp_ids:
                         sp.sudo().unlink()
+                        _logger.info("Parrain %s supprimé (id non soumis)", sp.id)
 
+                # Création des nouveaux parrains
                 new_sp_firstnames = form.getlist('new_sp_firstname[]')
                 new_sp_lastnames = form.getlist('new_sp_lastname[]')
                 new_sp_streets = form.getlist('new_sp_street[]')
@@ -668,6 +705,15 @@ class PortalEcolage(http.Controller):
                             'amount': float(new_sp_amounts[i]) if i < len(new_sp_amounts) and new_sp_amounts[i] else 0.0,
                         })
 
+                # ===== ÉCRITURE FINALE DU DOSSIER =====
+                if dossier_vals:
+                    _logger.info("=== ÉCRITURE DE dossier_vals ===")
+                    dossier.sudo().write(dossier_vals)
+                    _logger.info("Écriture terminée.")
+                    _logger.info("billing_recipients_data après écriture = %s", dossier.billing_recipients_data)
+                else:
+                    _logger.warning("Aucune valeur à écrire pour dossier_vals")
+
                 # ===== REDIRECTION FINALE =====
                 if params.get('form_action') == 'save_and_stay':
                     return request.redirect(f'/my/ecolage/edit/{dossier.id}')
@@ -680,6 +726,7 @@ class PortalEcolage(http.Controller):
                 elif params.get('form_action') == 'save_and_exit':
                     return request.redirect('/my/ecolage?success=Dossier%20enregistré')
                 return request.redirect('/my/ecolage?success=1')
+
             # ==================== GET ====================
             # Préremplir les infos du partenaire courant pour le parent correspondant à son rôle
             prefill_parent1 = {}

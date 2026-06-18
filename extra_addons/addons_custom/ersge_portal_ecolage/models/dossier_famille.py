@@ -420,14 +420,13 @@ class DossierFamille(models.Model):
     )
 
     # === FACTURATION DIVISÉE ===
-    parent1_billing_amount = fields.Monetary(
-        string="Montant annuel Parent 1 (Père)",
-        currency_field="currency_id",
+    billing_recipients_data = fields.Json(
+        string="Données destinataires facturation",
+        default=lambda self: self._default_billing_recipients_data()
     )
-    parent2_billing_amount = fields.Monetary(
-        string="Montant annuel Parent 2 (Mère)",
-        currency_field="currency_id",
-    )
+
+    def _default_billing_recipients_data(self):
+        return []
 
     membership_fee = fields.Selection([("paid", "Payé"), ("unpaid", "Non payé")])
     deposit_status = fields.Selection([("paid", "Payé"), ("unpaid", "Non payé")])

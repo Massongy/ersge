@@ -252,6 +252,34 @@ function validateRequiredAndFormat(root) {
         if (!employerCountry || !employerCountry.value) errors.push("Pays de l'employeur");
     }
 
+    // ==================== 11. Facturation divisée (si activée) ====================
+    const multiBillingYes = root.querySelector('#multi_yes')?.checked;
+    if (multiBillingYes) {
+        const recipients = root.querySelectorAll('.billing-recipient');
+        if (recipients.length === 0) {
+            errors.push("Ajouter au moins un destinataire pour la facturation divisée");
+        } else {
+            recipients.forEach((recip, idx) => {
+                const nameInput = recip.querySelector('input[name="billing_recipient_name[]"]');
+                const amountInput = recip.querySelector('input[name="billing_recipient_amount[]"]');
+                const streetInput = recip.querySelector('input[name="billing_recipient_street[]"]');
+                const zipInput = recip.querySelector('input[name="billing_recipient_zip[]"]');
+                const cityInput = recip.querySelector('input[name="billing_recipient_city[]"]');
+                const countrySelect = recip.querySelector('select[name="billing_recipient_country_id[]"]');
+
+                if (!nameInput || !nameInput.value.trim()) errors.push(`Nom du destinataire ${idx+1} manquant`);
+                if (!amountInput || !amountInput.value.trim() || parseFloat(amountInput.value) <= 0) {
+                    errors.push(`Montant du destinataire ${idx+1} invalide (doit être > 0)`);
+                }
+                // Optionnel : rendre l'adresse obligatoire
+                // if (!streetInput || !streetInput.value.trim()) errors.push(`Adresse du destinataire ${idx+1} manquante`);
+                // if (!zipInput || !zipInput.value.trim()) errors.push(`NPA du destinataire ${idx+1} manquant`);
+                // if (!cityInput || !cityInput.value.trim()) errors.push(`Ville du destinataire ${idx+1} manquante`);
+                // if (!countrySelect || !countrySelect.value) errors.push(`Pays du destinataire ${idx+1} manquant`);
+            });
+        }
+    }
+
     return errors;
 }
 
@@ -588,7 +616,7 @@ function updateProposalPercentage() {
 }
 
 // =====================================================================
-// TOGGLE PARRAINAGE (AJOUT)
+// TOGGLE PARRAINAGE
 // =====================================================================
 function toggleSponsorship(root) {
     const block = root.querySelector('#block_sponsorship_yes');
@@ -604,6 +632,61 @@ function toggleSponsorship(root) {
             input.removeAttribute('required');
         }
     });
+}
+
+// =====================================================================
+// GESTION DYNAMIQUE DES DESTINATAIRES DE FACTURATION (AVEC ADRESSE)
+// =====================================================================
+
+function addBillingRecipient(root) {
+    const template = root.querySelector('#new_billing_recipient_template .billing-recipient');
+    if (!template) return;
+    const clone = template.cloneNode(true);
+    // Réinitialiser les valeurs
+    clone.querySelector('input[name="billing_recipient_name[]"]').value = '';
+    clone.querySelector('input[name="billing_recipient_amount[]"]').value = '0.00';
+    clone.querySelector('input[name="billing_recipient_street[]"]').value = '';
+    clone.querySelector('input[name="billing_recipient_zip[]"]').value = '';
+    clone.querySelector('input[name="billing_recipient_city[]"]').value = '';
+    const select = clone.querySelector('select[name="billing_recipient_country_id[]"]');
+    if (select) select.selectedIndex = 0;
+    // Gérer la suppression
+    const removeBtn = clone.querySelector('.btn-remove-billing');
+    if (removeBtn) {
+        removeBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            clone.remove();
+            toggleMultiBilling(root);
+        });
+    }
+    const list = root.querySelector('#billing_recipients_list');
+    if (list) list.appendChild(clone);
+    toggleMultiBilling(root);
+}
+
+function toggleMultiBilling(root) {
+    const radioYes = root.querySelector('#multi_yes');
+    const container = root.querySelector('#billing_amounts_container');
+    if (!container) return;
+    if (radioYes && radioYes.checked) {
+        container.style.display = 'flex';
+        // S'assurer qu'il y a au moins un destinataire
+        const list = container.querySelector('#billing_recipients_list');
+        if (list && list.querySelectorAll('.billing-recipient').length === 0) {
+            addBillingRecipient(root);
+        }
+        // Rendre les champs obligatoires (nom et montant uniquement)
+        container.querySelectorAll('input[name="billing_recipient_name[]"], input[name="billing_recipient_amount[]"]').forEach(function(input) {
+            input.setAttribute('required', 'required');
+        });
+        // Les champs adresse restent optionnels
+    } else {
+        container.style.display = 'none';
+        // Enlever les required
+        container.querySelectorAll('input[name="billing_recipient_name[]"], input[name="billing_recipient_amount[]"]').forEach(function(input) {
+            input.removeAttribute('required');
+        });
+    }
 }
 
 // =====================================================================
@@ -1025,22 +1108,6 @@ function toggleBudgetMethod(root) {
     if (isOnline) attachBudgetEvents();
 }
 
-function toggleMultiBilling(root) {
-    const radioYes = root.querySelector('#multi_yes');
-    const container = root.querySelector('#billing_amounts_container');
-    const input1 = root.querySelector('#parent1_billing_amount');
-    const input2 = root.querySelector('#parent2_billing_amount');
-    if (radioYes && radioYes.checked) {
-        if (container) container.style.display = 'flex';
-        if (input1) input1.required = true;
-        if (input2) input2.required = true;
-    } else {
-        if (container) container.style.display = 'none';
-        if (input1) input1.required = false;
-        if (input2) input2.required = false;
-    }
-}
-
 // --- Toggle Réduction complémentaire selon Solidarité (ajout) ---
 function toggleComplementaryReduction() {
     const solidarityYes = document.querySelector('input[name="solidarity_request"]:checked')?.value === 'yes';
@@ -1126,6 +1193,9 @@ function initForm(root) {
 
     // AJOUT : toggle parrainage
     toggleSponsorship(root);
+
+    // AJOUT : toggle facturation divisée (avec adresse)
+    toggleMultiBilling(root);
 
     // FORCER LA MISE À JOUR DES TOTAUX APRÈS CHARGEMENT DES FORFAITS
     setTimeout(function() {
@@ -1324,6 +1394,21 @@ function attachDelegatedEvents(root) {
             const sponsorItem = removeNewSponsorBtn.closest('.sponsorship-item');
             if (sponsorItem) sponsorItem.remove();
         }
+        // AJOUT : Gestion des destinataires de facturation
+        if (e.target.id === 'btn_add_billing') {
+            e.preventDefault();
+            addBillingRecipient(root);
+        }
+        const removeBillingBtn = e.target.closest('.btn-remove-billing');
+        if (removeBillingBtn) {
+            e.preventDefault();
+            const recipientItem = removeBillingBtn.closest('.billing-recipient');
+            if (recipientItem) {
+                recipientItem.remove();
+                // Mettre à jour les required
+                toggleMultiBilling(root);
+            }
+        }
     });
 }
 
@@ -1513,9 +1598,20 @@ function generateRecap(form) {
     html += `<div class="col-12 mt-3"><strong>💳 Mode de paiement :</strong> ${paymentText}</div>`;
     const multiBilling = form.querySelector('input[name="multi_billing_request"]:checked')?.value === '1';
     if (multiBilling) {
-        const p1Amount = form.querySelector('#parent1_billing_amount')?.value || '0';
-        const p2Amount = form.querySelector('#parent2_billing_amount')?.value || '0';
-        html += `<div><strong>📑 Facturation divisée :</strong> Parent 1 : ${parseFloat(p1Amount).toFixed(2)} CHF/an, Parent 2 : ${parseFloat(p2Amount).toFixed(2)} CHF/an</div>`;
+        const recipients = form.querySelectorAll('.billing-recipient');
+        html += `<div><strong>📑 Facturation divisée :</strong><ul>`;
+        recipients.forEach(recip => {
+            const name = recip.querySelector('input[name="billing_recipient_name[]"]')?.value || '';
+            const amount = recip.querySelector('input[name="billing_recipient_amount[]"]')?.value || '0';
+            const street = recip.querySelector('input[name="billing_recipient_street[]"]')?.value || '';
+            const zip = recip.querySelector('input[name="billing_recipient_zip[]"]')?.value || '';
+            const city = recip.querySelector('input[name="billing_recipient_city[]"]')?.value || '';
+            const countrySelect = recip.querySelector('select[name="billing_recipient_country_id[]"]');
+            const countryName = countrySelect ? countrySelect.options[countrySelect.selectedIndex]?.text || '' : '';
+            const address = [street, zip, city, countryName].filter(Boolean).join(', ');
+            html += `<li><strong>${name}</strong> : ${parseFloat(amount).toFixed(2)} CHF/an${address ? ' — ' + address : ''}</li>`;
+        });
+        html += `</ul></div>`;
     }
 
     // ---------- 10. Cotisation annuelle et dépôt ----------

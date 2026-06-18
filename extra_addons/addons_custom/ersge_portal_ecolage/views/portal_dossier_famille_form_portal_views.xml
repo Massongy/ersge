@@ -1600,22 +1600,17 @@ Ajouter un élève
 
                             <div class="d-flex gap-3">
                                 <div class="form-check">
-                                    <input class="form-check-input" type="radio" name="sponsorship_request" id="sponsorship_no" value="no" t-att-checked="dossier.sponsorship_request == 'no' or not dossier.sponsorship_request"/>
-                                    <label class="form-check-label" for="sponsorship_no">
-                            Non
-                                    </label>
+                                    <input class="form-check-input" type="radio" name="sponsorship_request" id="sponsorship_no" value="no" t-att-checked="dossier.sponsorship_request == 'no' and not dossier.sponsorship_ids"/>
+                                    <label class="form-check-label" for="sponsorship_no">Non</label>
                                 </div>
-
                                 <div class="form-check">
-                                    <input class="form-check-input" type="radio" name="sponsorship_request" id="sponsorship_yes" value="yes" t-att-checked="dossier.sponsorship_request == 'yes'"/>
-                                    <label class="form-check-label" for="sponsorship_yes">
-                            Oui
-                                    </label>
+                                    <input class="form-check-input" type="radio" name="sponsorship_request" id="sponsorship_yes" value="yes" t-att-checked="dossier.sponsorship_request == 'yes' or dossier.sponsorship_ids"/>
+                                    <label class="form-check-label" for="sponsorship_yes">Oui</label>
                                 </div>
                             </div>
                         </div>
 
-                        <div class="col-12" id="block_sponsorship_yes" t-att-style="'display:' + ('block' if dossier.sponsorship_request == 'yes' else 'none')">
+                        <div class="col-12" id="block_sponsorship_yes" t-att-style="'display:' + ('block' if (dossier.sponsorship_request == 'yes' or dossier.sponsorship_ids) else 'none')">
 
                             <div class="card mt-3">
                                 <div class="card-header fw-semibold bg-light">
@@ -1826,64 +1821,138 @@ Ajouter un élève
 
                             <div class="d-flex gap-3">
                                 <div class="form-check">
-                                    <input class="form-check-input" type="radio" name="multi_billing_request" id="multi_no" value="0" checked="checked"/>
-                                    <label class="form-check-label" for="multi_no">
-                            Non
-                                    </label>
+                                    <input class="form-check-input" type="radio" name="multi_billing_request" id="multi_no" value="0" t-att-checked="not dossier.multi_billing_request and not dossier.billing_recipients_data"/>
+                                    <label class="form-check-label" for="multi_no">Non</label>
                                 </div>
-
                                 <div class="form-check">
-                                    <input class="form-check-input" type="radio" name="multi_billing_request" id="multi_yes" value="1"/>
-                                    <label class="form-check-label" for="multi_yes">
-                            Oui
-                                    </label>
+                                    <input class="form-check-input" type="radio" name="multi_billing_request" id="multi_yes" value="1" t-att-checked="dossier.multi_billing_request or dossier.billing_recipients_data"/>
+                                    <label class="form-check-label" for="multi_yes">Oui</label>
                                 </div>
                             </div>
                         </div>
 
-                        <div id="billing_amounts_container" class="row mt-3" style="display: none;">
-
+                        <div id="billing_amounts_container" class="row mt-3" t-att-style="'display:' + ('flex' if (dossier.multi_billing_request or dossier.billing_recipients_data) else 'none')">
                             <div class="col-12">
                                 <div class="card">
-
                                     <div class="card-header bg-light fw-semibold">
                                         <i class="fa fa-credit-card me-2"/>
-                            Répartition de la facturation
+                                            Répartition de la facturation
                                     </div>
-
                                     <div class="card-body">
-
-                                        <div class="row g-3">
-
-                                            <div class="col-md-6">
-                                                <label class="form-label">
-                                        Montant annuel pour Parent 1 (Père)
-                                                </label>
-
-                                                <div class="input-group">
-                                                    <span class="input-group-text">CHF</span>
-                                                    <input type="number" step="0.01" class="form-control" name="parent1_billing_amount" id="parent1_billing_amount" value="0.00"/>
-                                                </div>
-                                            </div>
-
-                                            <div class="col-md-6">
-                                                <label class="form-label">
-                                        Montant annuel pour Parent 2 (Mère)
-                                                </label>
-
-                                                <div class="input-group">
-                                                    <span class="input-group-text">CHF</span>
-                                                    <input type="number" step="0.01" class="form-control" name="parent2_billing_amount" id="parent2_billing_amount" value="0.00"/>
-                                                </div>
-                                            </div>
-
+                                        <div id="billing_recipients_list">
+                                            <!-- Destinataires existants (pré-remplis) -->
+                                            <t t-if="dossier.billing_recipients_data">
+                                                <t t-foreach="dossier.billing_recipients_data" t-as="recipient">
+                                                    <div class="card mb-3 billing-recipient">
+                                                        <div class="card-body">
+                                                            <div class="row g-3">
+                                                                <div class="col-md-6">
+                                                                    <label class="form-label">Nom du destinataire <span class="text-danger">*</span>
+                                                                    </label>
+                                                                    <input type="text" class="form-control" name="billing_recipient_name[]" placeholder="Nom" t-att-value="recipient.get('name', '')"/>
+                                                                </div>
+                                                                <div class="col-md-6">
+                                                                    <label class="form-label">Montant annuel (CHF) <span class="text-danger">*</span>
+                                                                    </label>
+                                                                    <div class="input-group">
+                                                                        <span class="input-group-text">CHF</span>
+                                                                        <input type="number" step="0.01" class="form-control" name="billing_recipient_amount[]" t-att-value="recipient.get('amount', 0)"/>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="col-12">
+                                                                    <label class="form-label">Adresse</label>
+                                                                    <input type="text" class="form-control" name="billing_recipient_street[]" placeholder="Rue, numéro" t-att-value="recipient.get('street', '')"/>
+                                                                </div>
+                                                                <div class="col-md-4">
+                                                                    <label class="form-label">NPA</label>
+                                                                    <input type="text" class="form-control" name="billing_recipient_zip[]" placeholder="1234" t-att-value="recipient.get('zip', '')"/>
+                                                                </div>
+                                                                <div class="col-md-8">
+                                                                    <label class="form-label">Ville</label>
+                                                                    <input type="text" class="form-control" name="billing_recipient_city[]" placeholder="Genève" t-att-value="recipient.get('city', '')"/>
+                                                                </div>
+                                                                <div class="col-md-6">
+                                                                    <label class="form-label">Pays</label>
+                                                                    <select class="form-select" name="billing_recipient_country_id[]">
+                                                                        <option value="">-- Sélectionner --</option>
+                                                                        <t t-foreach="countries" t-as="country">
+                                                                            <option t-att-value="country.id" t-att-selected="recipient.get('country_id', False) == country.id">
+                                                                                <t t-out="country.name"/>
+                                                                            </option>
+                                                                        </t>
+                                                                    </select>
+                                                                </div>
+                                                                <div class="col-12">
+                                                                    <button type="button" class="btn btn-sm btn-outline-danger btn-remove-billing">
+                                                                        <i class="fa fa-trash me-1"></i> Supprimer
+                                                                    </button>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </t>
+                                            </t>
                                         </div>
+
+                                        <!-- Template pour l'ajout dynamique (caché) -->
+                                        <div id="new_billing_recipient_template" style="display:none;">
+                                            <div class="card mb-3 billing-recipient">
+                                                <div class="card-body">
+                                                    <div class="row g-3">
+                                                        <div class="col-md-6">
+                                                            <label class="form-label">Nom du destinataire <span class="text-danger">*</span>
+                                                            </label>
+                                                            <input type="text" class="form-control" name="billing_recipient_name[]" placeholder="Nom"/>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <label class="form-label">Montant annuel (CHF) <span class="text-danger">*</span>
+                                                            </label>
+                                                            <div class="input-group">
+                                                                <span class="input-group-text">CHF</span>
+                                                                <input type="number" step="0.01" class="form-control" name="billing_recipient_amount[]" value="0.00"/>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-12">
+                                                            <label class="form-label">Adresse</label>
+                                                            <input type="text" class="form-control" name="billing_recipient_street[]" placeholder="Rue, numéro"/>
+                                                        </div>
+                                                        <div class="col-md-4">
+                                                            <label class="form-label">NPA</label>
+                                                            <input type="text" class="form-control" name="billing_recipient_zip[]" placeholder="1234"/>
+                                                        </div>
+                                                        <div class="col-md-8">
+                                                            <label class="form-label">Ville</label>
+                                                            <input type="text" class="form-control" name="billing_recipient_city[]" placeholder="Genève"/>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <label class="form-label">Pays</label>
+                                                            <select class="form-select" name="billing_recipient_country_id[]">
+                                                                <option value="">-- Sélectionner --</option>
+                                                                <t t-foreach="countries" t-as="country">
+                                                                    <option t-att-value="country.id">
+                                                                        <t t-out="country.name"/>
+                                                                    </option>
+                                                                </t>
+                                                            </select>
+                                                        </div>
+                                                        <div class="col-12">
+                                                            <button type="button" class="btn btn-sm btn-outline-danger btn-remove-billing">
+                                                                <i class="fa fa-trash me-1"></i> Supprimer
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <button type="button" class="btn btn-outline-primary mt-2" id="btn_add_billing">
+                                            <i class="fa fa-plus me-2"></i> Ajouter un destinataire
+                                        </button>
 
                                         <div class="alert alert-info mt-3">
                                             <i class="fa fa-info-circle me-2"/>
-                                Les montants saisis ici seront additionnés pour former le total annuel.
+        Les montants saisis seront additionnés pour former le total annuel.
                                         </div>
-
                                     </div>
                                 </div>
                             </div>
