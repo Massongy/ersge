@@ -1585,87 +1585,346 @@ Ajouter un élève
 
             <!-- 5. Parrainage & Facturation -->
             <div class="card mb-4">
-                <div class="card-header fw-semibold bg-light">Parrainage &amp; Facturation</div>
+                <div class="card-header fw-semibold bg-light">
+        Parrainage &amp; Facturation
+                </div>
+
                 <div class="card-body">
                     <div class="row g-3">
+
+                        <!-- Parrainage -->
                         <div class="col-12">
-                            <label class="form-label fw-semibold">Parrainage : je bénéficie de parrainage (familial/amical/fondation)</label>
+                            <label class="form-label fw-semibold">
+                    Parrainage : je bénéficie de parrainage (familial/amical/fondation)
+                            </label>
+
                             <div class="d-flex gap-3">
                                 <div class="form-check">
                                     <input class="form-check-input" type="radio" name="sponsorship_request" id="sponsorship_no" value="no" t-att-checked="dossier.sponsorship_request == 'no' or not dossier.sponsorship_request"/>
-                                    <label class="form-check-label" for="sponsorship_no">Non</label>
+                                    <label class="form-check-label" for="sponsorship_no">
+                            Non
+                                    </label>
                                 </div>
+
                                 <div class="form-check">
                                     <input class="form-check-input" type="radio" name="sponsorship_request" id="sponsorship_yes" value="yes" t-att-checked="dossier.sponsorship_request == 'yes'"/>
-                                    <label class="form-check-label" for="sponsorship_yes">Oui</label>
+                                    <label class="form-check-label" for="sponsorship_yes">
+                            Oui
+                                    </label>
                                 </div>
                             </div>
                         </div>
+
                         <div class="col-12" id="block_sponsorship_yes" t-att-style="'display:' + ('block' if dossier.sponsorship_request == 'yes' else 'none')">
-                            <!-- ... contenu inchangé ... -->
+
                             <div class="card mt-3">
                                 <div class="card-header fw-semibold bg-light">
                                     <i class="fa fa-handshake-o me-2"/>
-                                    Informations parrainage
+                        Informations parrainage
                                 </div>
+
                                 <div class="card-body">
+
                                     <div class="alert alert-info" role="alert">
                                         <i class="fa fa-info-circle me-2"/>
-                                        Quelqu'un souhaite vous parrainer ou vous souhaitez lui proposer de le faire ?
-                                        Partagez-lui le formulaire :
-                                        <a href="https://ersge.ch/parrainer-un-enfant/" target="_blank">https://ersge.ch/parrainer-un-enfant/</a>
+                            Quelqu'un souhaite vous parrainer ou vous souhaitez lui proposer de le faire ?
+                            Partagez-lui le formulaire :
+                                        <a href="https://ersge.ch/parrainer-un-enfant/" target="_blank">
+                                https://ersge.ch/parrainer-un-enfant/
+                                        </a>
                                     </div>
+
                                     <div id="sponsorship_list">
+
                                         <t t-foreach="dossier.sponsorship_ids" t-as="sp">
-                                            <!-- ... -->
+
+                                            <div class="card mb-3 border sponsorship-item">
+                                                <div class="card-body">
+
+                                                    <input type="hidden" t-att-name="'sp_id_' + str(sp.id)" t-att-value="sp.id"/>
+
+                                                    <div class="row g-3">
+
+                                                        <div class="col-md-6">
+                                                            <label class="form-label fw-semibold">
+                                                    Prénom <span class="text-danger">*</span>
+                                                            </label>
+                                                            <input type="text" class="form-control" t-att-name="'sp_firstname_' + str(sp.id)" t-att-value="sp.firstname or ''"/>
+                                                        </div>
+
+                                                        <div class="col-md-6">
+                                                            <label class="form-label fw-semibold">
+                                                    Nom <span class="text-danger">*</span>
+                                                            </label>
+                                                            <input type="text" class="form-control" t-att-name="'sp_lastname_' + str(sp.id)" t-att-value="sp.lastname or ''"/>
+                                                        </div>
+
+                                                        <div class="col-12">
+                                                            <label class="form-label fw-semibold">
+                                                    Adresse
+                                                            </label>
+                                                            <input type="text" class="form-control" t-att-name="'sp_street_' + str(sp.id)" t-att-value="sp.street or ''"/>
+                                                        </div>
+
+                                                        <div class="col-md-4">
+                                                            <label class="form-label fw-semibold">
+                                                    Code Postal
+                                                            </label>
+                                                            <input type="text" class="form-control" t-att-name="'sp_zip_' + str(sp.id)" t-att-value="sp.zip or ''"/>
+                                                        </div>
+
+                                                        <div class="col-md-8">
+                                                            <label class="form-label fw-semibold">
+                                                    Ville
+                                                            </label>
+                                                            <input type="text" class="form-control" t-att-name="'sp_city_' + str(sp.id)" t-att-value="sp.city or ''"/>
+                                                        </div>
+
+                                                        <div class="col-md-6">
+                                                            <label class="form-label fw-semibold">
+                                                    Pays
+                                                            </label>
+
+                                                            <select class="form-select" t-att-name="'sp_country_id_' + str(sp.id)">
+                                                                <option value="">
+                                                        -- Sélectionner --
+                                                                </option>
+
+                                                                <t t-foreach="countries" t-as="country">
+                                                                    <option t-att-value="country.id" t-att-selected="sp.country_id.id == country.id">
+                                                                        <t t-out="country.name"/>
+                                                                    </option>
+                                                                </t>
+                                                            </select>
+                                                        </div>
+
+                                                        <div class="col-md-6">
+                                                            <label class="form-label fw-semibold">
+                                                    Montant à facturer /mois
+                                                                <span class="text-danger">*</span>
+                                                            </label>
+
+                                                            <div class="input-group">
+                                                                <span class="input-group-text">CHF</span>
+                                                                <input type="number" class="form-control" step="0.01" t-att-name="'sp_amount_' + str(sp.id)" t-att-value="sp.amount or ''"/>
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="col-12">
+                                                            <button type="button" class="btn btn-sm btn-outline-danger btn-remove-sponsorship" t-att-data-sp-id="sp.id">
+                                                                <i class="fa fa-trash me-1"/>
+                                                    Supprimer
+                                                            </button>
+                                                        </div>
+
+                                                    </div>
+                                                </div>
+                                            </div>
+
                                         </t>
+
                                     </div>
+
                                     <div id="new_sponsorship_template" style="display:none;">
-                                        <!-- ... -->
+                                        <div class="card mb-3 border new-sponsorship">
+                                            <div class="card-body">
+
+                                                <div class="row g-3">
+
+                                                    <div class="col-md-6">
+                                                        <label class="form-label fw-semibold">
+                                                Prénom <span class="text-danger">*</span>
+                                                        </label>
+                                                        <input type="text" class="form-control" name="new_sp_firstname[]"/>
+                                                    </div>
+
+                                                    <div class="col-md-6">
+                                                        <label class="form-label fw-semibold">
+                                                Nom <span class="text-danger">*</span>
+                                                        </label>
+                                                        <input type="text" class="form-control" name="new_sp_lastname[]"/>
+                                                    </div>
+
+                                                    <div class="col-12">
+                                                        <label class="form-label fw-semibold">
+                                                Adresse
+                                                        </label>
+                                                        <input type="text" class="form-control" name="new_sp_street[]"/>
+                                                    </div>
+
+                                                    <div class="col-md-4">
+                                                        <label class="form-label fw-semibold">
+                                                Code Postal
+                                                        </label>
+                                                        <input type="text" class="form-control" name="new_sp_zip[]"/>
+                                                    </div>
+
+                                                    <div class="col-md-8">
+                                                        <label class="form-label fw-semibold">
+                                                Ville
+                                                        </label>
+                                                        <input type="text" class="form-control" name="new_sp_city[]"/>
+                                                    </div>
+
+                                                    <div class="col-md-6">
+                                                        <label class="form-label fw-semibold">
+                                                Pays
+                                                        </label>
+
+                                                        <select class="form-select" name="new_sp_country_id[]">
+                                                            <option value="">
+                                                    -- Sélectionner --
+                                                            </option>
+
+                                                            <t t-foreach="countries" t-as="country">
+                                                                <option t-att-value="country.id">
+                                                                    <t t-out="country.name"/>
+                                                                </option>
+                                                            </t>
+                                                        </select>
+                                                    </div>
+
+                                                    <div class="col-md-6">
+                                                        <label class="form-label fw-semibold">
+                                                Montant à facturer /mois
+                                                            <span class="text-danger">*</span>
+                                                        </label>
+
+                                                        <div class="input-group">
+                                                            <span class="input-group-text">CHF</span>
+                                                            <input type="number" class="form-control" name="new_sp_amount[]" step="0.01"/>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="col-12">
+                                                        <button type="button" class="btn btn-sm btn-outline-danger btn-remove-new-sponsorship">
+                                                            <i class="fa fa-trash me-1"/>
+                                                Supprimer
+                                                        </button>
+                                                    </div>
+
+                                                </div>
+
+                                            </div>
+                                        </div>
                                     </div>
+
                                     <button type="button" class="btn btn-outline-primary mt-2" id="btn_add_sponsorship">
                                         <i class="fa fa-plus me-2"/>
-Ajouter un parrainage
+                            Ajouter un parrainage
                                     </button>
+
                                 </div>
                             </div>
                         </div>
+
                         <!-- Division facturation -->
                         <div class="col-12">
-                            <label class="form-label fw-semibold">Je souhaite que la facturation soit divisée entre plusieurs personnes (hors parrainage)</label>
+                            <label class="form-label fw-semibold">
+                    Je souhaite que la facturation soit divisée entre plusieurs personnes (hors parrainage)
+                            </label>
+
                             <div class="d-flex gap-3">
                                 <div class="form-check">
-                                    <input class="form-check-input" type="radio" name="multi_billing_request" id="multi_no" value="0" t-att-checked="not dossier.multi_billing_request"/>
-                                    <label class="form-check-label" for="multi_no">Non</label>
+                                    <input class="form-check-input" type="radio" name="multi_billing_request" id="multi_no" value="0" checked="checked"/>
+                                    <label class="form-check-label" for="multi_no">
+                            Non
+                                    </label>
                                 </div>
+
                                 <div class="form-check">
-                                    <input class="form-check-input" type="radio" name="multi_billing_request" id="multi_yes" value="1" t-att-checked="dossier.multi_billing_request"/>
-                                    <label class="form-check-label" for="multi_yes">Oui</label>
+                                    <input class="form-check-input" type="radio" name="multi_billing_request" id="multi_yes" value="1"/>
+                                    <label class="form-check-label" for="multi_yes">
+                            Oui
+                                    </label>
                                 </div>
                             </div>
                         </div>
+
                         <div id="billing_amounts_container" class="row mt-3" style="display: none;">
-                            <!-- ... -->
-                        </div>
-                        <div class="col-12">
-                            <label class="form-label fw-semibold">Le versement se fera : <span class="text-danger">*</span>
-                            </label>
-                            <div class="d-flex flex-column gap-2">
-                                <div class="form-check">
-                                    <input class="form-check-input" type="radio" name="payment_terms" id="payment_monthly" value="monthly" t-att-checked="dossier.payment_terms == 'monthly'"/>
-                                    <label class="form-check-label" for="payment_monthly">Avant le 10 de chaque mois</label>
+
+                            <div class="col-12">
+                                <div class="card">
+
+                                    <div class="card-header bg-light fw-semibold">
+                                        <i class="fa fa-credit-card me-2"/>
+                            Répartition de la facturation
+                                    </div>
+
+                                    <div class="card-body">
+
+                                        <div class="row g-3">
+
+                                            <div class="col-md-6">
+                                                <label class="form-label">
+                                        Montant annuel pour Parent 1 (Père)
+                                                </label>
+
+                                                <div class="input-group">
+                                                    <span class="input-group-text">CHF</span>
+                                                    <input type="number" step="0.01" class="form-control" name="parent1_billing_amount" id="parent1_billing_amount" value="0.00"/>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-6">
+                                                <label class="form-label">
+                                        Montant annuel pour Parent 2 (Mère)
+                                                </label>
+
+                                                <div class="input-group">
+                                                    <span class="input-group-text">CHF</span>
+                                                    <input type="number" step="0.01" class="form-control" name="parent2_billing_amount" id="parent2_billing_amount" value="0.00"/>
+                                                </div>
+                                            </div>
+
+                                        </div>
+
+                                        <div class="alert alert-info mt-3">
+                                            <i class="fa fa-info-circle me-2"/>
+                                Les montants saisis ici seront additionnés pour former le total annuel.
+                                        </div>
+
+                                    </div>
                                 </div>
-                                <div class="form-check">
-                                    <input class="form-check-input" type="radio" name="payment_terms" id="payment_yearly" value="annually" t-att-checked="dossier.payment_terms == 'annually'"/>
-                                    <label class="form-check-label" for="payment_yearly">La totalité avant le 30 septembre, droit à déduction de 2%</label>
-                                </div>
-                                <div class="form-text text-muted">La réduction de 2% n'est pas applicable si une "Demande de réduction complémentaire" est sollicitée.</div>
                             </div>
                         </div>
+
+                        <!-- Modalités de paiement -->
+                        <div class="col-12">
+                            <label class="form-label fw-semibold">
+                    Le versement se fera :
+                                <span class="text-danger">*</span>
+                            </label>
+
+                            <div class="d-flex flex-column gap-2">
+
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="payment_terms" id="payment_monthly" value="monthly" checked="checked"/>
+                                    <label class="form-check-label" for="payment_monthly">
+                            Avant le 10 de chaque mois
+                                    </label>
+                                </div>
+
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="payment_terms" id="payment_yearly" value="annually"/>
+                                    <label class="form-check-label" for="payment_yearly">
+                            La totalité avant le 30 septembre, droit à déduction de 2%
+                                    </label>
+                                </div>
+
+                                <div class="form-text text-muted">
+                        La réduction de 2% n'est pas applicable si une demande de réduction complémentaire est sollicitée.
+                                </div>
+
+                            </div>
+                        </div>
+
+                        <!-- Commentaires -->
                         <div class="col-12">
                             <label class="form-label fw-semibold">Commentaires</label>
-                            <textarea class="form-control" name="comments" rows="3" t-att-data-initial="dossier.comments or ''"></textarea>
+                            <textarea class="form-control" name="comments" rows="3" data-initial=""></textarea>
                         </div>
+
                     </div>
                 </div>
             </div>

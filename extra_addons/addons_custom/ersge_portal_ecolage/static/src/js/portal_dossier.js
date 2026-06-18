@@ -588,6 +588,25 @@ function updateProposalPercentage() {
 }
 
 // =====================================================================
+// TOGGLE PARRAINAGE (AJOUT)
+// =====================================================================
+function toggleSponsorship(root) {
+    const block = root.querySelector('#block_sponsorship_yes');
+    if (!block) return;
+    const val = getCheckedVal(root, 'sponsorship_request');
+    block.style.display = (val === 'yes') ? 'block' : 'none';
+    // Gestion des champs requis (optionnel mais recommandé)
+    const inputs = block.querySelectorAll('input, select');
+    inputs.forEach(input => {
+        if (val === 'yes') {
+            input.setAttribute('required', 'required');
+        } else {
+            input.removeAttribute('required');
+        }
+    });
+}
+
+// =====================================================================
 // MISE À JOUR DU BLOC MONTANT FINAL (récapitulatif)
 // =====================================================================
 function updateFinalAmountBlock() {
@@ -1056,21 +1075,21 @@ function initForm(root) {
     });
     checkStudentInfoMsg();
     // Écouteurs explicites pour les cases à cocher de réduction
-const applyChildren = document.getElementById('apply_children_discount');
-const applySeniority = document.getElementById('apply_seniority_discount');
+    const applyChildren = document.getElementById('apply_children_discount');
+    const applySeniority = document.getElementById('apply_seniority_discount');
 
-if (applyChildren) {
-    applyChildren.addEventListener('change', function() {
-        console.log('Case enfants changée, checked =', this.checked);
-        updateAllDiscounts();
-    });
-}
-if (applySeniority) {
-    applySeniority.addEventListener('change', function() {
-        console.log('Case ancienneté changée, checked =', this.checked);
-        updateAllDiscounts();
-    });
-}
+    if (applyChildren) {
+        applyChildren.addEventListener('change', function() {
+            console.log('Case enfants changée, checked =', this.checked);
+            updateAllDiscounts();
+        });
+    }
+    if (applySeniority) {
+        applySeniority.addEventListener('change', function() {
+            console.log('Case ancienneté changée, checked =', this.checked);
+            updateAllDiscounts();
+        });
+    }
 
     // Toggle familles liées (initialisation + écouteur direct)
     const toggleLinked = document.getElementById('toggle_linked_families');
@@ -1104,6 +1123,9 @@ if (applySeniority) {
     updateProposalPercentage();
     // Mise à jour du bloc final
     updateFinalAmountBlock();
+
+    // AJOUT : toggle parrainage
+    toggleSponsorship(root);
 
     // FORCER LA MISE À JOUR DES TOTAUX APRÈS CHARGEMENT DES FORFAITS
     setTimeout(function() {
@@ -1184,7 +1206,7 @@ function attachDelegatedEvents(root) {
         // Gestion CEF
         if (target.name === 'cef_or_proposal') {
             toggleCefOrProposal();
-            updateFinalAmountBlock();   // <-- AJOUT
+            updateFinalAmountBlock();
         }
         if (target.id === 'previous_monthly_fee' || target.id === 'proposed_monthly_fee_cef') {
             updateCefIncrease();
@@ -1219,6 +1241,10 @@ function attachDelegatedEvents(root) {
                 const studentLineId = optionsDiv.getAttribute('data-student-line-id');
                 if (studentLineId) updateAfterSchoolMontant(studentLineId);
             }
+        }
+        // AJOUT : Toggle parrainage
+        if (target.name === 'sponsorship_request') {
+            toggleSponsorship(root);
         }
         // Le bloc toggle_linked_families est déjà traité dans initForm
     });
@@ -1260,7 +1286,7 @@ function attachDelegatedEvents(root) {
         // Mise à jour du pourcentage de la proposition
         if (e.target.id === 'proposed_monthly_amount' || e.target.id === 'proposal_annual_income' || e.target.id === 'proposed_monthly_fee_cef') {
             updateProposalPercentage();
-            updateFinalAmountBlock();   // <-- AJOUT
+            updateFinalAmountBlock();
         }
     });
 
