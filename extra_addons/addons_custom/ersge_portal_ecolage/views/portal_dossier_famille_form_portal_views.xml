@@ -2066,6 +2066,7 @@ Ajouter un élève
 </div>
 </div>
 </div>
+<script src="/ersge_portal_ecolage/static/src/js/portal_dossier.js"></script>
 
 </t>
 </template>

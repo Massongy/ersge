@@ -338,71 +338,75 @@
         </t>
     </template>
 
+
+
+
+
     <!-- NOUVEAU : Contenu pur du dossier (sans layout) -->
     <template id="portal_dossier_consult_content" name="Contenu du dossier (sans layout)">
         <div class="container mt-4" id="dossier-print-area">
             <!-- STYLES IMPRESSION -->
             <style>
-        @media print {
-            header, footer, nav, .o_main_navbar,
-            .no-print { display: none !important; }
-            #dossier-print-area { margin: 0; padding: 0; }
-            .card { break-inside: avoid; }
-            .section-title {
-                background-color: #1a3a5c !important;
-                -webkit-print-color-adjust: exact;
-                print-color-adjust: exact;
-            }
-        }
+    @media print {
+        header, footer, nav, .o_main_navbar,
+        .no-print { display: none !important; }
+        #dossier-print-area { margin: 0; padding: 0; }
+        .card { break-inside: avoid; }
         .section-title {
-            background-color: #1a3a5c;
-            color: white;
-            padding: 8px 14px;
-            font-size: 1rem;
-            font-weight: 600;
-            margin-bottom: 0;
-            border-radius: 4px 4px 0 0;
+            background-color: #1a3a5c !important;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
         }
-        .info-label {
-            font-size: 0.75rem;
-            color: #6c757d;
-            text-transform: uppercase;
-            letter-spacing: 0.04em;
-            margin-bottom: 1px;
-        }
-        .info-value {
-            font-size: 0.95rem;
-            font-weight: 500;
-            color: #212529;
-            min-height: 1.4em;
-        }
-        .info-block { margin-bottom: 12px; }
-        .badge-oui { background:#d1fae5; color:#065f46; padding:2px 8px;
-                     border-radius:12px; font-size:0.8rem; }
-        .badge-non { background:#fee2e2; color:#991b1b; padding:2px 8px;
-                     border-radius:12px; font-size:0.8rem; }
-        .sub-card {
-            border: 1px solid #e5e7eb;
-            border-radius: 6px;
-            padding: 14px;
-            margin-bottom: 14px;
-            background: #fafafa;
-        }
-        .sub-card-title {
-            font-weight: 600;
-            color: #1a3a5c;
-            border-bottom: 1px solid #e5e7eb;
-            padding-bottom: 6px;
-            margin-bottom: 10px;
-        }
-        .divider { border-top: 2px solid #1a3a5c; margin: 24px 0; }
+    }
+    .section-title {
+        background-color: #1a3a5c;
+        color: white;
+        padding: 8px 14px;
+        font-size: 1rem;
+        font-weight: 600;
+        margin-bottom: 0;
+        border-radius: 4px 4px 0 0;
+    }
+    .info-label {
+        font-size: 0.75rem;
+        color: #6c757d;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        margin-bottom: 1px;
+    }
+    .info-value {
+        font-size: 0.95rem;
+        font-weight: 500;
+        color: #212529;
+        min-height: 1.4em;
+    }
+    .info-block { margin-bottom: 12px; }
+    .badge-oui { background:#d1fae5; color:#065f46; padding:2px 8px;
+                 border-radius:12px; font-size:0.8rem; }
+    .badge-non { background:#fee2e2; color:#991b1b; padding:2px 8px;
+                 border-radius:12px; font-size:0.8rem; }
+    .sub-card {
+        border: 1px solid #e5e7eb;
+        border-radius: 6px;
+        padding: 14px;
+        margin-bottom: 14px;
+        background: #fafafa;
+    }
+    .sub-card-title {
+        font-weight: 600;
+        color: #1a3a5c;
+        border-bottom: 1px solid #e5e7eb;
+        padding-bottom: 6px;
+        margin-bottom: 10px;
+    }
+    .divider { border-top: 2px solid #1a3a5c; margin: 24px 0; }
             </style>
 
             <!-- BARRE ACTIONS (masquée à l'impression) -->
             <div class="d-flex justify-content-between align-items-center mb-4 no-print">
                 <h5 class="mb-0">
                     <i class="fa fa-folder me-2 text-primary"/>
-            Dossier <strong>
+        Dossier <strong>
                     <t t-out="dossier.name"/>
                 </strong>
             </h5>
@@ -474,6 +478,26 @@ Dossier d'écolage
                 </div>
             </div>
         </div>
+
+        <!-- ============================================================ -->
+        <!-- FAMILLES LIÉES (calcul écolage partagé)                      -->
+        <!-- ============================================================ -->
+        <t t-if="dossier.linked_families_comment_text">
+            <div class="card mb-4 border-info">
+                <div class="section-title" style="background-color:#0c5460;">
+                    <i class="fa fa-link me-2"/>
+Calcul de l'écolage partagé entre familles
+                </div>
+                <div class="card-body">
+                    <div class="info-block">
+                        <div class="info-label">Famille(s) liée(s) précisée(s)</div>
+                        <div class="info-value" style="white-space:pre-wrap; background:#f8f9fa; padding:10px; border-radius:4px;">
+                            <t t-out="dossier.linked_families_comment_text"/>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </t>
 
         <!-- ============================================================ -->
         <!-- SECTION 1 : INFORMATIONS PARENTS                             -->
@@ -814,12 +838,16 @@ Dépôt
                             <div class="col-md-4 info-block">
                                 <div class="info-label">Droit à l'image</div>
                                 <div class="info-value">
-                                    <t t-if="line.student_id.image_rights">
-                                        <span class="badge-oui">✓ Accordé</span>
-                                    </t>
-                                    <t t-else="">
+                                    <t t-if="line.student_id.image_rights == 'no'">
                                         <span class="badge-non">✗ Refusé</span>
                                     </t>
+                                    <t t-elif="line.student_id.image_rights == 'internal'">
+                                        <span class="badge-oui">✓ Accordé (usage interne)</span>
+                                    </t>
+                                    <t t-elif="line.student_id.image_rights == 'internal_external'">
+                                        <span class="badge-oui">✓ Accordé (interne et externe)</span>
+                                    </t>
+                                    <t t-else="">—</t>
                                 </div>
                             </div>
                             <div class="col-md-4 info-block">
@@ -947,17 +975,22 @@ Coordonnées de l'employeur
                             </t>
                         </tbody>
                     </table>
+                    <div class="alert alert-secondary">
+                        <strong>Total de la cotisation annuelle : </strong>
+                        <t t-out="dossier.membership_fee_amount or '0.00'"/>
+ CHF
+                    </div>
                 </t>
             </div>
         </div>
 
         <!-- ============================================================ -->
-        <!-- SECTION 5 : RÉDUCTIONS                                       -->
+        <!-- SECTION 5 : RÉDUCTIONS & SOLIDARITÉ                          -->
         <!-- ============================================================ -->
         <div class="card mb-4">
             <div class="section-title">
                 <i class="fa fa-percent me-2"/>
-5. Réductions
+5. Réductions &amp; Solidarité
             </div>
             <div class="card-body">
                 <div class="row g-3">
@@ -982,7 +1015,8 @@ Coordonnées de l'employeur
                                 <div class="info-label">Réduction enfants multiples</div>
                                 <div class="info-value">
                                     <t t-if="dossier.apply_children_discount">
-                                        <span class="badge-oui">✓ Oui</span>
+                                        <span class="badge-oui">✓ Oui (max <t t-out="dossier.max_children_discount or 0"/>
+%)</span>
                                     </t>
                                     <t t-else="">
                                         <span class="badge-non">Non</span>
@@ -993,24 +1027,17 @@ Coordonnées de l'employeur
                                 <div class="info-label">Réduction ancienneté</div>
                                 <div class="info-value">
                                     <t t-if="dossier.apply_seniority_discount">
-                                        <span class="badge-oui">✓ Oui</span>
+                                        <span class="badge-oui">✓ Oui (<t t-out="dossier.seniority_years or '—'"/>
+ ans)</span>
                                     </t>
                                     <t t-else="">
                                         <span class="badge-non">Non</span>
                                     </t>
                                 </div>
                             </div>
-                            <t t-if="dossier.apply_seniority_discount">
-                                <div class="col-md-4 info-block">
-                                    <div class="info-label">Années d'ancienneté</div>
-                                    <div class="info-value">
-                                        <t t-out="dossier.seniority_years or '—'"/>
-                                    </div>
-                                </div>
-                            </t>
                             <t t-if="dossier.requested_discount">
                                 <div class="col-md-4 info-block">
-                                    <div class="info-label">Réduction sollicitée (%)</div>
+                                    <div class="info-label">Réduction moindre sollicitée (%)</div>
                                     <div class="info-value">
                                         <t t-out="dossier.requested_discount"/>
  %</div>
@@ -1019,6 +1046,41 @@ Coordonnées de l'employeur
                         </div>
                     </div>
                 </t>
+
+                <!-- Solidarité -->
+                <div class="sub-card mt-3">
+                    <div class="sub-card-title">
+                        <i class="fa fa-heart me-2 text-danger"/>
+Solidarité
+                    </div>
+                    <div class="row g-3">
+                        <div class="col-md-4 info-block">
+                            <div class="info-label">Contribution au fonds de solidarité</div>
+                            <div class="info-value">
+                                <t t-if="dossier.solidarity_request == 'yes'">
+                                    <span class="badge-oui">✓ Oui</span>
+                                </t>
+                                <t t-else="">
+                                    <span class="badge-non">Non</span>
+                                </t>
+                            </div>
+                        </div>
+                        <t t-if="dossier.solidarity_request == 'yes'">
+                            <div class="col-md-4 info-block">
+                                <div class="info-label">Majoration (%)</div>
+                                <div class="info-value">
+                                    <t t-out="dossier.solidarity_percentage or 0"/>
+ %</div>
+                            </div>
+                            <div class="col-md-4 info-block">
+                                <div class="info-label">Total mensuel après solidarité (CHF)</div>
+                                <div class="info-value">
+                                    <t t-out="dossier.solidarity_total_amount or '0.00'"/>
+                                </div>
+                            </div>
+                        </t>
+                    </div>
+                </div>
 
                 <!-- Réduction complémentaire -->
                 <div class="row g-3 mt-1">
@@ -1037,20 +1099,8 @@ Coordonnées de l'employeur
 
                 <t t-if="dossier.additional_reduction_request">
                     <div class="sub-card mt-2">
-                        <div class="sub-card-title">Réduction complémentaire</div>
+                        <div class="sub-card-title">Réduction complémentaire — justificatifs</div>
                         <div class="row g-3">
-                            <div class="col-md-4 info-block">
-                                <div class="info-label">Revenu brut annuel familial (CHF)</div>
-                                <div class="info-value">
-                                    <t t-out="dossier.gross_annual_income or '—'"/>
-                                </div>
-                            </div>
-                            <div class="col-md-4 info-block">
-                                <div class="info-label">Montant mensuel proposé (CHF)</div>
-                                <div class="info-value">
-                                    <t t-out="dossier.proposed_monthly_amount or '—'"/>
-                                </div>
-                            </div>
                             <div class="col-md-4 info-block">
                                 <div class="info-label">Méthode budget</div>
                                 <div class="info-value">
@@ -1059,7 +1109,7 @@ Coordonnées de l'employeur
                                     <t t-else="">—</t>
                                 </div>
                             </div>
-                            <div class="col-md-6 info-block">
+                            <div class="col-md-8 info-block">
                                 <div class="info-label">Mode lettre explicative</div>
                                 <div class="info-value">
                                     <t t-if="dossier.explanatory_letter_mode == 'upload'">Fichier téléchargé</t>
@@ -1086,8 +1136,8 @@ Coordonnées de l'employeur
                                         <thead class="table-light">
                                             <tr>
                                                 <th>Catégorie</th>
-                                                <th class="text-end">Madame (CHF)</th>
-                                                <th class="text-end">Monsieur (CHF)</th>
+                                                <th class="text-end">Parent 1 (CHF)</th>
+                                                <th class="text-end">Parent 2 (CHF)</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -1113,8 +1163,8 @@ Coordonnées de l'employeur
                                         <thead class="table-light">
                                             <tr>
                                                 <th>Catégorie</th>
-                                                <th class="text-end">Madame (CHF)</th>
-                                                <th class="text-end">Monsieur (CHF)</th>
+                                                <th class="text-end">Parent 1 (CHF)</th>
+                                                <th class="text-end">Parent 2 (CHF)</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -1152,6 +1202,54 @@ Coordonnées de l'employeur
                                         <div class="info-value">
                                             <t t-out="dossier.solde or 0"/>
                                         </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </t>
+                    </div>
+
+                    <!-- Proposition CEF / montant simple -->
+                    <div class="sub-card mt-2">
+                        <div class="sub-card-title">
+                            <i class="fa fa-handshake-o me-2"/>
+Proposition de l'écolage
+                        </div>
+                        <t t-if="dossier.proposal_type == 'cef'">
+                            <div class="row g-3">
+                                <div class="col-md-4 info-block">
+                                    <div class="info-label">Type de proposition</div>
+                                    <div class="info-value">Accord CEF (augmentation min. 6%)</div>
+                                </div>
+                                <div class="col-md-4 info-block">
+                                    <div class="info-label">Tarif mensuel année dernière (CHF)</div>
+                                    <div class="info-value">
+                                        <t t-out="dossier.previous_monthly_fee or '—'"/>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 info-block">
+                                    <div class="info-label">Nouveau montant mensuel proposé (CHF)</div>
+                                    <div class="info-value">
+                                        <t t-out="dossier.proposed_monthly_fee_cef or '—'"/>
+                                    </div>
+                                </div>
+                            </div>
+                        </t>
+                        <t t-else="">
+                            <div class="row g-3">
+                                <div class="col-md-4 info-block">
+                                    <div class="info-label">Type de proposition</div>
+                                    <div class="info-value">Montant mensuel proposé</div>
+                                </div>
+                                <div class="col-md-4 info-block">
+                                    <div class="info-label">Écolage mensuel proposé (CHF)</div>
+                                    <div class="info-value">
+                                        <t t-out="dossier.proposed_monthly_amount or '—'"/>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 info-block">
+                                    <div class="info-label">Revenu annuel global familial (CHF)</div>
+                                    <div class="info-value">
+                                        <t t-out="dossier.proposal_annual_income or '—'"/>
                                     </div>
                                 </div>
                             </div>
@@ -1220,63 +1318,22 @@ Coordonnées de l'employeur
                             </div>
                         </div>
                     </t>
+                    <div class="alert alert-secondary">
+                        <strong>Total mensuel parascolaire : </strong>
+                        <t t-out="dossier.total_monthly_after_school or '0.00'"/>
+ CHF
+                    </div>
                 </t>
             </div>
         </div>
 
         <!-- ============================================================ -->
-        <!-- SECTION 7 : SOLIDARITÉ                                       -->
-        <!-- ============================================================ -->
-        <div class="card mb-4">
-            <div class="section-title">
-                <i class="fa fa-handshake-o me-2"/>
-7. Solidarité
-            </div>
-            <div class="card-body">
-                <div class="row g-3">
-                    <div class="col-md-4 info-block">
-                        <div class="info-label">Contribution au fonds de solidarité</div>
-                        <div class="info-value">
-                            <t t-if="dossier.solidarity_request == 'yes'">
-                                <span class="badge-oui">✓ Oui</span>
-                            </t>
-                            <t t-else="">
-                                <span class="badge-non">Non</span>
-                            </t>
-                        </div>
-                    </div>
-                    <t t-if="dossier.solidarity_request == 'yes'">
-                        <div class="col-md-4 info-block">
-                            <div class="info-label">Majoration appliquée</div>
-                            <div class="info-value">
-                                <t t-if="dossier.apply_solidarity_increase">
-                                    <span class="badge-oui">✓ Oui</span>
-                                </t>
-                                <t t-else="">
-                                    <span class="badge-non">Non</span>
-                                </t>
-                            </div>
-                        </div>
-                        <t t-if="dossier.apply_solidarity_increase and dossier.solidarity_percentage">
-                            <div class="col-md-4 info-block">
-                                <div class="info-label">Majoration (%)</div>
-                                <div class="info-value">
-                                    <t t-out="dossier.solidarity_percentage"/>
- %</div>
-                            </div>
-                        </t>
-                    </t>
-                </div>
-            </div>
-        </div>
-
-        <!-- ============================================================ -->
-        <!-- SECTION 8 : ÉCHANGES ENTRE PARENTS                          -->
+        <!-- SECTION 7 : ÉCHANGES ENTRE PARENTS                          -->
         <!-- ============================================================ -->
         <div class="card mb-4">
             <div class="section-title">
                 <i class="fa fa-address-card me-2"/>
-8. Échanges entre parents
+7. Échanges entre parents
             </div>
             <div class="card-body">
                 <div class="row g-3">
@@ -1296,18 +1353,21 @@ Coordonnées de l'employeur
         </div>
 
         <!-- ============================================================ -->
-        <!-- SECTION 9 : RÉCAPITULATIF FINANCIER                         -->
+        <!-- SECTION 8 : RÉCAPITULATIF FINANCIER                         -->
         <!-- ============================================================ -->
         <div class="card mb-4">
             <div class="section-title">
                 <i class="fa fa-calculator me-2"/>
-9. Récapitulatif financier
+8. Récapitulatif financier
             </div>
             <div class="card-body">
 
-                <!-- Totaux -->
+                <!-- TARIF STANDARD -->
                 <div class="sub-card">
-                    <div class="sub-card-title">Totaux</div>
+                    <div class="sub-card-title">
+                        <i class="fa fa-flag-checkered me-2"/>
+Tarif standard (après réductions standard)
+                    </div>
                     <div class="row g-3">
                         <div class="col-md-3 info-block">
                             <div class="info-label">Écolage mensuel (CHF)</div>
@@ -1346,14 +1406,55 @@ Coordonnées de l'employeur
                             </div>
                         </div>
                     </div>
+                    <t t-if="dossier.payment_terms == 'annually' and not dossier.additional_reduction_request">
+                        <div class="alert alert-success mt-3">
+                            <strong>Total annuel standard + déduction 2% (paiement avant le 30 septembre) : </strong>
+                            <t t-out="'%.2f' % ((dossier.total_annual + dossier.membership_fee_amount + dossier.deposit_amount) * 0.98)"/>
+ CHF
+                        </div>
+                    </t>
                 </div>
+
+                <!-- TARIF PROPOSÉ (cas particuliers) -->
+                <t t-if="dossier.solidarity_request == 'yes' or dossier.additional_reduction_request">
+                    <div class="sub-card">
+                        <div class="sub-card-title">
+                            <i class="fa fa-check-circle me-2 text-success"/>
+Tarif proposé (cas particuliers)
+                        </div>
+                        <t t-if="dossier.solidarity_request == 'yes'">
+                            <div class="alert alert-info mb-2">
+                                <i class="fa fa-heart me-2 text-danger"/>
+                                <strong>Total mensuel après solidarité : </strong>
+                                <t t-out="dossier.solidarity_total_amount or '0.00'"/>
+ CHF / mois
+                            </div>
+                        </t>
+                        <t t-elif="dossier.additional_reduction_request and dossier.proposal_type == 'cef'">
+                            <div class="alert alert-warning mb-2">
+                                <i class="fa fa-handshake-o me-2"/>
+                                <strong>Nouveau montant CEF proposé : </strong>
+                                <t t-out="dossier.proposed_monthly_fee_cef or '0.00'"/>
+ CHF / mois
+                            </div>
+                        </t>
+                        <t t-elif="dossier.additional_reduction_request">
+                            <div class="alert alert-warning mb-2">
+                                <i class="fa fa-handshake-o me-2"/>
+                                <strong>Montant écolage proposé : </strong>
+                                <t t-out="dossier.proposed_monthly_amount or '0.00'"/>
+ CHF / mois
+                            </div>
+                        </t>
+                    </div>
+                </t>
 
                 <!-- Parrainage -->
                 <div class="row g-3 mt-1">
                     <div class="col-md-4 info-block">
                         <div class="info-label">Parrainage</div>
                         <div class="info-value">
-                            <t t-if="dossier.sponsorship_request == 'yes'">
+                            <t t-if="dossier.sponsorship_request == 'yes' or dossier.sponsorship_ids">
                                 <span class="badge-oui">✓ Oui</span>
                             </t>
                             <t t-else="">
@@ -1362,7 +1463,7 @@ Coordonnées de l'employeur
                         </div>
                     </div>
                 </div>
-                <t t-if="dossier.sponsorship_request == 'yes' and dossier.sponsorship_ids">
+                <t t-if="dossier.sponsorship_ids">
                     <div class="sub-card mt-2">
                         <div class="sub-card-title">
                             <i class="fa fa-handshake-o me-2"/>
@@ -1388,117 +1489,143 @@ Parrains</div>
                                         <td>
                                             <t t-out="sp.street or ''"/>
                                             <t t-if="sp.zip or sp.city">
-                                                <t t-out="sp.zip or ''"/>
+                                            &#160;<t t-out="sp.zip or ''"/>
 &#160;<t t-out="sp.city or ''"/>
-                                            </t>
-                                            <t t-if="sp.country_id">—                                                <t t-out="sp.country_id.name"/>
-                                            </t>
-                                        </td>
-                                        <td class="text-end">
-                                            <t t-out="sp.amount or 0"/>
-                                        </td>
-                                    </tr>
-                                </t>
-                            </tbody>
-                        </table>
-                    </div>
-                </t>
-
-                <!-- Facturation divisée -->
-                <div class="row g-3 mt-1">
-                    <div class="col-md-4 info-block">
-                        <div class="info-label">Facturation divisée</div>
-                        <div class="info-value">
-                            <t t-if="dossier.multi_billing_request">
-                                <span class="badge-oui">✓ Oui</span>
+                                        </t>
+                                        <t t-if="sp.country_id">
+                                            —                                            <t t-out="sp.country_id.name"/>
+                                        </t>
+                                    </td>
+                                    <td class="text-end">
+                                        <t t-out="sp.amount or 0"/>
+                                    </td>
+                                </tr>
                             </t>
-                            <t t-else="">
-                                <span class="badge-non">Non</span>
-                            </t>
-                        </div>
-                    </div>
-                    <t t-if="dossier.multi_billing_request">
-                        <div class="col-md-4 info-block">
-                            <div class="info-label">Montant annuel Parent 1 (CHF)</div>
-                            <div class="info-value">
-                                <t t-out="dossier.parent1_billing_amount or '0.00'"/>
-                            </div>
-                        </div>
-                        <div class="col-md-4 info-block">
-                            <div class="info-label">Montant annuel Parent 2 (CHF)</div>
-                            <div class="info-value">
-                                <t t-out="dossier.parent2_billing_amount or '0.00'"/>
-                            </div>
-                        </div>
-                    </t>
+                        </tbody>
+                    </table>
                 </div>
+            </t>
 
-                <!-- Modalité de versement -->
-                <div class="row g-3 mt-1">
-                    <div class="col-md-6 info-block">
-                        <div class="info-label">Modalité de versement</div>
-                        <div class="info-value">
-                            <t t-if="dossier.payment_terms == 'monthly'">Mensuel (avant le 10 du mois)</t>
-                            <t t-elif="dossier.payment_terms == 'annually'">Annuel avant le 30 septembre (−2%)</t>
-                            <t t-else="">—</t>
-                        </div>
-                    </div>
-                    <t t-if="dossier.comments">
-                        <div class="col-12 info-block">
-                            <div class="info-label">Commentaires</div>
-                            <div class="info-value" style="white-space:pre-wrap; background:#f8f9fa; padding:10px; border-radius:4px;">
-                                <t t-out="dossier.comments"/>
-                            </div>
-                        </div>
-                    </t>
-                </div>
-
-                <!-- Conditions générales & signature -->
-                <div class="sub-card mt-3">
-                    <div class="sub-card-title">Conditions générales et signature</div>
-                    <div class="row g-3">
-                        <div class="col-md-4 info-block">
-                            <div class="info-label">Conditions acceptées</div>
-                            <div class="info-value">
-                                <t t-if="dossier.terms_accepted">
-                                    <span class="badge-oui">✓ Acceptées</span>
-                                </t>
-                                <t t-else="">
-                                    <span class="badge-non">Non acceptées</span>
-                                </t>
-                            </div>
-                        </div>
-                        <div class="col-md-8 info-block">
-                            <div class="info-label">Signature</div>
-                            <div class="info-value">
-                                <t t-out="dossier.signature_text or '—'"/>
-                            </div>
-                        </div>
+            <!-- Facturation divisée -->
+            <div class="row g-3 mt-1">
+                <div class="col-md-4 info-block">
+                    <div class="info-label">Facturation divisée</div>
+                    <div class="info-value">
+                        <t t-if="dossier.multi_billing_request or dossier.billing_recipients_data">
+                            <span class="badge-oui">✓ Oui</span>
+                        </t>
+                        <t t-else="">
+                            <span class="badge-non">Non</span>
+                        </t>
                     </div>
                 </div>
+            </div>
+            <t t-if="dossier.billing_recipients_data">
+                <div class="sub-card mt-2">
+                    <div class="sub-card-title">
+                        <i class="fa fa-credit-card me-2"/>
+Répartition de la facturation
+                    </div>
+                    <table class="table table-sm table-bordered">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Destinataire</th>
+                                <th>Adresse</th>
+                                <th class="text-end">Montant annuel (CHF)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <t t-foreach="dossier.billing_recipients_data" t-as="recipient">
+                                <tr>
+                                    <td>
+                                        <t t-out="recipient.get('name', '—')"/>
+                                    </td>
+                                    <td>
+                                        <t t-out="recipient.get('street', '')"/>
+                                        <t t-if="recipient.get('zip') or recipient.get('city')">
+                                            &#160;<t t-out="recipient.get('zip', '')"/>
+&#160;<t t-out="recipient.get('city', '')"/>
+                                    </t>
+                                </td>
+                                <td class="text-end">
+                                    <t t-out="'%.2f' % float(recipient.get('amount', 0) or 0)"/>
+                                </td>
+                            </tr>
+                        </t>
+                    </tbody>
+                </table>
+            </div>
+        </t>
 
+        <!-- Modalité de versement -->
+        <div class="row g-3 mt-1">
+            <div class="col-md-6 info-block">
+                <div class="info-label">Modalité de versement</div>
+                <div class="info-value">
+                    <t t-if="dossier.payment_terms == 'monthly'">Mensuel (avant le 10 du mois)</t>
+                    <t t-elif="dossier.payment_terms == 'annually'">Annuel avant le 30 septembre (−2%)</t>
+                    <t t-else="">—</t>
+                </div>
+            </div>
+            <t t-if="dossier.comments">
+                <div class="col-12 info-block">
+                    <div class="info-label">Commentaires</div>
+                    <div class="info-value" style="white-space:pre-wrap; background:#f8f9fa; padding:10px; border-radius:4px;">
+                        <t t-out="dossier.comments"/>
+                    </div>
+                </div>
+            </t>
+        </div>
+
+        <!-- Conditions générales & signature -->
+        <div class="sub-card mt-3">
+            <div class="sub-card-title">Conditions générales et signature</div>
+            <div class="row g-3">
+                <div class="col-md-4 info-block">
+                    <div class="info-label">Conditions acceptées</div>
+                    <div class="info-value">
+                        <t t-if="dossier.terms_accepted">
+                            <span class="badge-oui">✓ Acceptées</span>
+                        </t>
+                        <t t-else="">
+                            <span class="badge-non">Non acceptées</span>
+                        </t>
+                    </div>
+                </div>
+                <div class="col-md-8 info-block">
+                    <div class="info-label">Signature</div>
+                    <div class="info-value">
+                        <t t-out="dossier.signature_text or '—'"/>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <!-- BOUTON BAS DE PAGE -->
-        <div class="d-flex gap-2 mt-2 mb-5 no-print">
-            <button onclick="window.print()" class="btn btn-outline-primary">
-                <i class="fa fa-print me-1"/>
- Imprimer
-            </button>
-            <a href="/my/ecolage" class="btn btn-outline-secondary">
-                <i class="fa fa-arrow-left me-1"/>
- Retour
-            </a>
-        </div>
     </div>
+</div>
+
+<!-- BOUTON BAS DE PAGE -->
+<div class="d-flex gap-2 mt-2 mb-5 no-print">
+    <button onclick="window.print()" class="btn btn-outline-primary">
+        <i class="fa fa-print me-1"/>
+ Imprimer
+    </button>
+    <a href="/my/ecolage" class="btn btn-outline-secondary">
+        <i class="fa fa-arrow-left me-1"/>
+ Retour
+    </a>
+</div>
+</div>
 </template>
 
 <template id="portal_dossier_view" name="Consultation dossier écolage">
-    <t t-call="portal.portal_layout">
-        <t t-set="page_title">Détail du dossier</t>
-        <t t-call="ersge_portal_ecolage.portal_dossier_consult_content"/>
-    </t>
+<t t-call="portal.portal_layout">
+<t t-set="page_title">Détail du dossier</t>
+<t t-call="ersge_portal_ecolage.portal_dossier_consult_content"/>
+</t>
 </template>
+
+
+
 
 </odoo>
