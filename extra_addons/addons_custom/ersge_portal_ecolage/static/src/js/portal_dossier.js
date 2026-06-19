@@ -1724,6 +1724,7 @@ function forceCleanupModal() {
 document.addEventListener('click', function(e) {
     const btn = e.target.closest('button[name="form_action"][value="submit_dossier"]');
     if (btn && btn.closest('#ecolage_form_root')) {
+        console.log('>>> CLIC SUBMIT DOSSIER DETECTE <<<');
         e.preventDefault();
         e.stopPropagation();
         const form = document.getElementById('ecolage_form_root');

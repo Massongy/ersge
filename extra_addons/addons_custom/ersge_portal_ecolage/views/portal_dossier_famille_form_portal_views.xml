@@ -1101,7 +1101,7 @@ Ajouter un élève
                                                     <div class="col-12" id="proposal_warning_block" style="display:none;">
                                                         <div class="alert alert-warning" role="alert">
                                                             <i class="fa fa-exclamation-triangle me-2"></i>
-                                                            <strong>Attention :</strong> L'expérience nous a montré qu'un écolage représentant <strong>14%</strong> du revenu global de la famille est un point de départ.
+                                                            <strong>Attention :</strong> L'expérience nous a montré qu'un écolage représentant <strong>au moins 14%</strong> du revenu global de la famille est un bon point de départ.
                                                         </div>
                                                     </div>
                                                 </div>
@@ -1415,7 +1415,7 @@ Ajouter un élève
             <div class="card mb-4 border-secondary">
                 <div class="card-header fw-semibold bg-secondary bg-opacity-10">
                     <i class="fa fa-asterisk me-2 text-secondary"/>
-                    Cas particuliers (exclusifs)
+                    Adaptation du montant selon cas particuliers (solidarité, proposition simple, CEF)
                 </div>
                 <div class="card-body">
                     <div id="final_amount_solidarity_block" class="alert alert-info mb-3" style="display:none;">
@@ -1516,7 +1516,7 @@ Ajouter un élève
             <div class="card mb-4 border-success">
                 <div class="card-header fw-semibold bg-success text-white">
                     <i class="fa fa-check-circle me-2"/>
-    TARIF PROPOSÉ (cas particulier retenu)
+    TARIF PROPOSÉ 
                 </div>
                 <div class="card-body">
                     <div class="row g-3">
@@ -2066,7 +2066,6 @@ Ajouter un élève
 </div>
 </div>
 </div>
-<script src="/ersge_portal_ecolage/static/src/js/portal_dossier.js"></script>
 
 </t>
 </template>
