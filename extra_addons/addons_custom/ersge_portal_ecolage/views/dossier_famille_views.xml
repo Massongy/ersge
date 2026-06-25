@@ -443,10 +443,29 @@
                                 <field name="membership_fee_amount" string="Cotisation annuelle (CHF)" readonly="1"/>
                                 <field name="deposit_amount" string="Dépôt (CHF)" readonly="1"/>
                                 <field name="proposed_annual_total" string="Total annuel proposé (CHF)" readonly="1" decoration-danger="proposed_income_percentage &lt; 14"/>
-                                <span t-if="proposal_annual_income > 0" t-attf-class="{'text-danger': proposed_income_percentage &lt; 14}">
-                                    <i class="fa fa-exclamation-triangle"></i> Le pourcentage proposé est de <field name="proposed_income_percentage" widget="percentage" readonly="1"/>
- du revenu annuel.
-                                </span>
+
+                                <!-- Revenu annuel global (affiché avec t-esc) -->
+                                <div>
+                                    <strong>Revenu annuel global : </strong>
+                                    <span t-esc="proposal_annual_income"/>
+ CHF
+                                </div>
+
+                                <!-- Pourcentage du revenu (affiché avec t-esc) -->
+                                <div>
+                                    <span t-attf-class="{'text-danger': proposed_income_percentage &lt; 14}">
+                                        <strong>Pourcentage du revenu : </strong>
+                                        <span t-esc="proposed_income_percentage"/>
+%
+                                    </span>
+                                </div>
+
+                                <!-- Warning si < 14% -->
+                                <div t-if="proposed_income_percentage &lt; 14 and proposal_annual_income > 0" class="text-danger">
+                                    <i class="fa fa-exclamation-triangle"></i>
+                                    <strong>Attention :</strong> La proposition représente moins de 14% du revenu annuel global.
+                                    L'expérience montre qu'un écolage représentant au moins 14% du revenu est un bon point de départ.
+                                </div>
                             </group>
                             <!-- Déduction 2% pour paiement annuel sur le proposé -->
                             <div class="alert alert-success" invisible="payment_terms != 'annually' or additional_reduction_request">
