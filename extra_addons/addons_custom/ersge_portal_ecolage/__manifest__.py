@@ -38,7 +38,6 @@
     "license": "LGPL-3",
     "assets": {
         "web.assets_frontend": [
-            "ersge_portal_ecolage/static/src/js/portal_dossier.js",
             # 'https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js',
         ],
     }
