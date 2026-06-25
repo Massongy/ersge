@@ -44,7 +44,6 @@ function getCsrfToken() {
 // AFFICHAGE CONDITIONNEL DES BLOCS DESCRIPTIFS (JARDIN, CLASSE, CIRQUE)
 // =====================================================================
 function updateDescriptiveBlocks() {
-    // Vérifier si au moins un élève a sélectionné un type d'accueil
     const jardinRadios = document.querySelectorAll('input[name^="accueil_type_"]:checked');
     let hasJardin = false;
     let hasClasse = false;
@@ -59,14 +58,12 @@ function updateDescriptiveBlocks() {
         }
     });
 
-    // Afficher/masquer les blocs
     const blockJardin = document.getElementById('block_jardin_desc');
     const blockClasse = document.getElementById('block_classe_desc');
     const blockCirque = document.getElementById('block_cirque_desc');
 
     if (blockJardin) blockJardin.style.display = hasJardin ? 'block' : 'none';
     if (blockClasse) blockClasse.style.display = hasClasse ? 'block' : 'none';
-    // Le bloc cirque s'affiche si l'un ou l'autre est sélectionné (car lié aux deux)
     if (blockCirque) blockCirque.style.display = (hasJardin || hasClasse) ? 'block' : 'none';
 }
 
@@ -285,7 +282,13 @@ function validateRequiredAndFormat(root) {
     // ==================== 11. Facturation divisée (si activée) ====================
     const multiBillingYes = root.querySelector('#multi_yes')?.checked;
     if (multiBillingYes) {
-        const recipients = root.querySelectorAll('.billing-recipient');
+        // Récupérer tous les destinataires, puis filtrer ceux qui ont un nom renseigné
+        // (cela exclut automatiquement le template caché)
+        const allRecipients = root.querySelectorAll('.billing-recipient');
+        const recipients = Array.from(allRecipients).filter(recip => {
+            const nameInput = recip.querySelector('input[name="billing_recipient_name[]"]');
+            return nameInput && nameInput.value.trim() !== '';
+        });
         if (recipients.length === 0) {
             errors.push("Ajouter au moins un destinataire pour la facturation divisée");
         } else {
@@ -301,11 +304,6 @@ function validateRequiredAndFormat(root) {
                 if (!amountInput || !amountInput.value.trim() || parseFloat(amountInput.value) <= 0) {
                     errors.push(`Montant du destinataire ${idx+1} invalide (doit être > 0)`);
                 }
-                // Optionnel : rendre l'adresse obligatoire
-                // if (!streetInput || !streetInput.value.trim()) errors.push(`Adresse du destinataire ${idx+1} manquante`);
-                // if (!zipInput || !zipInput.value.trim()) errors.push(`NPA du destinataire ${idx+1} manquant`);
-                // if (!cityInput || !cityInput.value.trim()) errors.push(`Ville du destinataire ${idx+1} manquante`);
-                // if (!countrySelect || !countrySelect.value) errors.push(`Pays du destinataire ${idx+1} manquant`);
             });
         }
     }
@@ -838,7 +836,6 @@ function updateAfterSchoolTotal() {
     });
     setInner('after_school_total_amount', total);
     updateRecapTotals();
-    // Mettre à jour les blocs descriptifs
     updateDescriptiveBlocks();
 }
 
@@ -886,7 +883,6 @@ function filterPrestationsByAccueilType(optionsDiv) {
             if (checkbox && checkbox.checked) checkbox.checked = false;
         }
     });
-    // Mettre à jour les blocs descriptifs
     updateDescriptiveBlocks();
 }
 
@@ -947,7 +943,6 @@ function toggleAfterSchool(root) {
                 toggle.dispatchEvent(new Event('change', { bubbles: true }));
             }
         });
-        // Cacher les blocs descriptifs si parascolaire désactivé
         updateDescriptiveBlocks();
     }
     updateAfterSchoolTotal();
