@@ -1395,7 +1395,7 @@ Ajouter un élève
                         <div class="col-md-4">
                             <label class="form-label fw-semibold">Rabais ancienneté (max) :</label>
                             <div class="input-group">
-                                <input type="text" class="form-control bg-light" readonly="readonly" id="max_seniority_discount_display"/>
+                                <input type="text" class="form-control bg-light" readonly="readonly" id="max_seniority_discount_display" t-att-value="dossier.max_seniority_discount"/>
                                 <span class="input-group-text">%</span>
                             </div>
                         </div>
