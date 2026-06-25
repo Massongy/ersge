@@ -154,15 +154,18 @@
                                                         <input type="text" class="form-control" name="legal_representation_other" id="legal_representation_other" placeholder="Ex : Tuteur légal, Curateur..." t-att-value="dossier.legal_representation_other or ''"/>
                                                     </div>
                                                     <div class="col-md-6">
-                                                        <label class="form-label fw-semibold">Prénom</label>
+                                                        <label class="form-label fw-semibold">Prénom <span class="text-danger">*</span>
+                                                        </label>
                                                         <input type="text" class="form-control" name="other_firstname" t-att-value="dossier.other_firstname or prefill_tutor.get('firstname', '')"/>
                                                     </div>
                                                     <div class="col-md-6">
-                                                        <label class="form-label fw-semibold">Nom</label>
+                                                        <label class="form-label fw-semibold">Nom <span class="text-danger">*</span>
+                                                        </label>
                                                         <input type="text" class="form-control" name="other_lastname" t-att-value="dossier.other_lastname or prefill_tutor.get('lastname', '')"/>
                                                     </div>
                                                     <div class="col-md-6">
-                                                        <label class="form-label fw-semibold">Email</label>
+                                                        <label class="form-label fw-semibold">Email <span class="text-danger">*</span>
+                                                        </label>
                                                         <input type="email" class="form-control" name="other_email" t-att-value="dossier.other_email or prefill_tutor.get('email', '')"/>
                                                     </div>
                                                     <div class="col-md-6">
@@ -187,19 +190,23 @@
                                                         </div>
                                                     </div>
                                                     <div class="col-12">
-                                                        <label class="form-label fw-semibold">Rue</label>
+                                                        <label class="form-label fw-semibold">Rue <span class="text-danger">*</span>
+                                                        </label>
                                                         <input type="text" class="form-control" name="other_street" t-att-value="dossier.other_street or prefill_tutor.get('street', '')"/>
                                                     </div>
                                                     <div class="col-md-4">
-                                                        <label class="form-label fw-semibold">NPA</label>
+                                                        <label class="form-label fw-semibold">NPA <span class="text-danger">*</span>
+                                                        </label>
                                                         <input type="text" class="form-control" name="other_zip" t-att-value="dossier.other_zip or prefill_tutor.get('zip', '')"/>
                                                     </div>
                                                     <div class="col-md-8">
-                                                        <label class="form-label fw-semibold">Ville</label>
+                                                        <label class="form-label fw-semibold">Ville <span class="text-danger">*</span>
+                                                        </label>
                                                         <input type="text" class="form-control" name="other_city" t-att-value="dossier.other_city or prefill_tutor.get('city', '')"/>
                                                     </div>
                                                     <div class="col-md-6">
-                                                        <label class="form-label fw-semibold">Pays</label>
+                                                        <label class="form-label fw-semibold">Pays <span class="text-danger">*</span>
+                                                        </label>
                                                         <select class="form-select" name="other_country_id">
                                                             <option value="">-- Sélectionner un pays --</option>
                                                             <t t-foreach="countries" t-as="country">
@@ -231,15 +238,18 @@
                                             <div class="card-body">
                                                 <div class="row g-3">
                                                     <div class="col-md-6">
-                                                        <label class="form-label fw-semibold">Prénom</label>
+                                                        <label class="form-label fw-semibold">Prénom <span class="text-danger">*</span>
+                                                        </label>
                                                         <input type="text" class="form-control" name="parent1_firstname" t-att-value="dossier.parent1_firstname or prefill_parent1.get('firstname', '')"/>
                                                     </div>
                                                     <div class="col-md-6">
-                                                        <label class="form-label fw-semibold">Nom</label>
+                                                        <label class="form-label fw-semibold">Nom <span class="text-danger">*</span>
+                                                        </label>
                                                         <input type="text" class="form-control" name="parent1_lastname" t-att-value="dossier.parent1_lastname or prefill_parent1.get('lastname', '')"/>
                                                     </div>
                                                     <div class="col-md-6">
-                                                        <label class="form-label fw-semibold">Email</label>
+                                                        <label class="form-label fw-semibold">Email <span class="text-danger">*</span>
+                                                        </label>
                                                         <input type="email" class="form-control" name="parent1_email" t-att-value="dossier.parent1_email or prefill_parent1.get('email', '')"/>
                                                     </div>
                                                     <div class="col-md-6">
@@ -264,19 +274,23 @@
                                                         </div>
                                                     </div>
                                                     <div class="col-12">
-                                                        <label class="form-label fw-semibold">Rue</label>
+                                                        <label class="form-label fw-semibold">Rue <span class="text-danger">*</span>
+                                                        </label>
                                                         <input type="text" class="form-control" name="parent1_street" t-att-value="dossier.parent1_street or prefill_parent1.get('street', '')"/>
                                                     </div>
                                                     <div class="col-md-4">
-                                                        <label class="form-label fw-semibold">NPA</label>
+                                                        <label class="form-label fw-semibold">NPA <span class="text-danger">*</span>
+                                                        </label>
                                                         <input type="text" class="form-control" name="parent1_zip" t-att-value="dossier.parent1_zip or prefill_parent1.get('zip', '')"/>
                                                     </div>
                                                     <div class="col-md-8">
-                                                        <label class="form-label fw-semibold">Ville</label>
+                                                        <label class="form-label fw-semibold">Ville <span class="text-danger">*</span>
+                                                        </label>
                                                         <input type="text" class="form-control" name="parent1_city" t-att-value="dossier.parent1_city or prefill_parent1.get('city', '')"/>
                                                     </div>
                                                     <div class="col-md-6">
-                                                        <label class="form-label fw-semibold">Pays</label>
+                                                        <label class="form-label fw-semibold">Pays <span class="text-danger">*</span>
+                                                        </label>
                                                         <select class="form-select" name="parent1_country_id">
                                                             <option value="">-- Sélectionner un pays --</option>
                                                             <t t-foreach="countries" t-as="country">
@@ -308,15 +322,18 @@
                                             <div class="card-body">
                                                 <div class="row g-3">
                                                     <div class="col-md-6">
-                                                        <label class="form-label fw-semibold">Prénom</label>
+                                                        <label class="form-label fw-semibold">Prénom <span class="text-danger">*</span>
+                                                        </label>
                                                         <input type="text" class="form-control" name="parent2_firstname" t-att-value="dossier.parent2_firstname or prefill_parent2.get('firstname', '')"/>
                                                     </div>
                                                     <div class="col-md-6">
-                                                        <label class="form-label fw-semibold">Nom</label>
+                                                        <label class="form-label fw-semibold">Nom <span class="text-danger">*</span>
+                                                        </label>
                                                         <input type="text" class="form-control" name="parent2_lastname" t-att-value="dossier.parent2_lastname or prefill_parent2.get('lastname', '')"/>
                                                     </div>
                                                     <div class="col-md-6">
-                                                        <label class="form-label fw-semibold">Email</label>
+                                                        <label class="form-label fw-semibold">Email <span class="text-danger">*</span>
+                                                        </label>
                                                         <input type="email" class="form-control" name="parent2_email" t-att-value="dossier.parent2_email or prefill_parent2.get('email', '')"/>
                                                     </div>
                                                     <div class="col-md-6">
@@ -349,21 +366,25 @@
                                                     <div id="block_parent2_address" class="col-12" t-att-style="'display:' + ('none' if dossier.same_address_as_parent1 else 'block')">
                                                         <div class="row g-3">
                                                             <div class="col-12">
-                                                                <label class="form-label fw-semibold">Rue</label>
+                                                                <label class="form-label fw-semibold">Rue <span class="text-danger">*</span>
+                                                                </label>
                                                                 <input type="text" class="form-control" name="parent2_street" t-att-value="dossier.parent2_street or prefill_parent2.get('street', '')"/>
                                                             </div>
                                                             <div class="col-md-4">
-                                                                <label class="form-label fw-semibold">NPA</label>
+                                                                <label class="form-label fw-semibold">NPA <span class="text-danger">*</span>
+                                                                </label>
                                                                 <input type="text" class="form-control" name="parent2_zip" t-att-value="dossier.parent2_zip or prefill_parent2.get('zip', '')"/>
                                                             </div>
                                                             <div class="col-md-8">
-                                                                <label class="form-label fw-semibold">Ville</label>
+                                                                <label class="form-label fw-semibold">Ville <span class="text-danger">*</span>
+                                                                </label>
                                                                 <input type="text" class="form-control" name="parent2_city" t-att-value="dossier.parent2_city or prefill_parent2.get('city', '')"/>
                                                             </div>
                                                         </div>
                                                     </div>
                                                     <div id="block_parent2_country" class="col-md-6" t-att-style="'display:' + ('none' if dossier.same_address_as_parent1 else 'block')">
-                                                        <label class="form-label fw-semibold">Pays</label>
+                                                        <label class="form-label fw-semibold">Pays <span class="text-danger">*</span>
+                                                        </label>
                                                         <select class="form-select" name="parent2_country_id">
                                                             <option value="">-- Sélectionner un pays --</option>
                                                             <t t-foreach="countries" t-as="country">
@@ -446,15 +467,18 @@
                                                     <input type="hidden" t-att-name="'student_line_id_' + str(line.id)" t-att-value="line.id"/>
                                                     <div class="row g-3">
                                                         <div class="col-md-4">
-                                                            <label class="form-label fw-semibold">Prénom</label>
+                                                            <label class="form-label fw-semibold">Prénom <span class="text-danger">*</span>
+                                                            </label>
                                                             <input type="text" class="form-control" t-att-name="'student_firstname_' + str(line.id)" t-att-value="line.student_id.firstname or ''"/>
                                                         </div>
                                                         <div class="col-md-4">
-                                                            <label class="form-label fw-semibold">Nom</label>
+                                                            <label class="form-label fw-semibold">Nom <span class="text-danger">*</span>
+                                                            </label>
                                                             <input type="text" class="form-control" t-att-name="'student_lastname_' + str(line.id)" t-att-value="line.student_id.lastname or ''"/>
                                                         </div>
                                                         <div class="col-md-4">
-                                                            <label class="form-label fw-semibold">Date de naissance</label>
+                                                            <label class="form-label fw-semibold">Date de naissance <span class="text-danger">*</span>
+                                                            </label>
                                                             <input type="date" class="form-control" t-att-name="'student_birthdate_' + str(line.id)" t-att-value="line.student_id.birthdate or ''"/>
                                                         </div>
                                                         <div class="col-md-6">
@@ -512,15 +536,18 @@ Ajouter un élève
                                             <div class="card-body">
                                                 <div class="row g-3">
                                                     <div class="col-md-4">
-                                                        <label class="form-label fw-semibold">Prénom</label>
+                                                        <label class="form-label fw-semibold">Prénom <span class="text-danger">*</span>
+                                                        </label>
                                                         <input type="text" class="form-control" name="new_student_firstname[]"/>
                                                     </div>
                                                     <div class="col-md-4">
-                                                        <label class="form-label fw-semibold">Nom</label>
+                                                        <label class="form-label fw-semibold">Nom <span class="text-danger">*</span>
+                                                        </label>
                                                         <input type="text" class="form-control" name="new_student_lastname[]"/>
                                                     </div>
                                                     <div class="col-md-4">
-                                                        <label class="form-label fw-semibold">Date de naissance</label>
+                                                        <label class="form-label fw-semibold">Date de naissance <span class="text-danger">*</span>
+                                                        </label>
                                                         <input type="date" class="form-control" name="new_student_birthdate[]"/>
                                                     </div>
                                                     <div class="col-md-6">
@@ -603,7 +630,8 @@ Ajouter un élève
                                                             <input type="text" class="form-control" name="employer_city" id="employer_city" t-att-value="dossier.employer_city or ''"/>
                                                         </div>
                                                         <div class="col-12">
-                                                            <label class="form-label fw-semibold">Pays</label>
+                                                            <label class="form-label fw-semibold">Pays <span class="text-danger">*</span>
+                                                            </label>
                                                             <select class="form-select" name="employer_country_id" id="employer_country_id">
                                                                 <option value="">-- Sélectionner un pays --</option>
                                                                 <t t-foreach="countries" t-as="country">
@@ -669,7 +697,8 @@ Ajouter un élève
                                                 <input type="hidden" t-att-name="'forfait_line_id_' + str(line.id)" t-att-value="line.id"/>
                                                 <div class="row g-3">
                                                     <div class="col-md-6">
-                                                        <label class="form-label fw-semibold">Forfait</label>
+                                                        <label class="form-label fw-semibold">Forfait <span class="text-danger">*</span>
+                                                        </label>
                                                         <select class="form-select forfait-select" t-att-name="'forfait_id_' + str(line.id)" t-att-data-line-id="line.id">
                                                             <option value="">-- Aucun forfait --</option>
                                                             <t t-foreach="forfaits" t-as="f">
@@ -856,7 +885,6 @@ Ajouter un élève
                                     </div>
                                 </div>
                             </div>
-                            <!-- Réduction complémentaire -->
                             <!-- Réduction complémentaire -->
                             <div id="block_reduction_complementaire_question" class="card mb-4" t-att-style="'display:' + ('block' if dossier.solidarity_request != 'yes' else 'none')">
                                 <div class="card-header fw-semibold bg-light">
@@ -1271,50 +1299,57 @@ Ajouter un élève
                     <span id="after_school_total_amount">0.00</span> CHF
                 </div>
                 <!-- Descriptifs Jardin et Classe d'accueil -->
-                <!-- Descriptifs Jardin et Classe d'accueil -->
-<div class="card mb-4" id="block_jardin_desc" style="display: none;">
-    <div class="card-header fw-semibold bg-light">
-        <i class="fa fa-tree me-2"/>
-        Jardin d'accueil
-    </div>
-    <div class="card-body">
-        <p><em>pour les enfants des jardins d'enfants - 3 à 6 ans</em></p>
-        <p><strong>PRÉVOIR :</strong></p>
-        <ul>
-            <li>Des pantoufles</li>
-            <li>Pantalons de pluie</li>
-            <li>Pour la sieste des petits : couverture, coussin, vêtements de rechange, et, selon les besoins, doudou ou tétine.</li>
-            <li>Si besoin, couches</li>
-        </ul>
-    </div>
-</div>
-
-<div class="card mb-4" id="block_classe_desc" style="display: none;">
-    <div class="card-header fw-semibold bg-light">
-        <i class="fa fa-graduation-cap me-2"/>
-        Classe d'accueil
-    </div>
-    <div class="card-body">
-        <p><em>pour les enfants du primaire - 6 à 12 ans</em></p>
-        <p><strong>LES ÉTUDES SURVEILLÉES</strong> sont incluses dans le prix du parascolaire.</p>
-        <p>De la 5<sup>ème</sup> à la 9<sup>ème</sup> classe, les élèves bénéficient d'études surveillées de 15h30 à 17h, le lundi, mardi &amp; jeudi.</p>
-    </div>
-</div>
-
-<div class="card mb-4" id="block_cirque_desc" style="display: none;">
-    <div class="card-header fw-semibold bg-light">
-        <i class="fa fa-magic me-2"/>
-        Tarif "Accompagnement cirque"
-    </div>
-    <div class="card-body">
-        <p>Le tarif "accompagnement cirque" ne comprend pas l'inscription aux cours de cirque, ni le paiement aux cours de cirque, dispensés par l'association Cirque Rustelli Confetti. Vous pouvez vous inscrire à leurs cours par e-mail <a href="mailto:info@rustelli-confetti.ch">info@rustelli-confetti.ch</a> ou sur leur site : <a href="https://www.rustelliconfetticirque.com" target="_blank">www.rustelliconfetticirque.com</a>.</p>
-        <p><strong>LE TARIF "ACCOMPAGNEMENT CIRQUE" COMPREND :</strong></p>
-        <ul>
-            <li>Repas + Prise en charge de votre enfant avant et après le cours de cirque entre 12h et 15h30.</li>
-            <li>En cas d'annulation du cours de cirque, l'enfant est également pris en charge par la classe d'accueil.</li>
-        </ul>
-    </div>
-</div>
+                <div class="card mb-4" id="block_jardin_desc" style="display: none;">
+                    <div class="card-header fw-semibold bg-light">
+                        <i class="fa fa-tree me-2"/>
+                        Jardin d'accueil
+                    </div>
+                    <div class="card-body">
+                        <p>
+                            <em>pour les enfants des jardins d'enfants - 3 à 6 ans</em>
+                        </p>
+                        <p>
+                            <strong>PRÉVOIR :</strong>
+                        </p>
+                        <ul>
+                            <li>Des pantoufles</li>
+                            <li>Pantalons de pluie</li>
+                            <li>Pour la sieste des petits : couverture, coussin, vêtements de rechange, et, selon les besoins, doudou ou tétine.</li>
+                            <li>Si besoin, couches</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="card mb-4" id="block_classe_desc" style="display: none;">
+                    <div class="card-header fw-semibold bg-light">
+                        <i class="fa fa-graduation-cap me-2"/>
+                        Classe d'accueil
+                    </div>
+                    <div class="card-body">
+                        <p>
+                            <em>pour les enfants du primaire - 6 à 12 ans</em>
+                        </p>
+                        <p>
+                            <strong>LES ÉTUDES SURVEILLÉES</strong> sont incluses dans le prix du parascolaire.</p>
+                        <p>De la 5<sup>ème</sup> à la 9<sup>ème</sup> classe, les élèves bénéficient d'études surveillées de 15h30 à 17h, le lundi, mardi &amp; jeudi.</p>
+                    </div>
+                </div>
+                <div class="card mb-4" id="block_cirque_desc" style="display: none;">
+                    <div class="card-header fw-semibold bg-light">
+                        <i class="fa fa-magic me-2"/>
+                        Tarif "Accompagnement cirque"
+                    </div>
+                    <div class="card-body">
+                        <p>Le tarif "accompagnement cirque" ne comprend pas l'inscription aux cours de cirque, ni le paiement aux cours de cirque, dispensés par l'association Cirque Rustelli Confetti. Vous pouvez vous inscrire à leurs cours par e-mail <a href="mailto:info@rustelli-confetti.ch">info@rustelli-confetti.ch</a> ou sur leur site : <a href="https://www.rustelliconfetticirque.com" target="_blank">www.rustelliconfetticirque.com</a>.
+                        </p>
+                        <p>
+                            <strong>LE TARIF "ACCOMPAGNEMENT CIRQUE" COMPREND :</strong>
+                        </p>
+                        <ul>
+                            <li>Repas + Prise en charge de votre enfant avant et après le cours de cirque entre 12h et 15h30.</li>
+                            <li>En cas d'annulation du cours de cirque, l'enfant est également pris en charge par la classe d'accueil.</li>
+                        </ul>
+                    </div>
+                </div>
             </div>
         </div>
     </div>

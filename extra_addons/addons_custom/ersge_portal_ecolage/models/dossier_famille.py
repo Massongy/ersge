@@ -812,6 +812,53 @@ class DossierFamille(models.Model):
             else:
                 rec.solidarity_total_amount = 0.0
 
+    # =====================================================================
+    # CHAMPS POUR LE RÉCAPITULATIF PROPOSÉ (non stockés)
+    # =====================================================================
+    proposed_monthly_total = fields.Monetary(
+        string="Total mensuel proposé",
+        compute="_compute_proposed_totals",
+        store=False,
+        currency_field="currency_id",
+    )
+    proposed_annual_total = fields.Monetary(
+        string="Total annuel proposé",
+        compute="_compute_proposed_totals",
+        store=False,
+        currency_field="currency_id",
+    )
+    proposed_income_percentage = fields.Float(
+        string="Pourcentage du revenu proposé",
+        compute="_compute_proposed_totals",
+        store=False,
+    )
+
+    @api.depends(
+        'solidarity_request', 'solidarity_total_amount',
+        'additional_reduction_request', 'proposal_type',
+        'proposed_monthly_amount', 'proposed_monthly_fee_cef',
+        'total_monthly_after_school', 'membership_fee_amount',
+        'deposit_amount', 'proposal_annual_income'
+    )
+    def _compute_proposed_totals(self):
+        for rec in self:
+            monthly_ecolage = 0.0
+            if rec.solidarity_request == 'yes':
+                monthly_ecolage = rec.solidarity_total_amount or 0.0
+            elif rec.additional_reduction_request:
+                if rec.proposal_type == 'simple':
+                    monthly_ecolage = rec.proposed_monthly_amount or 0.0
+                elif rec.proposal_type == 'cef':
+                    monthly_ecolage = rec.proposed_monthly_fee_cef or 0.0
+            else:
+                monthly_ecolage = rec.total_monthly_tuition or 0.0
+            rec.proposed_monthly_total = monthly_ecolage + (rec.total_monthly_after_school or 0.0)
+            rec.proposed_annual_total = (rec.proposed_monthly_total * 12) + (rec.membership_fee_amount or 0.0) + (rec.deposit_amount or 0.0)
+            if rec.proposal_annual_income and rec.proposal_annual_income > 0 and monthly_ecolage > 0:
+                rec.proposed_income_percentage = (monthly_ecolage * 12 / rec.proposal_annual_income) * 100
+            else:
+                rec.proposed_income_percentage = 0.0
+
     # -------------------------------------------------------------------------
     # Constraints
     # -------------------------------------------------------------------------

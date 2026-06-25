@@ -7,14 +7,14 @@
                 <!-- Message d'erreur -->
                 <t t-if="error">
                     <div class="alert alert-warning" role="alert">
-                        <t t-esc="error"/>
+                        <t t-out="error"/>
                     </div>
                 </t>
 
                 <!-- Message de succès -->
                 <t t-if="success">
                     <div class="alert alert-success" role="alert">
-                        <t t-esc="success"/>
+                        <t t-out="success"/>
                     </div>
                 </t>
 

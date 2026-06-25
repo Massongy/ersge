@@ -107,11 +107,17 @@ class PortalEcolage(http.Controller):
                     'signature_text': False,
                 })
 
-                # Copie manuelle des lignes de budget (avec leurs montants)
+                # ===== COPIE MANUELLE DES LIGNES DE BUDGET =====
                 if last_dossier.budget_line_ids:
                     for line in last_dossier.budget_line_ids:
                         line.copy(default={'dossier_id': new_dossier.id})
-                    _logger.info("Budget copié (avec montants) pour le nouveau dossier %s", new_dossier.id)
+                    _logger.info("Budget copié pour le nouveau dossier %s", new_dossier.id)
+
+                # ===== COPIE MANUELLE DES LIGNES ÉLÈVES (avec forfaits) =====
+                if last_dossier.student_line_ids:
+                    for line in last_dossier.student_line_ids:
+                        line.copy(default={'dossier_id': new_dossier.id})
+                    _logger.info("Élèves et forfaits copiés pour le nouveau dossier %s", new_dossier.id)
 
                 new_dossier.add_acces(partner, role=role)
 
@@ -688,6 +694,15 @@ class PortalEcolage(http.Controller):
                 if params.get('form_action') == 'save_and_stay':
                     return request.redirect(f'/my/ecolage/edit/{dossier.id}')
                 elif params.get('form_action') == 'submit_dossier':
+                    # Vérifier s'il existe déjà un dossier soumis pour cette famille et cette année
+                    existing_submitted = request.env['ersge.dossier.famille'].sudo().search_count([
+                        ('family_id', '=', dossier.family_id.id),
+                        ('annee_scolaire', '=', dossier.annee_scolaire),
+                        ('state', 'in', ['soumis', 'en_cours', 'valide']),
+                        ('id', '!=', dossier.id)
+                    ])
+                    if existing_submitted:
+                        return request.redirect('/my/ecolage?error=Un dossier a déjà été soumis pour cette famille et cette année scolaire.')
                     dossier.sudo().write({
                         'state': 'soumis',
                         'date_soumission': fields.Datetime.now(),

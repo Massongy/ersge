@@ -12,31 +12,37 @@
                         Cliquez sur les sections ci-dessous pour les dérouler
                     </div>
 
+                    <!-- En-tête -->
                     <group>
                         <field name="name"/>
                         <field name="annee_scolaire"/>
                         <field name="family_id" options="{'no_create': True, 'no_create_edit': True}" readonly="1"/>
                         <field name="date_soumission"/>
+                        <field name="state" widget="badge"/>
                     </group>
 
                     <notebook>
 
+                        <!-- ==================== Page 1 : Informations parents ==================== -->
                         <page string="Informations parents">
                             <group string="Représentant légal">
                                 <field name="legal_representation" widget="radio"/>
                                 <field name="legal_representation_other" invisible="legal_representation != 'other'" />
                             </group>
+
                             <h3>Cotisation annuelle</h3>
                             <div class="alert alert-info">
-    À l'Association en faveur de l'école Rudolf Steiner de Genève :
-    Individuelle 40 CHF, Couple 60 CHF, Curateur/trice et Tuteur/trice Gratuit.
+                                À l'Association en faveur de l'école Rudolf Steiner de Genève :
+                                Individuelle 40 CHF, Couple 60 CHF, Curateur/trice et Tuteur/trice Gratuit.
                             </div>
                             <div>
                                 <strong>Total de la cotisation : </strong>
                                 <field name="membership_fee_amount" readonly="1" class="oe_inline"/>
  CHF
                             </div>
-                            <group string="Père (ou parent 1)" invisible="legal_representation != 'both'">
+
+                            <!-- Parent 1 -->
+                            <group string="Parent 1 (ou représentant principal)" invisible="legal_representation == 'other'">
                                 <field name="parent1_firstname" />
                                 <field name="parent1_lastname" />
                                 <field name="parent1_email" widget="email" />
@@ -50,7 +56,9 @@
                                 <field name="parent1_profession" />
                                 <field name="parent1_employeur"/>
                             </group>
-                            <group string="Mère (ou parent 2)" invisible="legal_representation != 'both'">
+
+                            <!-- Parent 2 -->
+                            <group string="Parent 2" invisible="legal_representation == 'father_only' or legal_representation == 'other'">
                                 <field name="parent2_firstname" />
                                 <field name="parent2_lastname" />
                                 <field name="parent2_email" widget="email" />
@@ -65,6 +73,8 @@
                                 <field name="parent2_profession" />
                                 <field name="parent2_employeur"/>
                             </group>
+
+                            <!-- Autre représentant -->
                             <group string="Autre représentant légal" invisible="legal_representation != 'other'">
                                 <field name="other_firstname"/>
                                 <field name="other_lastname"/>
@@ -79,450 +89,414 @@
                                 <field name="other_profession"/>
                                 <field name="other_employeur"/>
                             </group>
+
+                            <!-- Dépôt -->
                             <group string="Dépôt">
                                 <div class="alert alert-info">Toute nouvelle famille doit verser un dépôt de 1000 CHF</div>
                                 <field name="deposit_status" widget="radio"/>
                                 <field name="deposit_amount" readonly="1"/>
                             </group>
+
+                            <!-- Familles liées (recomposition) -->
+                            <group string="Familles recomposées / liées">
+                                <field name="linked_families_comment" widget="boolean_toggle"/>
+                                <field name="linked_families_comment_text" invisible="not linked_families_comment" placeholder="Précisez les familles concernées"/>
+                            </group>
                         </page>
 
-                        <page string="Informations élève(s)">
+                        <!-- ==================== Page 2 : Élèves et forfaits ==================== -->
+                        <page string="Élèves &amp; Forfaits">
+                            <group string="Élèves inscrits">
+                                <field name="student_line_ids" nolabel="1">
+                                    <list editable="bottom" create="1" delete="1">
+                                        <field name="student_id" string="Élève" domain="[('family_id', '=', parent.family_id)]" options="{'no_create': False, 'no_create_edit': False, 'always_reload': True}" context="{'form_view_ref': 'ersge_portal_ecolage.view_ersge_student_form', 'default_family_id': parent.family_id}"/>
+                                        <field name="sexe" />
+                                        <field name="image_rights" widget="boolean_toggle"/>
+                                        <field name="forfait_id" options="{'no_create': True}"/>
+                                        <field name="forfait_montant_mensuel" readonly="1"/>
+                                    </list>
+                                </field>
+                            </group>
 
-                            <!-- Un seul champ : la liaison vers l'étudiant -->
-
-                            <field name="student_line_ids" nolabel="1">
-                                <list editable="bottom" create="1" delete="1">
-                                    <field name="student_id" string="Élève" domain="[('family_id', '=', parent.family_id)]" options="{'no_create': False, 'no_create_edit': False, 'always_reload': True}" context="{'form_view_ref': 'ersge_portal_ecolage.view_ersge_student_form', 'default_family_id': parent.family_id}"/>
-                                    <field name="sexe" />
-                                    <field name="image_rights" widget="boolean_toggle"/>
-                                </list>
-                            </field>
-
-
-                            <!-- Info-bande comme avant -->
                             <div class="alert alert-info mt-3">
                                 <i class="fa fa-info-circle"></i>
-        Lors de diverses activités organisées par l'école, les élèves peuvent être amenés à être
-        photographiés ou filmés.
+                                Lors de diverses activités organisées par l'école, les élèves peuvent être amenés à être photographiés ou filmés.
                             </div>
+
+                            <group string="Total écolage (hors réduction)">
+                                <field name="base_monthly_fee" readonly="1"/>
+                            </group>
                         </page>
 
-                        <page string="Finances">
-
-                            <h2>Écolage</h2>
-                            <div>
-                                <strong>Bénéficiez-vous d'une aide de votre employeur pour l'écolage ?</strong>
+                        <!-- ==================== Page 3 : Finances & réductions ==================== -->
+                        <page string="Finances &amp; Réductions">
+                            <!-- Aide employeur -->
+                            <group string="Aide employeur">
                                 <field name="employer_assistance" widget="radio"/>
                                 <div invisible="employer_assistance != 'yes'">
                                     <field name="send_invoice_to_employer" widget="boolean_toggle"/>
                                     <label for="send_invoice_to_employer" string="Envoyer la facture à l'employeur"/>
                                 </div>
                                 <div invisible="employer_assistance != 'yes' or not send_invoice_to_employer">
-                                    <label for="employer_id"/>
                                     <field name="employer_id" context="{'default_is_employer': True}" options="{'no_create': False}"/>
+                                    <field name="employer_name" invisible="1"/>
+                                    <field name="employer_street" invisible="1"/>
+                                    <field name="employer_zip" invisible="1"/>
+                                    <field name="employer_city" invisible="1"/>
+                                    <field name="employer_country_id" invisible="1"/>
                                 </div>
+                            </group>
+
+                            <!-- Réductions -->
+                            <group string="Réductions">
+                                <field name="reduction_requested" widget="boolean_toggle"/>
+                                <label for="reduction_requested" string="Demander une réduction en raison du nombre d'enfants et/ou de l'ancienneté"/>
+                            </group>
+
+                            <div invisible="not reduction_requested">
+                                <group string="Réduction nombre d'enfants">
+                                    <field name="actual_children_count" readonly="1"/>
+                                    <field name="max_children_discount" readonly="1"/>
+                                    <field name="apply_children_discount" widget="boolean_toggle"/>
+                                    <label for="apply_children_discount" string="Solliciter la réduction enfants"/>
+                                    <field name="monthly_fee_after_children" readonly="1" invisible="not apply_children_discount"/>
+                                </group>
+
+                                <group string="Réduction ancienneté">
+                                    <field name="seniority_years" widget="radio"/>
+                                    <field name="max_seniority_discount" readonly="1"/>
+                                    <field name="apply_seniority_discount" widget="boolean_toggle"/>
+                                    <label for="apply_seniority_discount" string="Solliciter la réduction ancienneté"/>
+                                    <field name="monthly_fee_after_seniority" readonly="1" invisible="not apply_seniority_discount"/>
+                                </group>
+
+                                <group string="Ajustement de la réduction">
+                                    <field name="max_total_discount" readonly="1"/>
+                                    <field name="monthly_fee_at_max" readonly="1"/>
+                                    <field name="requested_discount" />
+                                    <field name="monthly_fee_after_requested" readonly="1"/>
+                                    <div class="alert alert-warning" invisible="requested_discount &lt;= max_total_discount">
+                                        Le pourcentage sollicité ne doit pas dépasser la réduction maximale !
+                                    </div>
+                                </group>
                             </div>
 
-                            <h2>Forfaits</h2>
-                            <div class="alert alert-info">
-                                <strong>CHOISISSEZ VOTRE FORFAIT</strong>
-                                <br/>
-        FRAIS DE SCOLARITÉ + MATÉRIEL SCOLAIRE DE BASE + REPAS DE MIDI* BIO<br/>
-        *Selon l'emploi du temps<br/>
-                        <br/>
-        Tarifs mensuels sur 12 mois - 1er versement au mois d'août.
-        Frais non compris : Activités en dehors des murs de l'école (ex. voyage, échange linguistique...) et goûters aux jardins d'enfants.
-                    </div>
-                    <field name="student_line_ids" nolabel="1">
-                        <list editable="bottom">
-                            <field name="student_id" readonly="1"/>
-                            <field name="forfait_id" options="{'no_create': True}"/>
-                            <field name="forfait_montant_mensuel" readonly="1"/>
-                        </list>
-                    </field>
-                    <div>
-                        <strong>Total mensuel (hors réduction) : </strong>
-                        <field name="base_monthly_fee" readonly="1" class="oe_inline"/>
- CHF
-                    </div>
+                            <!-- Solidarité -->
+                            <group string="Solidarité">
+                                <field name="solidarity_request" widget="radio" options="{'horizontal': true}"/>
+                                <div invisible="solidarity_request != 'yes'">
+                                    <field name="apply_solidarity_increase" widget="boolean_toggle"/>
+                                    <field name="solidarity_percentage" invisible="not apply_solidarity_increase"/>
+                                    <field name="solidarity_total_amount" readonly="1"/>
+                                </div>
+                            </group>
+                        </page>
 
-                    <h2>Cotisation annuelle</h2>
-                    <div class="alert alert-info">
-        À l'Association en faveur de l'école Rudolf Steiner de Genève :
-        Individuelle 40 CHF, Couple 60 CHF, Curateur/trice et Tuteur/trice Gratuit.
-                    </div>
-                    <div>
-                        <strong>Total de la cotisation : </strong>
-                        <field name="membership_fee_amount" readonly="1" class="oe_inline"/>
- CHF
-                    </div>
+                        <!-- ==================== Page 4 : Réduction complémentaire ==================== -->
+                        <page string="Réduction complémentaire">
+                            <group>
+                                <field name="additional_reduction_request" widget="boolean_toggle"/>
+                                <label for="additional_reduction_request" string="Demander une réduction complémentaire"/>
+                            </group>
 
-                    <h2>Réductions</h2>
-                    <div>
-                        <field name="reduction_requested" widget="boolean_toggle"/>
-                        <label for="reduction_requested" string="Demander une réduction en raison du nombre d'enfants inscrit à l'école et/ou une réduction d'ancienneté"/>
-                    </div>
-
-                    <div invisible="not reduction_requested">
-
-                        <h3>Réduction selon le nombre d'enfants inscrits</h3>
-                        <div>
-                            <strong>Nombre d'enfants inscrits : </strong>
-                            <field name="actual_children_count" class="oe_inline" readonly="1"/>
-                        </div>
-                        <div>
-                            <strong>Réduction maximale possible : </strong>
-                            <field name="max_children_discount" readonly="1" class="oe_inline"/>
- %
-                        </div>
-                        <div>
-                            <field name="apply_children_discount" widget="boolean_toggle"/>
-                            <label for="apply_children_discount" string="Vous sollicitez une réduction en raison du nombre d'enfants de votre famille inscrits dans l'école."/>
-                        </div>
-                        <div invisible="not apply_children_discount">
-                            <strong>Total mensuel après rabais enfants : </strong>
-                            <field name="monthly_fee_after_children" readonly="1" class="oe_inline"/>
- CHF
-                        </div>
-
-                        <h3>Réduction selon l'ancienneté</h3>
-                        <label for="seniority_years"/>
-                        <field name="seniority_years" widget="radio"/>
-                        <div>
-                            <strong>Réduction maximale possible : </strong>
-                            <field name="max_seniority_discount" readonly="1" class="oe_inline"/>
- %
-                        </div>
-                        <div>
-                            <field name="apply_seniority_discount" widget="boolean_toggle"/>
-                            <label for="apply_seniority_discount" string="Vous sollicitez une réduction d'ancienneté relative au temps pendant lequel votre famille a contribué à l'école."/>
-                        </div>
-                        <div invisible="not apply_seniority_discount">
-                            <strong>Total mensuel après rabais ancienneté : </strong>
-                            <field name="monthly_fee_after_seniority" readonly="1" class="oe_inline"/>
- CHF
-                        </div>
-
-                        <h3>Ajustement de la réduction</h3>
-                        <div>
-                            <strong>Sollicitez, en conscience, la réduction juste en fonction de votre situation.</strong>
-                        </div>
-                        <div>
-                            <strong>Réduction maximale possible (ancienneté + enfants) : </strong>
-                            <field name="max_total_discount" readonly="1" class="oe_inline"/>
- %
-                        </div>
-                        <div>
-                            <strong>Total mensuel après rabais maximal : </strong>
-                            <field name="monthly_fee_at_max" readonly="1" class="oe_inline"/>
- CHF
-                        </div>
-                        <div>
-                            <label for="requested_discount" string="Compte tenu de votre situation personnelle, vous sollicitez une réduction moindre, indiquez le pourcentage"/>
-                            <field name="requested_discount" />
-                        </div>
-                        <div>
-                            <strong>Total mensuel après votre réduction : </strong>
-                            <field name="monthly_fee_after_requested" readonly="1" class="oe_inline"/>
- CHF
-                        </div>
-                        <div class="alert alert-warning" invisible="requested_discount &lt;= max_total_discount">
-            Le pourcentage sollicité ne doit pas dépasser la réduction maximale !
-                        </div>
-
-                    </div>
-
-                    <h2>Réduction complémentaire</h2>
-                    <div>
-                        <field name="additional_reduction_request" widget="boolean_toggle"/>
-                        <label for="additional_reduction_request" string="Je sollicite une demande de réduction complémentaire"/>
-                    </div>
-
-                    <div invisible="not additional_reduction_request">
-
-                        <div class="alert alert-info">
-                            <i class="fa fa-info-circle"></i>
-            Merci de prendre impérativement connaissance de ce document :
-                            <a href="/ersge_portal_ecolage/static/src/Procedure-demande-reduction-ecolage-2025-26.pdf" target="_blank">
-                Demande de réduction d'écolage
-                            </a>
-                        </div>
-                        <div>
-            En cas d'impossibilité d'envoi de documents numériques, vous pouvez déposer une version papier de ces documents au secrétariat.
-                        </div>
-
-                        <h3>Situation financière</h3>
-                        <div>
-                            <label for="gross_annual_income" string="Revenu brut annuel familial (CHF)"/>
-                            <field name="gross_annual_income"/>
-                        </div>
-                        <div>
-                            <strong>Pourcentage que représente le tarif sur votre revenu annuel familial brut : </strong>
-                            <field name="additional_reduction_income_percentage" widget="percentage" readonly="1" class="oe_inline"/>
-                        </div>
-
-                        <h3>Justificatifs</h3>
-                        <div>
-                            <strong>Dernier avis de taxation</strong>
-                            <field name="tax_notice_attachment" filename="tax_notice_filename" help="Dernier avis de taxation (PDF, max 4MB)" nolabel="1"/>
-                        </div>
-                        <div>
-                            <strong>Trois dernières fiches de salaire</strong>
-                            <field name="payslip_ids" widget="many2many_binary" help="Vous pouvez télécharger plusieurs fichiers (max 8MB)" nolabel="1"/>
-                        </div>
-
-                        <h3>Lettre explicative</h3>
-                        <div>
-                            <label for="explanatory_letter_mode" string="Mode de saisie"/>
-                            <field name="explanatory_letter_mode" widget="radio"/>
-                            <div invisible="explanatory_letter_mode != 'upload'">
-                                <field name="explanatory_letter_attachment" filename="explanatory_letter_filename" help="PDF, max 4MB" nolabel="1"/>
-                            </div>
-                            <div invisible="explanatory_letter_mode != 'write'">
+                            <div invisible="not additional_reduction_request">
                                 <div class="alert alert-info">
-                                    <i class="fa fa-info-circle"/>
-                    Veuillez décrire votre situation familiale ci-dessous :
+                                    <i class="fa fa-info-circle"></i>
+                                    Merci de prendre impérativement connaissance de ce document :
+                                    <a href="/ersge_portal_ecolage/static/src/Procedure-demande-reduction-ecolage-2025-26.pdf" target="_blank">Demande de réduction d'écolage</a>
                                 </div>
-                                <field name="explanatory_letter_text" placeholder="Décrivez votre situation familiale, les difficultés, vos motivations..." nolabel="1"/>
+
+                                <group string="Situation financière">
+                                    <field name="gross_annual_income"/>
+                                    <field name="additional_reduction_income_percentage" readonly="1" widget="percentage"/>
+                                </group>
+
+                                <group string="Proposition d'écolage">
+                                    <field name="proposal_type" widget="radio"/>
+                                    <field name="proposed_monthly_amount" invisible="proposal_type == 'cef'"/>
+                                    <field name="proposal_annual_income" invisible="proposal_type == 'cef'"/>
+                                    <field name="previous_monthly_fee" invisible="proposal_type != 'cef'"/>
+                                    <field name="proposed_monthly_fee_cef" invisible="proposal_type != 'cef'"/>
+                                    <field name="previous_cef_agreement" invisible="proposal_type != 'cef'"/>
+                                </group>
+
+                                <group string="Justificatifs">
+                                    <field name="tax_notice_attachment" filename="tax_notice_filename" help="Dernier avis de taxation (PDF, max 4MB)" nolabel="1"/>
+                                    <field name="payslip_ids" widget="many2many_binary" help="Trois dernières fiches de salaire (max 8MB)" nolabel="1"/>
+                                </group>
+
+                                <group string="Lettre explicative">
+                                    <field name="explanatory_letter_mode" widget="radio"/>
+                                    <div invisible="explanatory_letter_mode != 'upload'">
+                                        <field name="explanatory_letter_attachment" filename="explanatory_letter_filename" help="PDF, max 4MB" nolabel="1"/>
+                                    </div>
+                                    <div invisible="explanatory_letter_mode != 'write'">
+                                        <field name="explanatory_letter_text" placeholder="Décrivez votre situation familiale..." nolabel="1"/>
+                                    </div>
+                                </group>
+
+                                <group string="Budget familial">
+                                    <field name="budget_method" widget="radio"/>
+                                    <div invisible="budget_method != 'upload'">
+                                        <field name="budget_attachment" filename="budget_attachment_filename" help="Téléchargez votre budget au format PDF (max 4MB)" nolabel="1"/>
+                                    </div>
+                                    <field name="budget_line_ids" nolabel="1" invisible="budget_method != 'online'">
+                                        <list editable="bottom" create="false" delete="false">
+                                            <field name="category_id" string="Catégorie" readonly="1"/>
+                                            <field name="montant_madame" string="Madame" widget="monetary"/>
+                                            <field name="montant_monsieur" string="Monsieur" widget="monetary"/>
+                                        </list>
+                                    </field>
+                                    <div invisible="budget_method != 'online'">
+                                        <group string="Totaux budget">
+                                            <field name="total_revenus_madame" readonly="1"/>
+                                            <field name="total_revenus_monsieur" readonly="1"/>
+                                            <field name="total_revenus" readonly="1"/>
+                                            <field name="total_charges_madame" readonly="1"/>
+                                            <field name="total_charges_monsieur" readonly="1"/>
+                                            <field name="total_charges" readonly="1"/>
+                                            <field name="solde" readonly="1" decoration-danger="solde &lt; 0"/>
+                                        </group>
+                                    </div>
+                                </group>
                             </div>
-                        </div>
-                        <h3>Budget familial</h3>
-                        <div>
-                            <label for="budget_method" string="Mode de saisie du budget"/>
-                            <field name="budget_method" widget="radio"/>
+                        </page>
 
-                            <div invisible="budget_method != 'upload'">
-                                <field name="budget_attachment" filename="budget_attachment_filename" help="Téléchargez votre budget au format PDF (max 4MB)" nolabel="1"/>
+                        <!-- ==================== Page 5 : Parascolaire ==================== -->
+                        <page string="Parascolaire">
+                            <field name="after_school_request" widget="radio" options="{'horizontal': true}"/>
+                            <label for="after_school_request" string="Souhaitez-vous inscrire votre enfant au parascolaire ?"/>
+
+                            <div invisible="after_school_request != 'yes'">
+                                <div class="alert alert-warning" role="alert">
+                                    <i class="fa fa-exclamation-triangle"/>
+                                    <strong>Important :</strong> remplir le formulaire ne signifie pas que votre demande sera forcément acceptée.<br/>
+                                    Des créneaux peuvent être complets. L'accord du responsable est nécessaire avant facturation.
+                                </div>
+
+                                <field name="after_school_line_ids" nolabel="1">
+                                    <list>
+                                        <field name="student_id" readonly="1"/>
+                                        <field name="accueil_type"/>
+                                        <field name="prestation_ids" widget="many2many_tags"/>
+                                        <field name="montant_mensuel" readonly="1" sum="Total"/>
+                                    </list>
+                                    <form>
+                                        <group>
+                                            <field name="student_id" readonly="1"/>
+                                            <field name="accueil_type" widget="radio"/>
+                                            <field name="prestation_ids" widget="many2many_checkboxes" domain="[('active', '=', True), '|', ('applicable_to', '=', accueil_type), ('applicable_to', '=', 'both')]"/>
+                                            <field name="montant_mensuel" readonly="1"/>
+                                        </group>
+                                    </form>
+                                </field>
+
+                                <!-- Descriptifs (affichage statique pour l'admin) -->
+                                <div class="mt-4">
+                                    <h4>Jardin d'accueil</h4>
+                                    <p>
+                                        <em>pour les enfants des jardins d'enfants - 3 à 6 ans</em>
+                                    </p>
+                                    <ul>
+                                        <li>Des pantoufles</li>
+                                        <li>Pantalons de pluie</li>
+                                        <li>Pour la sieste : couverture, coussin, vêtements de rechange, doudou ou tétine.</li>
+                                        <li>Si besoin, couches</li>
+                                    </ul>
+                                </div>
+                                <div class="mt-4">
+                                    <h4>Classe d'accueil</h4>
+                                    <p>
+                                        <em>pour les enfants du primaire - 6 à 12 ans</em>
+                                    </p>
+                                    <p>
+                                        <strong>Études surveillées</strong> incluses dans le prix.</p>
+                                    <p>De la 5ème à la 9ème classe, études surveillées de 15h30 à 17h, lundi, mardi &amp; jeudi.</p>
+                                </div>
+                                <div class="mt-4">
+                                    <h4>Tarif "Accompagnement cirque"</h4>
+                                    <p>Ne comprend pas l'inscription aux cours de cirque. Informations : <a href="https://www.rustelliconfetticirque.com" target="_blank">rustelliconfetticirque.com</a>
+                                    </p>
+                                    <p>
+                                        <strong>Comprend :</strong>
+                                    </p>
+                                    <ul>
+                                        <li>Repas + prise en charge avant/après le cours entre 12h et 15h30.</li>
+                                        <li>En cas d'annulation, l'enfant est pris en charge par la classe d'accueil.</li>
+                                    </ul>
+                                </div>
                             </div>
-                        </div>
-                        <field name="budget_line_ids" nolabel="1" invisible="not additional_reduction_request or budget_method != 'online'">
-                            <list editable="bottom" create="false" delete="false">
-                                <!-- Cache le champ type si vous ne voulez pas qu'il apparaisse -->
-                                <field name="type" column_invisible="0"/>
-                                <!-- Catégorie en lecture seule (affichage) -->
-                                <field name="category_id" string="Catégorie" readonly="1"/>
-                                <!-- Montants modifiables directement -->
-                                <field name="montant_madame" string="Madame" widget="monetary"/>
-                                <field name="montant_monsieur" string="Monsieur" widget="monetary"/>
-                            </list>
-                        </field>
+                        </page>
 
+                        <!-- ==================== Page 6 : Parrainage & facturation ==================== -->
+                        <page string="Parrainage &amp; Facturation">
+                            <group string="Parrainage">
+                                <field name="sponsorship_request" widget="radio" options="{'horizontal': true}"/>
+                                <div invisible="sponsorship_request != 'yes'">
+                                    <field name="sponsorship_ids" nolabel="1">
+                                        <list>
+                                            <field name="firstname"/>
+                                            <field name="lastname"/>
+                                            <field name="street"/>
+                                            <field name="zip"/>
+                                            <field name="city"/>
+                                            <field name="country_id"/>
+                                            <field name="amount" widget="monetary"/>
+                                        </list>
+                                        <form>
+                                            <group>
+                                                <field name="firstname"/>
+                                                <field name="lastname"/>
+                                                <field name="street"/>
+                                                <field name="zip"/>
+                                                <field name="city"/>
+                                                <field name="country_id"/>
+                                                <field name="amount"/>
+                                            </group>
+                                        </form>
+                                    </field>
+                                </div>
+                            </group>
 
-                        <div invisible="not additional_reduction_request or budget_method != 'online'">
-                            <h4>Totaux</h4>
-                            <div>
-                                <strong>Revenus Madame : </strong>
-                                <field name="total_revenus_madame" class="oe_inline" readonly="1"/>
+                            <group string="Facturation divisée">
+                                <field name="multi_billing_request" widget="radio" options="{'horizontal': true}"/>
+                                <!-- Affichage lisible du JSON en lecture seule -->
+                                <field name="billing_recipients_data" widget="json" readonly="1" nolabel="1"/>
+                            </group>
+
+                            <group string="Mode de paiement">
+                                <field name="payment_terms" widget="radio" options="{'horizontal': true}"/>
+                            </group>
+
+                            <group string="Carnet d'adresse des parents">
+                                <field name="address_book_optin" widget="boolean_toggle"/>
+                            </group>
+
+                            <group string="Commentaires">
+                                <field name="comments" placeholder="Commentaires sur le paiement ou autre"/>
+                            </group>
+                        </page>
+
+                        <!-- ==================== Page 7 : Récapitulatif complet ==================== -->
+                        <page string="Récapitulatif">
+                            <!-- 1. Montant de base & réductions standard -->
+                            <group string="1. Montant de base &amp; réductions standard">
+                                <field name="base_monthly_fee" string="Total mensuel écolage (hors réduction)" readonly="1"/>
+                                <field name="max_children_discount" string="Rabais nombre d'enfants (max)" readonly="1"/>
+                                <field name="max_seniority_discount" string="Rabais ancienneté (max)" readonly="1"/>
+                                <field name="monthly_fee_after_requested" string="Total après réductions standard" readonly="1"/>
+                            </group>
+
+                            <!-- 2. Cas particuliers -->
+                            <separator string="2. Cas particuliers (exclusifs)"/>
+                            <group string="Adaptation du montant selon cas particulier">
+                                <div invisible="solidarity_request != 'yes'">
+                                    <strong>Solidarité : </strong>
+                                    <field name="solidarity_total_amount" string="Total mensuel après solidarité" readonly="1"/>
+                                </div>
+                                <div invisible="not additional_reduction_request or proposal_type != 'simple'">
+                                    <strong>Réduction complémentaire (proposition simple) : </strong>
+                                    <field name="proposed_monthly_amount" string="Montant mensuel proposé" readonly="1"/>
+                                    <span t-if="proposal_annual_income > 0" t-attf-class="{'text-danger': proposed_income_percentage &lt; 14}">
+                                        Pourcentage du revenu : <field name="proposed_income_percentage" widget="percentage" readonly="1"/>
+                                    </span>
+                                </div>
+                                <div invisible="not additional_reduction_request or proposal_type != 'cef'">
+                                    <strong>Réduction complémentaire (CEF) : </strong>
+                                    <field name="proposed_monthly_fee_cef" string="Nouveau montant CEF proposé" readonly="1"/>
+                                    <span t-if="proposal_annual_income > 0" t-attf-class="{'text-danger': proposed_income_percentage &lt; 14}">
+                                        Pourcentage du revenu : <field name="proposed_income_percentage" widget="percentage" readonly="1"/>
+                                    </span>
+                                </div>
+                                <div invisible="solidarity_request == 'yes' and not additional_reduction_request">
+                                    <span>Aucun cas particulier demandé.</span>
+                                </div>
+                            </group>
+
+                            <!-- 3. TARIF STANDARD -->
+                            <separator string="3. TARIF STANDARD (après réductions standard)"/>
+                            <group string="Mensuel">
+                                <field name="total_monthly_tuition" string="Écolage mensuel (CHF)" readonly="1"/>
+                                <field name="total_monthly_after_school" string="Parascolaire mensuel (CHF)" readonly="1"/>
+                                <field name="total_monthly" string="TOTAL MENSUEL STANDARD (CHF)" readonly="1"/>
+                            </group>
+                            <group string="Annuel">
+                                <field name="total_annual_tuition" string="Écolage x 12 mois (CHF)" readonly="1"/>
+                                <field name="total_annual_after_school" string="Parascolaire x 12 mois (CHF)" readonly="1"/>
+                                <field name="membership_fee_amount" string="Cotisation annuelle (CHF)" readonly="1"/>
+                                <field name="deposit_amount" string="Dépôt (CHF)" readonly="1"/>
+                                <field name="total_annual" string="TOTAL ANNUEL STANDARD (CHF)" readonly="1"/>
+                            </group>
+                            <!-- Déduction 2% pour paiement annuel -->
+                            <div class="alert alert-success" invisible="payment_terms != 'annually' or additional_reduction_request">
+                                <strong>TOTAL ANNUEL STANDARD + DÉDUCTION 2% : </strong>
+                                <span t-esc="total_annual * 0.98"/>
  CHF
                             </div>
-                            <div>
-                                <strong>Revenus Monsieur : </strong>
-                                <field name="total_revenus_monsieur" class="oe_inline" readonly="1"/>
+
+                            <!-- 4. TARIF PROPOSÉ (montant proposé par la famille) -->
+                            <separator string="4. TARIF PROPOSÉ (montant proposé par la famille)"/>
+                            <group string="Mensuel">
+                                <field name="proposed_monthly_total" string="Total mensuel proposé (CHF)" readonly="1"/>
+                            </group>
+                            <group string="Annuel">
+                                <field name="membership_fee_amount" string="Cotisation annuelle (CHF)" readonly="1"/>
+                                <field name="deposit_amount" string="Dépôt (CHF)" readonly="1"/>
+                                <field name="proposed_annual_total" string="Total annuel proposé (CHF)" readonly="1" decoration-danger="proposed_income_percentage &lt; 14"/>
+                                <span t-if="proposal_annual_income > 0" t-attf-class="{'text-danger': proposed_income_percentage &lt; 14}">
+                                    <i class="fa fa-exclamation-triangle"></i> Le pourcentage proposé est de <field name="proposed_income_percentage" widget="percentage" readonly="1"/>
+ du revenu annuel.
+                                </span>
+                            </group>
+                            <!-- Déduction 2% pour paiement annuel sur le proposé -->
+                            <div class="alert alert-success" invisible="payment_terms != 'annually' or additional_reduction_request">
+                                <strong>TOTAL ANNUEL PROPOSÉ + DÉDUCTION 2% : </strong>
+                                <span t-esc="proposed_annual_total * 0.98"/>
  CHF
                             </div>
-                            <div>
-                                <strong>Total revenus : </strong>
-                                <field name="total_revenus" class="oe_inline" readonly="1"/>
- CHF
-                            </div>
-                            <div>
-                                <strong>Charges Madame : </strong>
-                                <field name="total_charges_madame" class="oe_inline" readonly="1"/>
- CHF
-                            </div>
-                            <div>
-                                <strong>Charges Monsieur : </strong>
-                                <field name="total_charges_monsieur" class="oe_inline" readonly="1"/>
- CHF
-                            </div>
-                            <div>
-                                <strong>Total charges : </strong>
-                                <field name="total_charges" class="oe_inline" readonly="1"/>
- CHF
-                            </div>
-                            <div>
-                                <strong>Solde : </strong>
-                                <field name="solde" class="oe_inline" readonly="1" decoration-danger="solde &lt; 0"/>
- CHF
-                            </div>
-                        </div>
 
+                            <!-- 5. Conditions générales -->
+                            <separator string="5. Conditions générales"/>
+                            <group>
+                                <field name="terms_accepted" widget="boolean_toggle"/>
+                                <field name="signature_text" placeholder="Nom et prénom du signataire"/>
+                            </group>
 
-                        <h3>Proposition</h3>
-                        <div>
-                            <label for="proposed_monthly_amount" string="Je propose à la CEF un montant mensuel"/>
-                            <field name="proposed_monthly_amount"/>
-                        </div>
+                        </page>
 
-                    </div>
+                        <!-- ==================== Page 8 : Mentions ==================== -->
+                        <page string="Mentions">
+                            <field name="legal_notice" widget="html" readonly="1"/>
+                            <field name="technical_contact" widget="html" readonly="1"/>
+                        </page>
 
-                </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
 
-                <page string="Parascolaire">
-                    <!-- Question initiale avec boutons radio -->
-                    <field name="after_school_request" widget="radio" options="{'horizontal': true}"/>
-                    <label for="after_school_request" string="Souhaitez-vous inscrire votre enfant au parascolaire ?"/>
+    <!-- Vue liste -->
+    <record id="view_dossier_famille_list" model="ir.ui.view">
+        <field name="name">ersge.dossier.famille.list</field>
+        <field name="model">ersge.dossier.famille</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="display_name"/>
+                <field name="annee_scolaire"/>
+                <field name="state" widget="badge"/>
+                <field name="date_soumission"/>
+                <field name="family_id"/>
+            </list>
+        </field>
+    </record>
 
-                    <!-- Contenu conditionnel : visible uniquement si after_school_request == 'yes' -->
-                    <div invisible="after_school_request != 'yes'">
-                        <!-- Message important -->
-                        <div class="alert alert-warning mt-2" role="alert">
-                            <i class="fa fa-exclamation-triangle"/>
-                            <strong>Important :</strong> remplir le formulaire ne signifie pas que votre demande sera forcément acceptée.<br/>
-            En effet, il se peut que certains créneaux horaires soient déjà complets (il peut y avoir une liste d’attente). Ce n’est donc qu’une fois que le responsable de l’accueil considéré (jardin d'accueil ou classe d’accueil) vous aura donné son accord (email) que la comptabilité émettra une facture associée et que votre enfant sera inscrit au parascolaire.<br/>
-            Si nécessaire, vous pourrez modifier ultérieurement les jours et horaires de vos inscriptions au parascolaire.<br/>
-                <a href="https://ersge.ch/emploi-du-temps/" onclick="return false;">Au besoin, cliquez ici pour voir les horaires de classe</a>
-            </div>
-
-            <!-- Section : liste des élèves -->
-            <group string="Inscriptions par élève">
-                <field name="after_school_line_ids" nolabel="1">
-                    <list>
-                        <field name="student_id" readonly="1"/>
-                        <field name="accueil_type"/>
-                        <field name="prestation_ids" widget="many2many_tags"/>
-                        <field name="montant_mensuel" readonly="1" sum="Total"/>
-                    </list>
-                    <form>
-                        <group>
-                            <field name="student_id" readonly="1"/>
-                            <field name="accueil_type" widget="radio"/>
-                            <field name="prestation_ids" widget="many2many_checkboxes" domain="[('active', '=', True), '|', ('applicable_to', '=', accueil_type), ('applicable_to', '=', 'both')]"/>
-                            <field name="montant_mensuel" readonly="1"/>
-                        </group>
-                    </form>
-                </field>
-            </group>
-
-            <!-- Descriptif JARDIN D'ACCUEIL -->
-            <div class="mt-4">
-                <h4>JARDIN D'ACCUEIL</h4>
-                <p>
-                    <em>pour les enfants des jardins d'enfants - 3 à 6 ans</em>
-                </p>
-                <p>
-                    <strong>PRÉVOIR :</strong>
-                </p>
-                <ul>
-                    <li>Des pantoufles</li>
-                    <li>Pantalons de pluie</li>
-                    <li>Pour la sieste des petits : couverture, coussin, vêtements de rechange, et, selon les besoins, doudou ou tétine.</li>
-                    <li>Si besoin, couches</li>
-                </ul>
-            </div>
-
-            <!-- Descriptif CLASSE D'ACCUEIL -->
-            <div class="mt-4">
-                <h4>CLASSE D'ACCUEIL</h4>
-                <p>
-                    <em>pour les enfants du primaire - 6 à 12 ans</em>
-                </p>
-                <p>
-                    <strong>LES ÉTUDES SURVEILLÉES</strong> sont incluses dans le prix du parascolaire.</p>
-                <p>De la 5<sup>ème</sup> à la 9<sup>ème</sup> classe, les élèves bénéficient d'études surveillées de 15h30 à 17h, le lundi, mardi &amp; jeudi. Les études surveillées permettent à vos enfants de faire leurs devoirs encadrés par un professeur.</p>
-            </div>
-
-            <!-- Tarif "Accompagnement cirque" -->
-            <div class="mt-4">
-                <h4>TARIF “ACCOMPAGNEMENT CIRQUE”</h4>
-                <p>Le tarif “accompagnement cirque” ne comprend pas l’inscription aux cours de cirque, ni le paiement aux cours de cirque, dispensés par l’association Cirque Rustelli Confetti. Vous pouvez vous inscrire à leurs cours par e-mail <a href="mailto:info@rustelli-confetti.ch">info@rustelli-confetti.ch</a> ou sur leur site : <a href="https://www.rustelliconfetticirque.com" target="_blank">www.rustelliconfetticirque.com</a>.
-                </p>
-                <p>
-                    <strong>LE TARIF "ACCOMPAGNEMENT CIRQUE" COMPREND :</strong>
-                </p>
-                <ul>
-                    <li>Repas + Prise en charge de votre enfant avant et après le cours de cirque entre 12h et 15h30.</li>
-                    <li>En cas d'annulation du cours de cirque, l’enfant est également pris en charge par la classe d’accueil.</li>
-                </ul>
-            </div>
-        </div>
-    </page>
-
-
-
-    <page string="Récapitulatif">
-        <group string="Mensuel">
-            <field name="total_monthly_tuition"/>
-            <field name="total_monthly_after_school"/>
-            <field name="total_monthly"/>
-        </group>
-        <group string="Annuel">
-            <field name="total_annual_tuition"/>
-            <field name="total_annual_after_school"/>
-            <field name="membership_fee_amount"/>
-            <field name="deposit_amount"/>
-            <field name="total_annual"/>
-        </group>
-
-        <separator string="Solidarité"/>
-        <group>
-            <field name="solidarity_request" widget="radio" options="{'horizontal': true}"/>
-            <field name="apply_solidarity_increase" invisible="solidarity_request != 'yes'"/>
-            <field name="solidarity_percentage" invisible="solidarity_request != 'yes' or not apply_solidarity_increase"/>
-            <field name="solidarity_total_amount" readonly="1"/>
-        </group>
-
-        <separator string="Carnet d'adresse des parents"/>
-        <group>
-            <field name="address_book_optin" widget="boolean_toggle"/>
-        </group>
-
-        <separator string="Parrainage &amp; Facturation"/>
-        <group>
-            <field name="sponsorship_request" widget="radio" options="{'horizontal': true}"/>
-            <field name="multi_billing_request" widget="radio" options="{'horizontal': true}"/>
-            <field name="payment_terms" widget="radio" options="{'horizontal': true}"/>
-            <field name="comments" placeholder="Commentaires sur le paiement"/>
-        </group>
-
-        <separator string="Conditions générales &amp; signature"/>
-        <group>
-            <field name="terms_accepted" widget="boolean_toggle"/>
-            <field name="contract_accepted" widget="boolean_toggle"/>
-            <field name="convention_accepted" widget="boolean_toggle"/>
-            <field name="procedures_accepted" widget="boolean_toggle"/>
-            <field name="signature_text" placeholder="Nom et prénom du signataire"/>
-        </group>
-
-        <separator string="Réduction complémentaire (éléments clés)"/>
-        <group>
-            <field name="additional_reduction_request" widget="boolean_toggle"/>
-            <field name="gross_annual_income" invisible="not additional_reduction_request"/>
-            <field name="proposed_monthly_amount" invisible="not additional_reduction_request"/>
-            <field name="explanatory_letter_mode" widget="radio" invisible="not additional_reduction_request"/>
-            <field name="explanatory_letter_text" invisible="not additional_reduction_request or explanatory_letter_mode != 'write'"/>
-        </group>
-    </page>
-
-    <page string="Mentions">
-        <field name="legal_notice" widget="html" readonly="1"/>
-        <field name="technical_contact" widget="html" readonly="1"/>
-    </page>
-
-</notebook>
-</sheet>
-</form>
-</field>
-</record>
-
-<record id="view_dossier_famille_list" model="ir.ui.view">
-<field name="name">ersge.dossier.famille.list</field>
-<field name="model">ersge.dossier.famille</field>
-<field name="arch" type="xml">
-<list>
-<field name="display_name"/>
-<field name="annee_scolaire"/>
-<field name="state" widget="badge"/>
-<field name="date_soumission"/>
-</list>
-</field>
-</record>
-
-<record id="action_dossier_famille" model="ir.actions.act_window">
-<field name="name">Dossiers famille</field>
-<field name="res_model">ersge.dossier.famille</field>
-<field name="view_mode">list,form</field>
-<field name="context">{}</field>
-</record>
+    <!-- Action -->
+    <record id="action_dossier_famille" model="ir.actions.act_window">
+        <field name="name">Dossiers famille</field>
+        <field name="res_model">ersge.dossier.famille</field>
+        <field name="view_mode">list,form</field>
+        <field name="context">{}</field>
+    </record>
 
 </odoo>
