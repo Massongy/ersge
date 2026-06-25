@@ -15,14 +15,9 @@ class PortalEcolage(http.Controller):
     # ==================== UTILITAIRES ====================
 
     def _get_partner_families(self, partner):
-        """Retourne toutes les familles dont le partenaire est membre (via Many2many)."""
-        return partner.family_ids  # Many2many vers ersge.family
+        return partner.family_ids
 
     def _check_dossier_access(self, dossier, partner):
-        """
-        Vérifie si le partner a accès au dossier.
-        Utilise la table ersge.dossier.acces (invitations acceptées).
-        """
         acces = request.env['ersge.dossier.acces'].sudo().search([
             ('dossier_id', '=', dossier.id),
             ('partner_id', '=', partner.id),
@@ -31,24 +26,15 @@ class PortalEcolage(http.Controller):
         return bool(acces)
 
     def _get_partner_dossiers(self, partner):
-        """
-        Retourne tous les dossiers accessibles par le partenaire :
-        - via la table ersge.dossier.acces
-        - via toutes les familles dont il est membre
-        """
-        # Via invitations acceptées
         acces_records = request.env['ersge.dossier.acces'].sudo().search([
             ('partner_id', '=', partner.id),
             ('invite_state', '=', 'accepted'),
         ])
         dossiers_via_acces = acces_records.mapped('dossier_id')
-
-        # Via les familles dont il est membre
         families = self._get_partner_families(partner)
         dossiers_via_family = request.env['ersge.dossier.famille'].sudo().search([
             ('family_id', 'in', families.ids)
         ])
-
         return dossiers_via_acces | dossiers_via_family
 
     # ==================== LISTE DES DOSSIERS ====================
@@ -58,29 +44,22 @@ class PortalEcolage(http.Controller):
         partner = request.env.user.partner_id
         family_id = kwargs.get('family_id')
         dossiers = self._get_partner_dossiers(partner)
-
-        # Filtre par famille si demandé
         if family_id:
             family = request.env['ersge.family'].sudo().browse(int(family_id))
-            # Vérifier que la famille appartient bien au partenaire
             if partner in family.partner_ids:
                 dossiers = dossiers.filtered(lambda d: d.family_id.id == family.id)
-
         return request.render('ersge_portal_ecolage.portal_my_dossiers', {
-            'dossiers':          dossiers,
-            'error':             kwargs.get('error'),
-            'success':           kwargs.get('success'),
-            'csrf_token':        request.csrf_token(),
+            'dossiers': dossiers,
+            'error': kwargs.get('error'),
+            'success': kwargs.get('success'),
+            'csrf_token': request.csrf_token(),
             'current_family_id': int(family_id) if family_id else None,
         })
 
-    # ==================== CRÉATION D'UN NOUVEAU DOSSIER (CHOIX FAMILLE) ====================
+    # ==================== CRÉATION D'UN NOUVEAU DOSSIER ====================
 
     @http.route('/my/ecolage/dossier/choose', type='http', auth='user', website=True, methods=['GET', 'POST'])
     def choose_dossier_family(self, **kwargs):
-        """
-        Étape 1 : choisir ou créer une famille, puis créer le dossier.
-        """
         partner = request.env.user.partner_id
 
         if request.httprequest.method == 'POST':
@@ -88,60 +67,88 @@ class PortalEcolage(http.Controller):
             new_family_name = kwargs.get('new_family_name', '').strip()
             role = kwargs.get('my_role', 'parent1')
 
-            # Validation du rôle
             if role not in ['parent1', 'parent2', 'tutor']:
                 role = 'parent1'
 
             if new_family_name:
-                # Créer une nouvelle famille
                 family = request.env['ersge.family'].sudo().create({'name': new_family_name})
                 family.write({'partner_ids': [(4, partner.id)]})
                 family_id = family.id
             elif family_id:
                 family = request.env['ersge.family'].sudo().browse(int(family_id))
-                # Ajouter le partenaire s'il n'est pas déjà membre
                 if partner not in family.partner_ids:
                     family.write({'partner_ids': [(4, partner.id)]})
             else:
-                # Aucune sélection
                 return request.render('ersge_portal_ecolage.portal_choose_family', {
                     'families': self._get_partner_families(partner),
                     'error': 'Veuillez choisir ou créer une famille.',
                     'csrf_token': request.csrf_token(),
                 })
 
-            # Création du dossier
-            new_dossier = request.env['ersge.dossier.famille'].sudo().with_context(
-                default_family_id=family.id
-            ).create({
-                'annee_scolaire': request.env['ersge.dossier.famille']._get_current_school_year(),
-                'state': 'incomplet',
-            })
-            # Ajout de l'accès direct pour le créateur
-            new_dossier.add_acces(partner, role=role)
+            # ===== RECHERCHE DU DERNIER DOSSIER =====
+            last_dossier = request.env['ersge.dossier.famille'].sudo().search([
+                ('family_id', '=', family.id)
+            ], order='create_date desc', limit=1)
 
-            # Redirection après création
+            if not last_dossier:
+                partner_dossiers = self._get_partner_dossiers(partner)
+                last_dossier = partner_dossiers.sorted('create_date', reverse=True)[:1]
+
+            if last_dossier:
+                # Copie du dossier avec les contextes pour désactiver la création automatique des lignes budget
+                new_dossier = last_dossier.with_context(
+                    no_budget_default=True,
+                    no_budget_init=True
+                ).copy(default={
+                    'family_id': family.id,
+                    'state': 'incomplet',
+                    'date_soumission': False,
+                    'terms_accepted': False,
+                    'signature_text': False,
+                })
+
+                # Copie manuelle des lignes de budget (avec leurs montants)
+                if last_dossier.budget_line_ids:
+                    for line in last_dossier.budget_line_ids:
+                        line.copy(default={'dossier_id': new_dossier.id})
+                    _logger.info("Budget copié (avec montants) pour le nouveau dossier %s", new_dossier.id)
+
+                new_dossier.add_acces(partner, role=role)
+
+            else:
+                new_dossier = request.env['ersge.dossier.famille'].sudo().with_context(
+                    default_family_id=family.id
+                ).create({
+                    'annee_scolaire': request.env['ersge.dossier.famille']._get_current_school_year(),
+                    'state': 'incomplet',
+                    'family_id': family.id,
+                })
+                new_dossier.add_acces(partner, role=role)
+
             return request.redirect(f'/my/ecolage/{new_dossier.id}/acces?just_created=1')
 
-        # GET : afficher le formulaire de choix
         existing_families = self._get_partner_families(partner)
         return request.render('ersge_portal_ecolage.portal_choose_family', {
             'families': existing_families,
             'csrf_token': request.csrf_token(),
         })
 
-    # Ancienne route /my/ecolage/new redirige vers le choix
+    # ==================== ANCIENNES ROUTES ====================
+
     @http.route('/my/ecolage/new', type='http', auth='user', website=True)
     def new_dossier(self, **kwargs):
         return request.redirect('/my/ecolage/dossier/choose')
 
+    @http.route('/my/ecolage/invite', type='http', auth='user', website=True, methods=['GET', 'POST'])
+    def invite_partner_legacy(self, **kwargs):
+        dossier_id = kwargs.get('dossier_id')
+        if dossier_id:
+            return request.redirect(f'/my/ecolage/{dossier_id}/acces')
+        return request.redirect('/my/ecolage')
+
     # ==================== GESTION DES ACCÈS ====================
 
-    @http.route(
-        '/my/ecolage/<int:dossier_id>/acces',
-        type='http', auth='user', website=True,
-        methods=['GET', 'POST'],
-    )
+    @http.route('/my/ecolage/<int:dossier_id>/acces', type='http', auth='user', website=True, methods=['GET', 'POST'])
     def portal_dossier_acces(self, dossier_id, **kwargs):
         partner = request.env.user.partner_id
         dossier = request.env['ersge.dossier.famille'].sudo().browse(dossier_id)
@@ -151,14 +158,13 @@ class PortalEcolage(http.Controller):
         if not dossier.exists() or not self._check_dossier_access(dossier, partner):
             return request.redirect('/my/ecolage')
 
-        error   = None
+        error = None
         success = None
         just_created = kwargs.get('just_created')
 
         if request.httprequest.method == 'POST':
             email = kwargs.get('email', '').strip()
-            role  = kwargs.get('role', 'parent2')
-
+            role = kwargs.get('role', 'parent2')
             if not email:
                 error = "Veuillez saisir une adresse email."
             else:
@@ -170,27 +176,23 @@ class PortalEcolage(http.Controller):
                     error = str(e)
 
         return request.render('ersge_portal_ecolage.portal_dossier_acces', {
-            'dossier':       dossier,
-            'acces_list':    dossier.acces_ids,
-            'error':         error,
-            'success':       success,
-            'just_created':  just_created,
-            'csrf_token':    request.csrf_token(),
-            'current_role':  current_role,
+            'dossier': dossier,
+            'acces_list': dossier.acces_ids,
+            'error': error,
+            'success': success,
+            'just_created': just_created,
+            'csrf_token': request.csrf_token(),
+            'current_role': current_role,
         })
 
     # ==================== ACCEPTER UNE INVITATION ====================
 
     def _add_partner_to_family(self, partner, dossier):
-        """Ajoute le partenaire à la famille du dossier."""
         family = dossier.family_id
         if family and partner not in family.partner_ids:
             family.write({'partner_ids': [(4, partner.id)]})
 
-    @http.route(
-        '/my/ecolage/join/<string:token>',
-        type='http', auth='public', website=True,
-    )
+    @http.route('/my/ecolage/join/<string:token>', type='http', auth='public', website=True)
     def portal_join_dossier(self, token, **kwargs):
         acces = request.env['ersge.dossier.acces'].sudo().search([
             ('invite_token', '=', token),
@@ -200,26 +202,20 @@ class PortalEcolage(http.Controller):
         if not acces:
             return request.render('ersge_portal_ecolage.portal_invite_invalid', {})
 
-        # Connecté → lier le compte
         if not request.env.user._is_public():
             partner = request.env.user.partner_id
             acces.write({
-                'partner_id':   partner.id,
+                'partner_id': partner.id,
                 'invite_state': 'accepted',
                 'invite_token': False,
             })
-            # Ajouter le partenaire à la famille
             self._add_partner_to_family(partner, acces.dossier_id)
             return request.redirect(f'/my/ecolage/edit/{acces.dossier_id.id}')
 
-        # Non connecté → stocker token en session + login
         request.session['invite_token'] = token
         return request.redirect('/web/login?redirect=/my/ecolage/join/confirm')
 
-    @http.route(
-        '/my/ecolage/join/confirm',
-        type='http', auth='user', website=True,
-    )
+    @http.route('/my/ecolage/join/confirm', type='http', auth='user', website=True)
     def portal_join_confirm(self, **kwargs):
         token = request.session.get('invite_token')
         if not token:
@@ -235,12 +231,11 @@ class PortalEcolage(http.Controller):
 
         partner = request.env.user.partner_id
         acces.write({
-            'partner_id':   partner.id,
+            'partner_id': partner.id,
             'invite_state': 'accepted',
             'invite_token': False,
         })
         request.session.pop('invite_token', None)
-        # Ajouter le partenaire à la famille
         self._add_partner_to_family(partner, acces.dossier_id)
         return request.redirect(f'/my/ecolage/edit/{acces.dossier_id.id}')
 
@@ -254,7 +249,6 @@ class PortalEcolage(http.Controller):
             return request.redirect('/my/ecolage')
 
         acces = request.env['ersge.dossier.acces'].sudo().browse(acces_id)
-        # Ne révoquer que si l'invitation est en attente
         if acces.exists() and acces.partner_id != partner and acces.invite_state == 'pending':
             acces.unlink()
         else:
@@ -264,11 +258,7 @@ class PortalEcolage(http.Controller):
 
     # ==================== ÉDITION DU DOSSIER ====================
 
-    @http.route(
-        '/my/ecolage/edit/<int:dossier_id>',
-        type='http', auth='user', website=True,
-        methods=['GET', 'POST'],
-    )
+    @http.route('/my/ecolage/edit/<int:dossier_id>', type='http', auth='user', website=True, methods=['GET', 'POST'])
     def edit_dossier(self, dossier_id, **kwargs):
         try:
             partner = request.env.user.partner_id
@@ -283,12 +273,10 @@ class PortalEcolage(http.Controller):
             if dossier.state != 'incomplet':
                 return request.redirect('/my/ecolage?error=already_submitted')
 
-            # Récupérer le rôle du partenaire pour ce dossier (via ersge.dossier.acces)
             acces = dossier.acces_ids.filtered(lambda a: a.partner_id == partner)
             current_role = acces.role if acces else 'parent1'
 
             if request.httprequest.method == 'POST':
-                # Traitement du formulaire
                 params = request.params
                 form = request.httprequest.form
 
@@ -322,9 +310,7 @@ class PortalEcolage(http.Controller):
                         line_id = int(params.get(key))
                         line = request.env['ersge.dossier.student.line'].sudo().browse(line_id)
                         if line.exists() and line.dossier_id.id == dossier.id:
-                            # Récupération de la valeur du radio (no, internal, internal_external)
                             image_rights = params.get(f'student_image_rights_{line_id}', 'internal_external')
-
                             line.student_id.sudo().write({
                                 'firstname': params.get(f'student_firstname_{line_id}', ''),
                                 'lastname': params.get(f'student_lastname_{line_id}', ''),
@@ -352,6 +338,9 @@ class PortalEcolage(http.Controller):
                     'explanatory_letter_text', 'explanatory_letter_mode',
                     'budget_method', 'apply_children_discount',
                     'apply_seniority_discount', 'seniority_years',
+                    'proposal_annual_income',
+                    'previous_monthly_fee',
+                    'proposed_monthly_fee_cef',
                 ]
                 dossier_vals = {}
                 bool_simple = {
@@ -366,12 +355,23 @@ class PortalEcolage(http.Controller):
                         val = params.get(k)
                         dossier_vals[k] = (val == '1') if k in bool_simple else val
 
+                # ===== GESTION DE LA RÉDUCTION COMPLÉMENTAIRE =====
+                if 'additional_reduction_request' in params:
+                    if params.get('additional_reduction_request') == '0':
+                        dossier_vals['proposed_monthly_amount'] = 0.0
+                        dossier_vals['proposal_annual_income'] = 0.0
+                        dossier_vals['previous_monthly_fee'] = 0.0
+                        dossier_vals['proposed_monthly_fee_cef'] = 0.0
+                        dossier_vals['explanatory_letter_text'] = ''
+                        dossier_vals['explanatory_letter_mode'] = 'upload'
+                        dossier_vals['budget_method'] = 'upload'
+                        dossier_vals['gross_annual_income'] = 0.0
+
                 for field in ['solidarity_request', 'sponsorship_request', 'payment_terms']:
                     val = params.get(field)
                     if val:
                         dossier_vals[field] = val
 
-                # Initialisation de multi_billing_request à False par défaut
                 dossier_vals['multi_billing_request'] = False
                 for field in ['apply_solidarity_increase', 'multi_billing_request']:
                     values = form.getlist(field)
@@ -394,34 +394,22 @@ class PortalEcolage(http.Controller):
                 if 'signature_text' in params:
                     dossier_vals['signature_text'] = params.get('signature_text')
 
-                # ----- GESTION DES FAMILLES LIÉES -----
                 dossier_vals['linked_families_comment'] = params.get('has_linked_families') == '1'
                 if 'linked_families_comment_text' in params:
                     dossier_vals['linked_families_comment_text'] = params.get('linked_families_comment_text')
 
                 # =================================================================
-                # GESTION DE LA PROPOSITION D'ÉCOLAGE (exclusif: simple ou CEF)
+                # GESTION DE LA PROPOSITION D'ÉCOLAGE
                 # =================================================================
-                _logger.info("=== GESTION CEF / PROPOSITION ===")
-                _logger.info("cef_or_proposal = %s", params.get('cef_or_proposal'))
-                _logger.info("proposed_monthly_amount (reçu) = %s", params.get('proposed_monthly_amount'))
-                _logger.info("proposed_monthly_fee_cef (reçu) = %s", params.get('proposed_monthly_fee_cef'))
-                _logger.info("previous_monthly_fee (reçu) = %s", params.get('previous_monthly_fee'))
-                _logger.info("proposal_annual_income (reçu) = %s", params.get('proposal_annual_income'))
-
-                # Récupérer le type de proposition depuis le formulaire
                 cef_or_proposal = params.get('cef_or_proposal', 'simple')
 
                 if cef_or_proposal == 'cef':
-                    # Stocker le montant CEF dans son champ dédié
                     cef_amount = params.get('proposed_monthly_fee_cef', '0')
                     try:
                         dossier_vals['proposed_monthly_fee_cef'] = float(cef_amount) if cef_amount else 0.0
                     except ValueError:
                         dossier_vals['proposed_monthly_fee_cef'] = 0.0
-                    # Vider le champ "proposition simple" (exclusif)
                     dossier_vals['proposed_monthly_amount'] = 0.0
-                    # Infos CEF
                     dossier_vals['previous_cef_agreement'] = True
                     dossier_vals['proposal_type'] = 'cef'
                     if 'previous_monthly_fee' in params:
@@ -429,53 +417,35 @@ class PortalEcolage(http.Controller):
                             dossier_vals['previous_monthly_fee'] = float(params.get('previous_monthly_fee') or 0)
                         except ValueError:
                             dossier_vals['previous_monthly_fee'] = 0.0
-
                 else:
-                    # Stocker le montant simple dans son champ dédié
-                    # (déjà récupéré via simple_fields, mais on s'assure qu'il est présent)
                     if 'proposed_monthly_amount' not in dossier_vals:
                         dossier_vals['proposed_monthly_amount'] = 0.0
-                    # Vider le champ CEF (exclusif)
                     dossier_vals['proposed_monthly_fee_cef'] = 0.0
                     dossier_vals['proposal_type'] = 'simple'
                     dossier_vals['previous_cef_agreement'] = False
                     dossier_vals['previous_monthly_fee'] = 0.0
 
-                # ----- REVENU ANNUEL POUR LE CALCUL DU POURCENTAGE DE LA PROPOSITION -----
                 if 'proposal_annual_income' in params:
                     try:
                         dossier_vals['proposal_annual_income'] = float(params.get('proposal_annual_income') or 0)
                     except ValueError:
                         dossier_vals['proposal_annual_income'] = 0.0
 
-                _logger.info("dossier_vals après gestion CEF: %s", dossier_vals)
-
                 # =================================================================
-                # GESTION DES DESTINATAIRES DE FACTURATION (via champ JSON)
+                # GESTION DES DESTINATAIRES DE FACTURATION
                 # =================================================================
-                _logger.info("=== FACTURATION DIVISÉE ===")
-                _logger.info("multi_billing_request reçu = %s", params.get('multi_billing_request'))
-
-                # Récupération explicite de la valeur booléenne
                 multi_billing = dossier_vals.get('multi_billing_request', False)
-                _logger.info("multi_billing (booléen) = %s", multi_billing)
-
                 if multi_billing:
-                    # Récupération des listes du formulaire
                     names = form.getlist('billing_recipient_name[]')
                     amounts = form.getlist('billing_recipient_amount[]')
                     streets = form.getlist('billing_recipient_street[]')
                     zips = form.getlist('billing_recipient_zip[]')
                     cities = form.getlist('billing_recipient_city[]')
                     country_ids = form.getlist('billing_recipient_country_id[]')
-
-                    _logger.info("names = %s", names)
-                    _logger.info("amounts = %s", amounts)
-
                     recipients = []
                     for i in range(len(names)):
                         name = names[i].strip()
-                        if name:  # ignorer les lignes vides
+                        if name:
                             try:
                                 amount = float(amounts[i]) if amounts[i] and amounts[i].strip() else 0.0
                             except ValueError:
@@ -489,23 +459,18 @@ class PortalEcolage(http.Controller):
                                 'country_id': int(country_ids[i]) if i < len(country_ids) and country_ids[i] else False,
                             })
                     dossier_vals['billing_recipients_data'] = recipients
-                    _logger.info("recipients = %s", recipients)
                 else:
                     dossier_vals['billing_recipients_data'] = []
-                    _logger.info("Facturation divisée désactivée, données vidées")
 
-                # Supprimer les anciens champs (plus utilisés)
                 dossier_vals.pop('parent1_billing_amount', None)
                 dossier_vals.pop('parent2_billing_amount', None)
 
                 # =================================================================
-                # GESTION DU PARRAINAGE : suppression explicite si 'no'
+                # GESTION DU PARRAINAGE
                 # =================================================================
                 if params.get('sponsorship_request') == 'no':
                     dossier.sponsorship_ids.unlink()
                     _logger.info("Parrainages supprimés car sponsorship_request = no")
-                # Sinon, on laisse la gestion par les IDs (déjà faite plus bas)
-                # Mais on s'assure de bien supprimer ceux qui ne sont pas soumis
 
                 # ===== 4. PARENT 1 =====
                 parent1_vals = {
@@ -530,7 +495,6 @@ class PortalEcolage(http.Controller):
                 if dossier.parent1_id:
                     dossier.parent1_id.sudo().write(parent1_vals)
                 else:
-                    # Recherche d'un partenaire existant dans la même famille
                     existing = request.env['res.partner'].sudo().search([
                         ('firstname', '=', parent1_vals['firstname']),
                         ('lastname', '=', parent1_vals['lastname']),
@@ -615,6 +579,13 @@ class PortalEcolage(http.Controller):
 
                 # ===== 8. EMPLOYEUR =====
                 if params.get('employer_assistance') == 'yes' and params.get('send_invoice_to_employer') == '1':
+                    dossier_vals.update({
+                        'employer_name': params.get('employer_name', '').strip(),
+                        'employer_street': params.get('employer_street', '').strip(),
+                        'employer_zip': params.get('employer_zip', '').strip(),
+                        'employer_city': params.get('employer_city', '').strip(),
+                        'employer_country_id': int(params.get('employer_country_id')) if params.get('employer_country_id') else False,
+                    })
                     employer_vals = {
                         'name': params.get('employer_name', '') or 'Employeur',
                         'street': params.get('employer_street', ''),
@@ -628,9 +599,16 @@ class PortalEcolage(http.Controller):
                         ('is_employer', '=', True),
                     ], limit=1)
                     employer = existing_emp if existing_emp else request.env['res.partner'].sudo().create(employer_vals)
-                    dossier.sudo().write({'employer_id': employer.id})
+                    dossier_vals['employer_id'] = employer.id
                 else:
-                    dossier.sudo().write({'employer_id': False})
+                    dossier_vals.update({
+                        'employer_id': False,
+                        'employer_name': False,
+                        'employer_street': False,
+                        'employer_zip': False,
+                        'employer_city': False,
+                        'employer_country_id': False,
+                    })
 
                 # ===== 9. PARASCOLAIRE =====
                 existing_after = dossier.after_school_line_ids
@@ -659,8 +637,7 @@ class PortalEcolage(http.Controller):
                         if after_line:
                             after_line.sudo().unlink()
 
-                # ===== 10. PARRAINS (mise à jour et suppression) =====
-                # On commence par traiter les parrains existants (modifications)
+                # ===== 10. PARRAINS =====
                 for key in list(params.keys()):
                     if key.startswith('sp_id_'):
                         sp_id = int(params.get(key))
@@ -676,14 +653,12 @@ class PortalEcolage(http.Controller):
                                 'amount': float(params.get(f'sp_amount_{sp_id}') or 0),
                             })
 
-                # Suppression des parrains qui ne sont pas dans la soumission
                 submitted_sp_ids = [int(params.get(k)) for k in params.keys() if k.startswith('sp_id_')]
                 for sp in dossier.sponsorship_ids:
                     if sp.id not in submitted_sp_ids:
                         sp.sudo().unlink()
                         _logger.info("Parrain %s supprimé (id non soumis)", sp.id)
 
-                # Création des nouveaux parrains
                 new_sp_firstnames = form.getlist('new_sp_firstname[]')
                 new_sp_lastnames = form.getlist('new_sp_lastname[]')
                 new_sp_streets = form.getlist('new_sp_street[]')
@@ -707,12 +682,7 @@ class PortalEcolage(http.Controller):
 
                 # ===== ÉCRITURE FINALE DU DOSSIER =====
                 if dossier_vals:
-                    _logger.info("=== ÉCRITURE DE dossier_vals ===")
                     dossier.sudo().write(dossier_vals)
-                    _logger.info("Écriture terminée.")
-                    _logger.info("billing_recipients_data après écriture = %s", dossier.billing_recipients_data)
-                else:
-                    _logger.warning("Aucune valeur à écrire pour dossier_vals")
 
                 # ===== REDIRECTION FINALE =====
                 if params.get('form_action') == 'save_and_stay':
@@ -728,7 +698,6 @@ class PortalEcolage(http.Controller):
                 return request.redirect('/my/ecolage?success=1')
 
             # ==================== GET ====================
-            # Préremplir les infos du partenaire courant pour le parent correspondant à son rôle
             prefill_parent1 = {}
             prefill_parent2 = {}
             prefill_tutor = {}
@@ -793,10 +762,7 @@ class PortalEcolage(http.Controller):
 
     # ==================== SUPPRESSION LIGNE ÉLÈVE (AJAX) ====================
 
-    @http.route(
-        '/my/ecolage/delete_student_line',
-        type='json', auth='user', methods=['POST'], csrf=True,
-    )
+    @http.route('/my/ecolage/delete_student_line', type='json', auth='user', methods=['POST'], csrf=True)
     def delete_student_line(self):
         data = request.get_json_data()
         line_id = data.get('line_id')
@@ -822,10 +788,7 @@ class PortalEcolage(http.Controller):
 
     # ==================== CONSULTATION ====================
 
-    @http.route(
-        '/my/ecolage/dossier/<int:dossier_id>',
-        type='http', auth='user', website=True,
-    )
+    @http.route('/my/ecolage/dossier/<int:dossier_id>', type='http', auth='user', website=True)
     def view_dossier(self, dossier_id, **kwargs):
         partner = request.env.user.partner_id
         dossier = request.env['ersge.dossier.famille'].sudo().browse(dossier_id)
@@ -843,10 +806,7 @@ class PortalEcolage(http.Controller):
 
     # ==================== SUPPRESSION DOSSIER ====================
 
-    @http.route(
-        '/my/ecolage/delete/<int:dossier_id>',
-        type='http', auth='user', website=True, methods=['POST'],
-    )
+    @http.route('/my/ecolage/delete/<int:dossier_id>', type='http', auth='user', website=True, methods=['POST'])
     def delete_dossier(self, dossier_id):
         partner = request.env.user.partner_id
         dossier = request.env['ersge.dossier.famille'].sudo().browse(dossier_id)
@@ -864,22 +824,14 @@ class PortalEcolage(http.Controller):
         except Exception as e:
             return request.redirect(f'/my/ecolage?error=Erreur lors de la suppression : {str(e)}')
 
-    # ==================== REDIRECTIONS LEGACY (vers nouvelles routes) ====================
+    # ==================== REDIRECTIONS LEGACY ====================
 
     @http.route('/my/famille/new', type='http', auth='user', website=True, methods=['GET', 'POST'])
     def famille_new(self, **kwargs):
         return request.redirect('/my/ecolage/dossier/choose')
 
-    @http.route('/my/ecolage/invite', type='http', auth='user', website=True, methods=['GET', 'POST'])
-    def invite_partner_legacy(self, **kwargs):
-        dossier_id = kwargs.get('dossier_id')
-        if dossier_id:
-            return request.redirect(f'/my/ecolage/{dossier_id}/acces')
-        return request.redirect('/my/ecolage')
-
     @http.route('/my/ecolage/families', type='http', auth='user', website=True)
     def my_families(self, **kwargs):
-        """Liste des familles dont l'utilisateur est membre."""
         partner = request.env.user.partner_id
         families = self._get_partner_families(partner)
         return request.render('ersge_portal_ecolage.portal_my_families', {
@@ -891,7 +843,6 @@ class PortalEcolage(http.Controller):
 
     @http.route('/my/ecolage/family/delete/<int:family_id>', type='http', auth='user', website=True, methods=['POST'])
     def delete_family(self, family_id, **kwargs):
-        """Supprimer une famille si elle n'a pas de dossier."""
         partner = request.env.user.partner_id
         family = request.env['ersge.family'].sudo().browse(family_id)
 
@@ -907,7 +858,7 @@ class PortalEcolage(http.Controller):
         except Exception as e:
             return request.redirect(f'/my/ecolage/families?error={quote(str(e))}')
 
-    @http.route(['/my/ecolage/dossier/<int:dossier_id>/recap_html'], type='http', auth='user', website=True)
+    @http.route('/my/ecolage/dossier/<int:dossier_id>/recap_html', type='http', auth='user', website=True)
     def dossier_recap_html(self, dossier_id):
         dossier = request.env['ersge.dossier.famille'].sudo().browse(dossier_id)
         if not dossier.exists():

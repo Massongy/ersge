@@ -394,12 +394,12 @@ class DossierFamille(models.Model):
     # === ACCORD CEF ANNÉE PRÉCÉDENTE (informations complémentaires, non stockées comme montant principal) ===
     previous_cef_agreement = fields.Boolean(string="J'avais un accord CEF l'année dernière")
     previous_monthly_fee = fields.Monetary(string="Tarif mensuel de l'année dernière", currency_field="currency_id")
-    # Champ utilisé uniquement dans le formulaire pour saisir le nouveau montant, mais c'est proposed_monthly_amount qui est stocké
     proposed_monthly_fee_cef = fields.Monetary(
         string="Nouveau montant mensuel proposé",
         currency_field="currency_id",
-        store=True  # <-- AJOUTER
-)
+        store=True
+    )
+
     # Parascolaire
     after_school_request = fields.Selection(
         [("yes", "Oui"), ("no", "Non")], string="Demande parascolaire", default="no"
@@ -545,7 +545,7 @@ class DossierFamille(models.Model):
         store=True,
     )
 
-     # Solidarité 
+    # Solidarité 
     apply_solidarity_increase = fields.Boolean(string="Appliquer augmentation solidaire", default=False)
     solidarity_total_amount = fields.Monetary(string="Montant total avec solidarité", compute="_compute_solidarity_total", store=True, currency_field="currency_id")
 
@@ -570,7 +570,6 @@ class DossierFamille(models.Model):
 
     legal_notice = fields.Html(readonly=True)
     technical_contact = fields.Html(readonly=True)
-
 
     # === ACCÈS PORTAIL ===
 
@@ -602,14 +601,11 @@ class DossierFamille(models.Model):
 
     def invite_by_email(self, email, role='parent2'):
         email = email.strip().lower()
-        
-        # Vérifier s'il existe déjà un accès pour cet email (en attente ou accepté)
         existing = self.acces_ids.filtered(
             lambda a: a.invite_email == email or (a.partner_id and a.partner_id.email == email)
         )
         if existing:
             return existing
-        
         acces_vals = {
             'dossier_id': self.id,
             'role': role,
@@ -997,22 +993,24 @@ class DossierFamille(models.Model):
                         )
 
         # --- Si aucune ligne budget n'a été copiée, création à partir des catégories ---
-        if not budget_lines and categories:
-            for cat in categories:
-                budget_lines.append(
-                    (
-                        0,
-                        0,
-                        {
-                            "category_id": cat.id,
-                            "montant_monsieur": 0.0,
-                            "montant_madame": 0.0,
-                        },
+        # On désactive cette création automatique si le contexte no_budget_default est présent
+        if not self.env.context.get('no_budget_default'):
+            if not budget_lines and categories:
+                for cat in categories:
+                    budget_lines.append(
+                        (
+                            0,
+                            0,
+                            {
+                                "category_id": cat.id,
+                                "montant_monsieur": 0.0,
+                                "montant_madame": 0.0,
+                            },
+                        )
                     )
+                _logger.warning(
+                    f"Budget créé avec {len(budget_lines)} catégories (mode online)"
                 )
-            _logger.warning(
-                f"Budget créé avec {len(budget_lines)} catégories (mode online)"
-            )
 
         if budget_lines:
             defaults["budget_line_ids"] = budget_lines
@@ -1042,7 +1040,7 @@ class DossierFamille(models.Model):
                     for cmd in vals["budget_line_ids"]
                     if not (cmd[0] == 0 and not cmd[2].get("category_id"))
                 ]
-            # ✅ Nettoyer les lignes parascolaires sans student_id
+            # Nettoyer les lignes parascolaires sans student_id
             if "after_school_line_ids" in vals:
                 vals["after_school_line_ids"] = [
                     cmd
@@ -1053,8 +1051,9 @@ class DossierFamille(models.Model):
         records = super().create(vals_list)
 
         for record in records:
-            # Budget
-            record._init_budget_lines()
+            # Budget (uniquement si pas de contexte no_budget_init)
+            if not self.env.context.get('no_budget_init'):
+                record._init_budget_lines()
 
             # Parents
             if (
@@ -1191,7 +1190,7 @@ class DossierFamille(models.Model):
                     )
 
         return records    
-    
+
     # -------------------------------------------------------------------------
     # Onchange methods
     # -------------------------------------------------------------------------

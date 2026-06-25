@@ -41,6 +41,36 @@ function getCsrfToken() {
 }
 
 // =====================================================================
+// AFFICHAGE CONDITIONNEL DES BLOCS DESCRIPTIFS (JARDIN, CLASSE, CIRQUE)
+// =====================================================================
+function updateDescriptiveBlocks() {
+    // Vérifier si au moins un élève a sélectionné un type d'accueil
+    const jardinRadios = document.querySelectorAll('input[name^="accueil_type_"]:checked');
+    let hasJardin = false;
+    let hasClasse = false;
+
+    jardinRadios.forEach(radio => {
+        const val = radio.value;
+        if (val === 'jardin' || val === 'jardins_enfants') {
+            hasJardin = true;
+        }
+        if (val === 'classe') {
+            hasClasse = true;
+        }
+    });
+
+    // Afficher/masquer les blocs
+    const blockJardin = document.getElementById('block_jardin_desc');
+    const blockClasse = document.getElementById('block_classe_desc');
+    const blockCirque = document.getElementById('block_cirque_desc');
+
+    if (blockJardin) blockJardin.style.display = hasJardin ? 'block' : 'none';
+    if (blockClasse) blockClasse.style.display = hasClasse ? 'block' : 'none';
+    // Le bloc cirque s'affiche si l'un ou l'autre est sélectionné (car lié aux deux)
+    if (blockCirque) blockCirque.style.display = (hasJardin || hasClasse) ? 'block' : 'none';
+}
+
+// =====================================================================
 // GESTION DYNAMIQUE DES CHAMPS REQUIRED (conditionnels)
 // =====================================================================
 function updateConditionalRequired(root) {
@@ -808,6 +838,8 @@ function updateAfterSchoolTotal() {
     });
     setInner('after_school_total_amount', total);
     updateRecapTotals();
+    // Mettre à jour les blocs descriptifs
+    updateDescriptiveBlocks();
 }
 
 function setMontant(studentLineId, montant) {
@@ -854,6 +886,8 @@ function filterPrestationsByAccueilType(optionsDiv) {
             if (checkbox && checkbox.checked) checkbox.checked = false;
         }
     });
+    // Mettre à jour les blocs descriptifs
+    updateDescriptiveBlocks();
 }
 
 function initAfterSchoolForStudent(studentLineId) {
@@ -913,6 +947,8 @@ function toggleAfterSchool(root) {
                 toggle.dispatchEvent(new Event('change', { bubbles: true }));
             }
         });
+        // Cacher les blocs descriptifs si parascolaire désactivé
+        updateDescriptiveBlocks();
     }
     updateAfterSchoolTotal();
     updateRecapTotals();
@@ -1196,6 +1232,9 @@ function initForm(root) {
 
     // AJOUT : toggle facturation divisée (avec adresse)
     toggleMultiBilling(root);
+
+    // Initialiser les blocs descriptifs du parascolaire
+    updateDescriptiveBlocks();
 
     // FORCER LA MISE À JOUR DES TOTAUX APRÈS CHARGEMENT DES FORFAITS
     setTimeout(function() {
@@ -1840,6 +1879,8 @@ document.addEventListener('DOMContentLoaded', function () {
             console.log("Formulaire trouvé, appel de initForm et attachDelegatedEvents");
             initForm(form);
             attachDelegatedEvents(form);
+            // Initialiser les blocs descriptifs une fois le formulaire chargé
+            updateDescriptiveBlocks();
         } else {
             console.log("Formulaire non trouvé, nouvel essai dans 100ms");
             setTimeout(waitForForm, 100);
@@ -1869,4 +1910,5 @@ document.addEventListener('DOMContentLoaded', function () {
     }
     initLinkedFamiliesToggle();
 })();
+
 console.log("portal_dossier.js chargé - en attente du formulaire");

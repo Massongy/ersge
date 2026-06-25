@@ -857,10 +857,11 @@ Ajouter un élève
                                 </div>
                             </div>
                             <!-- Réduction complémentaire -->
+                            <!-- Réduction complémentaire -->
                             <div id="block_reduction_complementaire_question" class="card mb-4" t-att-style="'display:' + ('block' if dossier.solidarity_request != 'yes' else 'none')">
                                 <div class="card-header fw-semibold bg-light">
                                     <i class="fa fa-plus-circle me-2"/>
-                                            Réduction complémentaire
+        Réduction complémentaire
                                 </div>
                                 <div class="card-body">
                                     <label class="form-label fw-semibold">Je sollicite une demande de réduction complémentaire</label>
@@ -1270,57 +1271,50 @@ Ajouter un élève
                     <span id="after_school_total_amount">0.00</span> CHF
                 </div>
                 <!-- Descriptifs Jardin et Classe d'accueil -->
-                <div class="card mb-4">
-                    <div class="card-header fw-semibold bg-light">
-                        <i class="fa fa-tree me-2"/>
-                                                Jardin d'accueil
-                    </div>
-                    <div class="card-body">
-                        <p>
-                            <em>pour les enfants des jardins d'enfants - 3 à 6 ans</em>
-                        </p>
-                        <p>
-                            <strong>PRÉVOIR :</strong>
-                        </p>
-                        <ul>
-                            <li>Des pantoufles</li>
-                            <li>Pantalons de pluie</li>
-                            <li>Pour la sieste des petits : couverture, coussin, vêtements de rechange, et, selon les besoins, doudou ou tétine.</li>
-                            <li>Si besoin, couches</li>
-                        </ul>
-                    </div>
-                </div>
-                <div class="card mb-4">
-                    <div class="card-header fw-semibold bg-light">
-                        <i class="fa fa-graduation-cap me-2"/>
-                                                Classe d'accueil
-                    </div>
-                    <div class="card-body">
-                        <p>
-                            <em>pour les enfants du primaire - 6 à 12 ans</em>
-                        </p>
-                        <p>
-                            <strong>LES ÉTUDES SURVEILLÉES</strong> sont incluses dans le prix du parascolaire.</p>
-                        <p>De la 5<sup>ème</sup> à la 9<sup>ème</sup> classe, les élèves bénéficient d'études surveillées de 15h30 à 17h, le lundi, mardi &amp; jeudi.</p>
-                    </div>
-                </div>
-                <div class="card mb-4">
-                    <div class="card-header fw-semibold bg-light">
-                        <i class="fa fa-magic me-2"/>
-                                                Tarif "Accompagnement cirque"
-                    </div>
-                    <div class="card-body">
-                        <p>Le tarif "accompagnement cirque" ne comprend pas l'inscription aux cours de cirque, ni le paiement aux cours de cirque, dispensés par l'association Cirque Rustelli Confetti. Vous pouvez vous inscrire à leurs cours par e-mail <a href="mailto:info@rustelli-confetti.ch">info@rustelli-confetti.ch</a> ou sur leur site : <a href="https://www.rustelliconfetticirque.com" target="_blank">www.rustelliconfetticirque.com</a>.
-                        </p>
-                        <p>
-                            <strong>LE TARIF "ACCOMPAGNEMENT CIRQUE" COMPREND :</strong>
-                        </p>
-                        <ul>
-                            <li>Repas + Prise en charge de votre enfant avant et après le cours de cirque entre 12h et 15h30.</li>
-                            <li>En cas d'annulation du cours de cirque, l'enfant est également pris en charge par la classe d'accueil.</li>
-                        </ul>
-                    </div>
-                </div>
+                <!-- Descriptifs Jardin et Classe d'accueil -->
+<div class="card mb-4" id="block_jardin_desc" style="display: none;">
+    <div class="card-header fw-semibold bg-light">
+        <i class="fa fa-tree me-2"/>
+        Jardin d'accueil
+    </div>
+    <div class="card-body">
+        <p><em>pour les enfants des jardins d'enfants - 3 à 6 ans</em></p>
+        <p><strong>PRÉVOIR :</strong></p>
+        <ul>
+            <li>Des pantoufles</li>
+            <li>Pantalons de pluie</li>
+            <li>Pour la sieste des petits : couverture, coussin, vêtements de rechange, et, selon les besoins, doudou ou tétine.</li>
+            <li>Si besoin, couches</li>
+        </ul>
+    </div>
+</div>
+
+<div class="card mb-4" id="block_classe_desc" style="display: none;">
+    <div class="card-header fw-semibold bg-light">
+        <i class="fa fa-graduation-cap me-2"/>
+        Classe d'accueil
+    </div>
+    <div class="card-body">
+        <p><em>pour les enfants du primaire - 6 à 12 ans</em></p>
+        <p><strong>LES ÉTUDES SURVEILLÉES</strong> sont incluses dans le prix du parascolaire.</p>
+        <p>De la 5<sup>ème</sup> à la 9<sup>ème</sup> classe, les élèves bénéficient d'études surveillées de 15h30 à 17h, le lundi, mardi &amp; jeudi.</p>
+    </div>
+</div>
+
+<div class="card mb-4" id="block_cirque_desc" style="display: none;">
+    <div class="card-header fw-semibold bg-light">
+        <i class="fa fa-magic me-2"/>
+        Tarif "Accompagnement cirque"
+    </div>
+    <div class="card-body">
+        <p>Le tarif "accompagnement cirque" ne comprend pas l'inscription aux cours de cirque, ni le paiement aux cours de cirque, dispensés par l'association Cirque Rustelli Confetti. Vous pouvez vous inscrire à leurs cours par e-mail <a href="mailto:info@rustelli-confetti.ch">info@rustelli-confetti.ch</a> ou sur leur site : <a href="https://www.rustelliconfetticirque.com" target="_blank">www.rustelliconfetticirque.com</a>.</p>
+        <p><strong>LE TARIF "ACCOMPAGNEMENT CIRQUE" COMPREND :</strong></p>
+        <ul>
+            <li>Repas + Prise en charge de votre enfant avant et après le cours de cirque entre 12h et 15h30.</li>
+            <li>En cas d'annulation du cours de cirque, l'enfant est également pris en charge par la classe d'accueil.</li>
+        </ul>
+    </div>
+</div>
             </div>
         </div>
     </div>
