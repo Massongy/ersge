@@ -95,12 +95,13 @@ function updateConditionalRequired(root) {
         }
     });
 
-    // Employeur (si send_invoice_to_employer est coché)
+    // Employeur (si send_invoice_to_employer est coché ET que employer_assistance est "yes")
     const employerBlock = document.getElementById('block_employer_id');
     const employerInputs = root.querySelectorAll('#block_employer_id input, #block_employer_id select');
+    const val = getCheckedVal(root, 'employer_assistance');
     const sendToEmployer = root.querySelector('#send_invoice_to_employer')?.checked;
     employerInputs.forEach(input => {
-        if (employerBlock && employerBlock.style.display !== 'none' && sendToEmployer) {
+        if (employerBlock && employerBlock.style.display !== 'none' && val === 'yes' && sendToEmployer) {
             input.setAttribute('required', 'required');
         } else {
             input.removeAttribute('required');
@@ -225,7 +226,7 @@ function validateRequiredAndFormat(root) {
         });
     }
 
-   // ==================== 6. Nouveaux élèves ====================
+    // ==================== 6. Nouveaux élèves ====================
     const newStudents = root.querySelectorAll('.new-student');
     newStudents.forEach((line, idx) => {
         const first = line.querySelector('input[name^="new_student_firstname"]');
@@ -264,8 +265,9 @@ function validateRequiredAndFormat(root) {
     if (signature && !signature.value.trim()) errors.push("Signature");
 
     // ==================== 10. Employeur ====================
+    const employerAssistance = root.querySelector('input[name="employer_assistance"]:checked');
     const sendToEmployer = root.querySelector('#send_invoice_to_employer');
-    if (sendToEmployer && sendToEmployer.checked) {
+    if (employerAssistance && employerAssistance.value === 'yes' && sendToEmployer && sendToEmployer.checked) {
         const employerName = root.querySelector('input[name="employer_name"]');
         const employerStreet = root.querySelector('input[name="employer_street"]');
         const employerZip = root.querySelector('input[name="employer_zip"]');
@@ -282,8 +284,6 @@ function validateRequiredAndFormat(root) {
     // ==================== 11. Facturation divisée (si activée) ====================
     const multiBillingYes = root.querySelector('#multi_yes')?.checked;
     if (multiBillingYes) {
-        // Récupérer tous les destinataires, puis filtrer ceux qui ont un nom renseigné
-        // (cela exclut automatiquement le template caché)
         const allRecipients = root.querySelectorAll('.billing-recipient');
         const recipients = Array.from(allRecipients).filter(recip => {
             const nameInput = recip.querySelector('input[name="billing_recipient_name[]"]');
@@ -295,11 +295,6 @@ function validateRequiredAndFormat(root) {
             recipients.forEach((recip, idx) => {
                 const nameInput = recip.querySelector('input[name="billing_recipient_name[]"]');
                 const amountInput = recip.querySelector('input[name="billing_recipient_amount[]"]');
-                const streetInput = recip.querySelector('input[name="billing_recipient_street[]"]');
-                const zipInput = recip.querySelector('input[name="billing_recipient_zip[]"]');
-                const cityInput = recip.querySelector('input[name="billing_recipient_city[]"]');
-                const countrySelect = recip.querySelector('select[name="billing_recipient_country_id[]"]');
-
                 if (!nameInput || !nameInput.value.trim()) errors.push(`Nom du destinataire ${idx+1} manquant`);
                 if (!amountInput || !amountInput.value.trim() || parseFloat(amountInput.value) <= 0) {
                     errors.push(`Montant du destinataire ${idx+1} invalide (doit être > 0)`);
@@ -350,16 +345,25 @@ function toggleSameAddress(root) {
 
 function toggleEmployerYes(root) {
     const block = root.querySelector('#block_employer_yes');
+    const val = getCheckedVal(root, 'employer_assistance');
     if (block) {
-        block.style.display = (getCheckedVal(root, 'employer_assistance') === 'yes') ? 'block' : 'none';
+        block.style.display = (val === 'yes') ? 'block' : 'none';
+    }
+    // Si la réponse est "non", décocher la case send_invoice_to_employer
+    const sendInvoiceChk = root.querySelector('#send_invoice_to_employer');
+    if (sendInvoiceChk && val !== 'yes') {
+        sendInvoiceChk.checked = false;
+        // Déclencher l'événement change pour que toggleEmployerBlock se mette à jour
+        sendInvoiceChk.dispatchEvent(new Event('change', { bubbles: true }));
     }
 }
 
 function toggleEmployerBlock(root) {
     const chk = root.querySelector('#send_invoice_to_employer');
     const block = root.querySelector('#block_employer_id');
+    const val = getCheckedVal(root, 'employer_assistance');
     if (chk && block) {
-        block.style.display = chk.checked ? 'block' : 'none';
+        block.style.display = (val === 'yes' && chk.checked) ? 'block' : 'none';
         updateConditionalRequired(root);
     }
 }
@@ -1263,6 +1267,7 @@ function attachDelegatedEvents(root) {
         }
         if (target.name === 'employer_assistance') {
             toggleEmployerYes(root);
+            toggleEmployerBlock(root); // Ajout : mise à jour du bloc employeur
         }
         if (target.id === 'send_invoice_to_employer') {
             toggleEmployerBlock(root);
