@@ -132,18 +132,20 @@
                         <page string="Finances &amp; Réductions">
                             <!-- Aide employeur -->
                             <group string="Aide employeur">
-                                <field name="employer_assistance" widget="radio"/>
+                                <field name="employer_assistance" widget="radio" options="{'horizontal': true}"/>
                                 <div invisible="employer_assistance != 'yes'">
                                     <field name="send_invoice_to_employer" widget="boolean_toggle"/>
                                     <label for="send_invoice_to_employer" string="Envoyer la facture à l'employeur"/>
                                 </div>
                                 <div invisible="employer_assistance != 'yes' or not send_invoice_to_employer">
-                                    <field name="employer_id" context="{'default_is_employer': True}" options="{'no_create': False}"/>
-                                    <field name="employer_name" invisible="1"/>
-                                    <field name="employer_street" invisible="1"/>
-                                    <field name="employer_zip" invisible="1"/>
-                                    <field name="employer_city" invisible="1"/>
-                                    <field name="employer_country_id" invisible="1"/>
+                                    <group string="Coordonnées de l'employeur">
+                                        <field name="employer_id" context="{'default_is_employer': True}" options="{'no_create': True}"/>
+                                        <field name="employer_name" readonly="1"/>
+                                        <field name="employer_street" readonly="1"/>
+                                        <field name="employer_zip" readonly="1"/>
+                                        <field name="employer_city" readonly="1"/>
+                                        <field name="employer_country_id" readonly="1"/>
+                                    </group>
                                 </div>
                             </group>
 
@@ -176,7 +178,7 @@
                                     <field name="requested_discount" />
                                     <field name="monthly_fee_after_requested" readonly="1"/>
                                     <div class="alert alert-warning" invisible="requested_discount &lt;= max_total_discount">
-                                        Le pourcentage sollicité ne doit pas dépasser la réduction maximale !
+                Le pourcentage sollicité ne doit pas dépasser la réduction maximale !
                                     </div>
                                 </group>
                             </div>
@@ -191,6 +193,8 @@
                                 </div>
                             </group>
                         </page>
+
+
 
                         <!-- ==================== Page 4 : Réduction complémentaire ==================== -->
                         <page string="Réduction complémentaire">
@@ -394,7 +398,7 @@
                             </group>
 
                             <!-- 2. Cas particuliers -->
-                            <separator string="2. Cas particuliers (exclusifs)"/>
+                            <separator string="2. Cas particuliers (réductions complémentaires ou solidarité)"/>
                             <group string="Adaptation du montant selon cas particulier">
                                 <div invisible="solidarity_request != 'yes'">
                                     <strong>Solidarité : </strong>
