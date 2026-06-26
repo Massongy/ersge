@@ -206,8 +206,6 @@
                                     <a href="/ersge_portal_ecolage/static/src/Procedure-demande-reduction-ecolage-2025-26.pdf" target="_blank">Demande de réduction d'écolage</a>
                                 </div>
 
-
-
                                 <group string="Proposition d'écolage">
                                     <field name="proposal_type" widget="radio"/>
                                     <field name="proposed_monthly_amount" invisible="proposal_type == 'cef'"/>
@@ -358,7 +356,6 @@
                             <group string="Facturation divisée">
                                 <field name="multi_billing_request" widget="radio" options="{'horizontal': true}"/>
 
-                                <!-- Style pour éviter l'écrasement des colonnes -->
                                 <style>
             .o_field_html .table-responsive .table {
                 min-width: 500px;
@@ -406,18 +403,18 @@
                                 <div invisible="not additional_reduction_request or proposal_type != 'simple'">
                                     <strong>Réduction complémentaire (proposition simple) : </strong>
                                     <field name="proposed_monthly_amount" string="Montant mensuel proposé" readonly="1"/>
-                                    <span t-if="proposal_annual_income > 0" t-attf-class="{'text-danger': proposed_income_percentage &lt; 14}">
-                Pourcentage du revenu : <field name="proposed_income_percentage" widget="percentage" readonly="1"/>
+                                    <span invisible="proposal_annual_income == 0">
+                                        Pourcentage du revenu : <field name="proposed_income_percentage" widget="percentage" readonly="1"/>
                                     </span>
                                 </div>
                                 <div invisible="not additional_reduction_request or proposal_type != 'cef'">
                                     <strong>Réduction complémentaire (CEF) : </strong>
                                     <field name="proposed_monthly_fee_cef" string="Nouveau montant CEF proposé" readonly="1"/>
-                                    <span t-if="proposal_annual_income > 0" t-attf-class="{'text-danger': proposed_income_percentage &lt; 14}">
-                Pourcentage du revenu : <field name="proposed_income_percentage" widget="percentage" readonly="1"/>
+                                    <span invisible="proposal_annual_income == 0">
+                                        Pourcentage du revenu : <field name="proposed_income_percentage" widget="percentage" readonly="1"/>
                                     </span>
                                 </div>
-                                <div invisible="solidarity_request == 'yes' and not additional_reduction_request">
+                                <div invisible="solidarity_request == 'yes' or additional_reduction_request">
                                     <span>Aucun cas particulier demandé.</span>
                                 </div>
                             </group>
@@ -436,10 +433,11 @@
                                 <field name="deposit_amount" string="Dépôt (CHF)" readonly="1"/>
                                 <field name="total_annual" string="TOTAL ANNUEL STANDARD (CHF)" readonly="1"/>
                             </group>
+
                             <!-- Déduction 2% pour paiement annuel -->
                             <div class="alert alert-success" invisible="payment_terms != 'annually' or additional_reduction_request">
                                 <strong>TOTAL ANNUEL STANDARD + DÉDUCTION 2% : </strong>
-                                <span t-esc="total_annual * 0.98"/>
+                                <field name="total_annual_with_discount" readonly="1"/>
  CHF
                             </div>
 
@@ -453,32 +451,36 @@
                                 <field name="deposit_amount" string="Dépôt (CHF)" readonly="1"/>
                                 <field name="proposed_annual_total" string="Total annuel proposé (CHF)" readonly="1" decoration-danger="proposed_income_percentage &lt; 14"/>
 
-                                <!-- Revenu annuel global : champ modifiable en mode upload, readonly en mode online -->
+                                <!-- Revenu annuel global -->
                                 <div>
                                     <strong>Revenu annuel global : </strong>
-                                    <field name="proposal_annual_income" class="oe_inline" attrs="{'readonly': [('budget_method', '=', 'online')]}"/>
+                                    <field name="proposal_annual_income" class="oe_inline"/>
  CHF
                                 </div>
 
                                 <!-- Pourcentage du revenu -->
                                 <div>
-                                    <span t-attf-class="{'text-danger': proposed_income_percentage &lt; 14}">
+                                    <span class="text-danger" invisible="proposed_income_percentage &gt;= 14">
+                                        <strong>Pourcentage du revenu : </strong>
+                                        <field name="proposed_income_percentage" readonly="1" widget="percentage" class="oe_inline"/>
+                                    </span>
+                                    <span invisible="proposed_income_percentage &lt; 14">
                                         <strong>Pourcentage du revenu : </strong>
                                         <field name="proposed_income_percentage" readonly="1" widget="percentage" class="oe_inline"/>
                                     </span>
                                 </div>
 
                                 <!-- Warning si < 14% -->
-                                <div t-if="proposed_income_percentage &lt; 14 and proposal_annual_income > 0" class="text-danger">
+                                <div class="text-danger" invisible="proposed_income_percentage &gt;= 14 or proposal_annual_income == 0">
                                     <i class="fa fa-exclamation-triangle"></i>
                                     <strong>Attention :</strong> La proposition représente moins de 14% du revenu annuel global.
-            L'expérience montre qu'un écolage représentant au moins 14% du revenu est un bon point de départ.
                                 </div>
                             </group>
+
                             <!-- Déduction 2% pour paiement annuel sur le proposé -->
                             <div class="alert alert-success" invisible="payment_terms != 'annually' or additional_reduction_request">
                                 <strong>TOTAL ANNUEL PROPOSÉ + DÉDUCTION 2% : </strong>
-                                <span t-esc="proposed_annual_total * 0.98"/>
+                                <field name="proposed_annual_with_discount" readonly="1"/>
  CHF
                             </div>
 

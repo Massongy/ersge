@@ -271,6 +271,21 @@ class DossierFamille(models.Model):
         store=True,
     )
 
+    # NOUVEAUX CHAMPS POUR LA DÉDUCTION 2%
+    total_annual_with_discount = fields.Monetary(
+        string="Total annuel avec déduction 2%",
+        compute="_compute_annual_discounts",
+        store=True,
+        currency_field="currency_id",
+    )
+
+    proposed_annual_with_discount = fields.Monetary(
+        string="Total annuel proposé avec déduction 2%",
+        compute="_compute_annual_discounts",
+        store=True,
+        currency_field="currency_id",
+    )
+
     # Aide employeur
     employer_name = fields.Char(
         related="employer_id.name", string="Nom", readonly=False, store=False
@@ -850,7 +865,7 @@ class DossierFamille(models.Model):
         'additional_reduction_request', 'proposal_type',
         'proposed_monthly_amount', 'proposed_monthly_fee_cef',
         'total_monthly_after_school', 'membership_fee_amount',
-        'deposit_amount', 'proposal_annual_income'  # Dépendance ajoutée
+        'deposit_amount', 'proposal_annual_income'
     )
     def _compute_proposed_totals(self):
         for rec in self:
@@ -871,21 +886,21 @@ class DossierFamille(models.Model):
             else:
                 rec.proposed_income_percentage = 0.0
 
-
     @api.depends('billing_recipients_data')
     def _compute_billing_recipients_html(self):
         for rec in self:
             if not rec.billing_recipients_data:
-                rec.billing_recipients_html = "<p><em>Aucun destinataire configuré</em></p>"
+                rec.billing_recipients_html = "<p class='text-muted'><em>Aucun destinataire configuré</em></p>"
                 continue
             
             html = """
-            <table class="table table-bordered table-sm">
-                <thead>
+            <div class="table-responsive">
+            <table class="table table-bordered table-sm table-striped">
+                <thead class="table-light">
                     <tr>
                         <th>Nom</th>
                         <th>Adresse</th>
-                        <th>Code postal</th>
+                        <th>NPA</th>
                         <th>Ville</th>
                         <th>Pays</th>
                         <th class="text-end">Montant (CHF)</th>
@@ -919,9 +934,19 @@ class DossierFamille(models.Model):
                     </tr>
                 </tbody>
             </table>
+            </div>
             """
             
             rec.billing_recipients_html = html
+
+    # =====================================================================
+    # MÉTHODE DE CALCUL DES DÉDUCTIONS 2% (NOUVEAU)
+    # =====================================================================
+    @api.depends('total_annual', 'proposed_annual_total')
+    def _compute_annual_discounts(self):
+        for rec in self:
+            rec.total_annual_with_discount = (rec.total_annual or 0.0) * 0.98
+            rec.proposed_annual_with_discount = (rec.proposed_annual_total or 0.0) * 0.98
 
     # =====================================================================
     # MÉTHODE DE CALCUL DU REVENU ANNUEL GLOBAL (modifiée)
