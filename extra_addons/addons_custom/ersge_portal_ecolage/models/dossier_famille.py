@@ -386,8 +386,14 @@ class DossierFamille(models.Model):
     proposed_monthly_amount = fields.Monetary(
         string="Montant mensuel proposé", currency_field="currency_id"
     )
+    
+    # === CHAMP MODIFIÉ : calcul automatique ou saisie manuelle ===
     proposal_annual_income = fields.Float(
         string="Revenu annuel global (CHF)",
+        compute='_compute_proposal_annual_income',
+        inverse='_inverse_proposal_annual_income',
+        store=True,
+        readonly=False,
         help="Revenu annuel total du ménage utilisé pour le calcul du pourcentage de l'écolage proposé."
     )
 
@@ -572,7 +578,6 @@ class DossierFamille(models.Model):
     technical_contact = fields.Html(readonly=True)
 
     # === ACCÈS PORTAIL ===
-
     acces_ids = fields.One2many(
         'ersge.dossier.acces',
         'dossier_id',
@@ -838,7 +843,7 @@ class DossierFamille(models.Model):
         'additional_reduction_request', 'proposal_type',
         'proposed_monthly_amount', 'proposed_monthly_fee_cef',
         'total_monthly_after_school', 'membership_fee_amount',
-        'deposit_amount', 'proposal_annual_income'
+        'deposit_amount', 'proposal_annual_income'  # Dépendance ajoutée
     )
     def _compute_proposed_totals(self):
         for rec in self:
@@ -858,6 +863,25 @@ class DossierFamille(models.Model):
                 rec.proposed_income_percentage = (monthly_ecolage * 12 / rec.proposal_annual_income) * 100
             else:
                 rec.proposed_income_percentage = 0.0
+
+    # =====================================================================
+    # MÉTHODE DE CALCUL DU REVENU ANNUEL GLOBAL (modifiée)
+    # =====================================================================
+    @api.depends('budget_method', 'total_revenus', 'gross_annual_income')
+    def _compute_proposal_annual_income(self):
+        for rec in self:
+            # Priorité au revenu brut annuel saisi manuellement dans la page "Réduction complémentaire"
+            if rec.gross_annual_income:
+                rec.proposal_annual_income = rec.gross_annual_income
+            # Sinon, si le budget est en ligne et que total_revenus est connu, on calcule automatiquement
+            elif rec.budget_method == 'online' and rec.total_revenus:
+                rec.proposal_annual_income = rec.total_revenus * 12
+            # Sinon, on ne modifie pas la valeur existante (permet la saisie manuelle)
+
+    def _inverse_proposal_annual_income(self):
+        # Méthode vide car le champ est déjà en lecture/écriture.
+        # L'inverse permet de stocker la valeur saisie manuellement.
+        pass
 
     # -------------------------------------------------------------------------
     # Constraints

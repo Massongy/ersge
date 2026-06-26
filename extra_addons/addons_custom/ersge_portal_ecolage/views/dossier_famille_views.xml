@@ -206,10 +206,7 @@
                                     <a href="/ersge_portal_ecolage/static/src/Procedure-demande-reduction-ecolage-2025-26.pdf" target="_blank">Demande de réduction d'écolage</a>
                                 </div>
 
-                                <group string="Situation financière">
-                                    <field name="gross_annual_income"/>
-                                    <field name="additional_reduction_income_percentage" readonly="1" widget="percentage"/>
-                                </group>
+
 
                                 <group string="Proposition d'écolage">
                                     <field name="proposal_type" widget="radio"/>
@@ -377,7 +374,7 @@
                             </group>
                         </page>
 
-                        <!-- ==================== Page 7 : Récapitulatif complet ==================== -->
+                        <!-- ==================== Page 7 : Récapitulatif ==================== -->
                         <page string="Récapitulatif">
                             <!-- 1. Montant de base & réductions standard -->
                             <group string="1. Montant de base &amp; réductions standard">
@@ -398,14 +395,14 @@
                                     <strong>Réduction complémentaire (proposition simple) : </strong>
                                     <field name="proposed_monthly_amount" string="Montant mensuel proposé" readonly="1"/>
                                     <span t-if="proposal_annual_income > 0" t-attf-class="{'text-danger': proposed_income_percentage &lt; 14}">
-                                        Pourcentage du revenu : <field name="proposed_income_percentage" widget="percentage" readonly="1"/>
+                Pourcentage du revenu : <field name="proposed_income_percentage" widget="percentage" readonly="1"/>
                                     </span>
                                 </div>
                                 <div invisible="not additional_reduction_request or proposal_type != 'cef'">
                                     <strong>Réduction complémentaire (CEF) : </strong>
                                     <field name="proposed_monthly_fee_cef" string="Nouveau montant CEF proposé" readonly="1"/>
                                     <span t-if="proposal_annual_income > 0" t-attf-class="{'text-danger': proposed_income_percentage &lt; 14}">
-                                        Pourcentage du revenu : <field name="proposed_income_percentage" widget="percentage" readonly="1"/>
+                Pourcentage du revenu : <field name="proposed_income_percentage" widget="percentage" readonly="1"/>
                                     </span>
                                 </div>
                                 <div invisible="solidarity_request == 'yes' and not additional_reduction_request">
@@ -444,19 +441,18 @@
                                 <field name="deposit_amount" string="Dépôt (CHF)" readonly="1"/>
                                 <field name="proposed_annual_total" string="Total annuel proposé (CHF)" readonly="1" decoration-danger="proposed_income_percentage &lt; 14"/>
 
-                                <!-- Revenu annuel global (affiché avec t-esc) -->
+                                <!-- Revenu annuel global : champ modifiable en mode upload, readonly en mode online -->
                                 <div>
                                     <strong>Revenu annuel global : </strong>
-                                    <span t-esc="proposal_annual_income"/>
+                                    <field name="proposal_annual_income" class="oe_inline" attrs="{'readonly': [('budget_method', '=', 'online')]}"/>
  CHF
                                 </div>
 
-                                <!-- Pourcentage du revenu (affiché avec t-esc) -->
+                                <!-- Pourcentage du revenu -->
                                 <div>
                                     <span t-attf-class="{'text-danger': proposed_income_percentage &lt; 14}">
                                         <strong>Pourcentage du revenu : </strong>
-                                        <span t-esc="proposed_income_percentage"/>
-%
+                                        <field name="proposed_income_percentage" readonly="1" widget="percentage" class="oe_inline"/>
                                     </span>
                                 </div>
 
@@ -464,7 +460,7 @@
                                 <div t-if="proposed_income_percentage &lt; 14 and proposal_annual_income > 0" class="text-danger">
                                     <i class="fa fa-exclamation-triangle"></i>
                                     <strong>Attention :</strong> La proposition représente moins de 14% du revenu annuel global.
-                                    L'expérience montre qu'un écolage représentant au moins 14% du revenu est un bon point de départ.
+            L'expérience montre qu'un écolage représentant au moins 14% du revenu est un bon point de départ.
                                 </div>
                             </group>
                             <!-- Déduction 2% pour paiement annuel sur le proposé -->
