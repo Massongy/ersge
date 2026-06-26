@@ -577,6 +577,13 @@ class DossierFamille(models.Model):
     legal_notice = fields.Html(readonly=True)
     technical_contact = fields.Html(readonly=True)
 
+    billing_recipients_html = fields.Html(
+        string="Destinataires de facturation",
+        compute="_compute_billing_recipients_html",
+        store=False,
+        sanitize=False,
+    )
+
     # === ACCÈS PORTAIL ===
     acces_ids = fields.One2many(
         'ersge.dossier.acces',
@@ -863,6 +870,58 @@ class DossierFamille(models.Model):
                 rec.proposed_income_percentage = (monthly_ecolage * 12 / rec.proposal_annual_income) * 100
             else:
                 rec.proposed_income_percentage = 0.0
+
+
+    @api.depends('billing_recipients_data')
+    def _compute_billing_recipients_html(self):
+        for rec in self:
+            if not rec.billing_recipients_data:
+                rec.billing_recipients_html = "<p><em>Aucun destinataire configuré</em></p>"
+                continue
+            
+            html = """
+            <table class="table table-bordered table-sm">
+                <thead>
+                    <tr>
+                        <th>Nom</th>
+                        <th>Adresse</th>
+                        <th>Code postal</th>
+                        <th>Ville</th>
+                        <th>Pays</th>
+                        <th class="text-end">Montant (CHF)</th>
+                    </tr>
+                </thead>
+                <tbody>
+            """
+            
+            for recipient in rec.billing_recipients_data:
+                country_name = ""
+                if recipient.get('country_id'):
+                    country = self.env['res.country'].browse(recipient['country_id'])
+                    country_name = country.name if country.exists() else ""
+                
+                html += f"""
+                    <tr>
+                        <td>{recipient.get('name', '')}</td>
+                        <td>{recipient.get('street', '')}</td>
+                        <td>{recipient.get('zip', '')}</td>
+                        <td>{recipient.get('city', '')}</td>
+                        <td>{country_name}</td>
+                        <td class="text-end">{recipient.get('amount', 0):.2f}</td>
+                    </tr>
+                """
+            
+            total = sum(recipient.get('amount', 0) for recipient in rec.billing_recipients_data)
+            html += f"""
+                    <tr class="table-success">
+                        <td colspan="5"><strong>Total</strong></td>
+                        <td class="text-end"><strong>{total:.2f}</strong></td>
+                    </tr>
+                </tbody>
+            </table>
+            """
+            
+            rec.billing_recipients_html = html
 
     # =====================================================================
     # MÉTHODE DE CALCUL DU REVENU ANNUEL GLOBAL (modifiée)

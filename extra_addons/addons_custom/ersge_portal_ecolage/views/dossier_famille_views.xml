@@ -357,8 +357,20 @@
 
                             <group string="Facturation divisée">
                                 <field name="multi_billing_request" widget="radio" options="{'horizontal': true}"/>
-                                <!-- Affichage lisible du JSON en lecture seule -->
-                                <field name="billing_recipients_data" widget="json" readonly="1" nolabel="1"/>
+
+                                <!-- Style pour éviter l'écrasement des colonnes -->
+                                <style>
+            .o_field_html .table-responsive .table {
+                min-width: 500px;
+            }
+            .o_field_html .table-responsive .table th,
+            .o_field_html .table-responsive .table td {
+                white-space: nowrap;
+                padding: 4px 10px;
+            }
+                                </style>
+
+                                <field name="billing_recipients_html" readonly="1" nolabel="1"/>
                             </group>
 
                             <group string="Mode de paiement">
