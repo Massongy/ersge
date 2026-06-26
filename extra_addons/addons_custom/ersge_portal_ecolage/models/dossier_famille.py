@@ -194,7 +194,7 @@ class DossierFamille(models.Model):
         readonly=False,
         store=True,
     )
-    
+
     # === AUTRE REPRÉSENTANT LÉGAL (Tuteur, curateur, etc.) ===
     other_firstname = fields.Char(string="Prénom autre représentant")
     other_lastname = fields.Char(string="Nom autre représentant")
@@ -401,7 +401,7 @@ class DossierFamille(models.Model):
     proposed_monthly_amount = fields.Monetary(
         string="Montant mensuel proposé", currency_field="currency_id"
     )
-    
+
     # === CHAMP MODIFIÉ : calcul automatique ou saisie manuelle ===
     proposal_annual_income = fields.Float(
         string="Revenu annuel global (CHF)",
@@ -566,7 +566,7 @@ class DossierFamille(models.Model):
         store=True,
     )
 
-    # Solidarité 
+    # Solidarité
     apply_solidarity_increase = fields.Boolean(string="Appliquer augmentation solidaire", default=False)
     solidarity_total_amount = fields.Monetary(string="Montant total avec solidarité", compute="_compute_solidarity_total", store=True, currency_field="currency_id")
 
@@ -892,7 +892,7 @@ class DossierFamille(models.Model):
             if not rec.billing_recipients_data:
                 rec.billing_recipients_html = "<p class='text-muted'><em>Aucun destinataire configuré</em></p>"
                 continue
-            
+
             html = """
             <div class="table-responsive">
             <table class="table table-bordered table-sm table-striped">
@@ -908,13 +908,13 @@ class DossierFamille(models.Model):
                 </thead>
                 <tbody>
             """
-            
+
             for recipient in rec.billing_recipients_data:
                 country_name = ""
                 if recipient.get('country_id'):
                     country = self.env['res.country'].browse(recipient['country_id'])
                     country_name = country.name if country.exists() else ""
-                
+
                 html += f"""
                     <tr>
                         <td>{recipient.get('name', '')}</td>
@@ -925,7 +925,7 @@ class DossierFamille(models.Model):
                         <td class="text-end">{recipient.get('amount', 0):.2f}</td>
                     </tr>
                 """
-            
+
             total = sum(recipient.get('amount', 0) for recipient in rec.billing_recipients_data)
             html += f"""
                     <tr class="table-success">
@@ -936,11 +936,11 @@ class DossierFamille(models.Model):
             </table>
             </div>
             """
-            
+
             rec.billing_recipients_html = html
 
     # =====================================================================
-    # MÉTHODE DE CALCUL DES DÉDUCTIONS 2% (NOUVEAU)
+    # MÉTHODE DE CALCUL DES DÉDUCTIONS 2%
     # =====================================================================
     @api.depends('total_annual', 'proposed_annual_total')
     def _compute_annual_discounts(self):
@@ -949,7 +949,7 @@ class DossierFamille(models.Model):
             rec.proposed_annual_with_discount = (rec.proposed_annual_total or 0.0) * 0.98
 
     # =====================================================================
-    # MÉTHODE DE CALCUL DU REVENU ANNUEL GLOBAL (modifiée)
+    # MÉTHODE DE CALCUL DU REVENU ANNUEL GLOBAL
     # =====================================================================
     @api.depends('budget_method', 'total_revenus', 'gross_annual_income')
     def _compute_proposal_annual_income(self):
@@ -966,6 +966,122 @@ class DossierFamille(models.Model):
         # Méthode vide car le champ est déjà en lecture/écriture.
         # L'inverse permet de stocker la valeur saisie manuellement.
         pass
+
+    # =====================================================================
+    # ONCHANGE POUR LE BACKEND - Nettoie les champs quand on décoche
+    # =====================================================================
+    @api.onchange('additional_reduction_request')
+    def _onchange_additional_reduction_request(self):
+        if not self.additional_reduction_request:
+            # Réinitialiser tous les champs de réduction complémentaire
+            self.proposed_monthly_amount = 0.0
+            self.proposed_monthly_fee_cef = 0.0
+            self.proposal_type = 'simple'
+            self.proposal_annual_income = 0.0
+            self.previous_cef_agreement = False
+            self.previous_monthly_fee = 0.0
+
+    @api.onchange('solidarity_request')
+    def _onchange_solidarity_request(self):
+        if self.solidarity_request != 'yes':
+            # Réinitialiser les champs de solidarité
+            self.apply_solidarity_increase = False
+            self.solidarity_percentage = 0.0
+            self.solidarity_total_amount = 0.0
+
+    @api.onchange('proposal_type')
+    def _onchange_proposal_type(self):
+        if self.proposal_type == 'simple':
+            self.proposed_monthly_fee_cef = 0.0
+            self.previous_cef_agreement = False
+            self.previous_monthly_fee = 0.0
+        elif self.proposal_type == 'cef':
+            self.proposed_monthly_amount = 0.0
+
+    @api.onchange("employer_assistance")
+    def _onchange_employer_assistance(self):
+        if self.employer_assistance == "no":
+            self.send_invoice_to_employer = False
+            self.employer_id = False
+
+    @api.onchange("after_school_request")
+    def _onchange_after_school_request(self):
+        if self.after_school_request == "yes" and not self.after_school_line_ids:
+            students = self.env["ersge.student"].search(
+                [("family_id", "=", self.family_id.id)]
+            )
+            lines = [
+                (
+                    0,
+                    0,
+                    {
+                        "student_id": student.id,
+                        "selected": False,
+                        "accueil_type": "jardin",
+                    },
+                )
+                for student in students
+            ]
+            if lines:
+                self.after_school_line_ids = lines
+        elif self.after_school_request == "no":
+            self.after_school_line_ids = [(5, 0, 0)]
+
+    # =====================================================================
+    # SURCHARGE DE write POUR RÉINITIALISER LES CHAMPS
+    # =====================================================================
+    def write(self, vals):
+        """
+        IMPORTANT : on ne se fie plus uniquement à la présence des clés dans
+        `vals`. Le client (formulaire backend) n'envoie dans `vals` que les
+        champs dont la valeur a changé par rapport à l'état chargé en mémoire.
+        Si l'onchange a déjà "nettoyé" les champs côté client avant l'envoi,
+        ou si pour toute autre raison le diff envoyé ne contient pas la clé
+        'additional_reduction_request' / 'solidarity_request', l'ancienne
+        version de cette méthode ne déclenchait jamais le nettoyage en base.
+
+        On effectue donc le write normal d'abord, puis on vérifie l'état RÉEL
+        du record après écriture, et on nettoie si nécessaire. Une garde de
+        contexte évite la récursion infinie.
+        """
+        res = super().write(vals)
+
+        if self.env.context.get('skip_dossier_clean'):
+            return res
+
+        for rec in self.with_context(skip_dossier_clean=True):
+            clean_vals = {}
+
+            # --- Nettoyage réduction complémentaire ---
+            if not rec.additional_reduction_request:
+                if rec.proposed_monthly_amount:
+                    clean_vals['proposed_monthly_amount'] = 0.0
+                if rec.proposed_monthly_fee_cef:
+                    clean_vals['proposed_monthly_fee_cef'] = 0.0
+                if rec.proposal_type != 'simple':
+                    clean_vals['proposal_type'] = 'simple'
+                if rec.proposal_annual_income:
+                    clean_vals['proposal_annual_income'] = 0.0
+                if rec.previous_cef_agreement:
+                    clean_vals['previous_cef_agreement'] = False
+                if rec.previous_monthly_fee:
+                    clean_vals['previous_monthly_fee'] = 0.0
+
+            # --- Nettoyage solidarité ---
+            if rec.solidarity_request != 'yes':
+                if rec.apply_solidarity_increase:
+                    clean_vals['apply_solidarity_increase'] = False
+                if rec.solidarity_percentage:
+                    clean_vals['solidarity_percentage'] = 0.0
+                # solidarity_total_amount est un compute(store=True) : il se
+                # recalculera automatiquement via _compute_solidarity_total
+                # dès que apply_solidarity_increase / solidarity_percentage
+                # changent. Pas besoin (et pas correct) de l'écrire ici.
+
+            if clean_vals:
+                rec.write(clean_vals)
+
+        return res
 
     # -------------------------------------------------------------------------
     # Constraints
@@ -1344,40 +1460,7 @@ class DossierFamille(models.Model):
                         f"create(): {len(lines)} lignes parascolaires créées"
                     )
 
-        return records    
-
-    # -------------------------------------------------------------------------
-    # Onchange methods
-    # -------------------------------------------------------------------------
-
-    @api.onchange("employer_assistance")
-    def _onchange_employer_assistance(self):
-        if self.employer_assistance == "no":
-            self.send_invoice_to_employer = False
-            self.employer_id = False
-
-    @api.onchange("after_school_request")
-    def _onchange_after_school_request(self):
-        if self.after_school_request == "yes" and not self.after_school_line_ids:
-            students = self.env["ersge.student"].search(
-                [("family_id", "=", self.family_id.id)]
-            )
-            lines = [
-                (
-                    0,
-                    0,
-                    {
-                        "student_id": student.id,
-                        "selected": False,
-                        "accueil_type": "jardin",
-                    },
-                )
-                for student in students
-            ]
-            if lines:
-                self.after_school_line_ids = lines
-        elif self.after_school_request == "no":
-            self.after_school_line_ids = [(5, 0, 0)]
+        return records
 
     # -------------------------------------------------------------------------
     # Workflow actions
@@ -1429,17 +1512,6 @@ class DossierFamille(models.Model):
             for cat in categories
         ]
         self.write({"budget_line_ids": vals})
-
-    def write(self, vals):
-        if "budget_method" in vals:
-            _logger.warning(
-                f"[WRITE] budget_method = {vals['budget_method']} pour dossiers {self.ids}"
-            )
-        result = super().write(vals)
-        if vals.get("budget_method") == "online":
-            for record in self:
-                record._init_budget_lines()
-        return result
 
     def web_read(self, specification):
         for record in self:

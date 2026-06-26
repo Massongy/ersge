@@ -139,7 +139,7 @@
                                 </div>
                                 <div invisible="employer_assistance != 'yes' or not send_invoice_to_employer">
                                     <group string="Coordonnées de l'employeur">
-                                        <field name="employer_id" context="{'default_is_employer': True}" options="{'no_create': True}"/>
+                                        <field name="employer_id" context="{'default_is_employer': True}" options="{'no_create': False, 'create_edit': True}"/>
                                         <field name="employer_name" readonly="1"/>
                                         <field name="employer_street" readonly="1"/>
                                         <field name="employer_zip" readonly="1"/>
@@ -178,7 +178,7 @@
                                     <field name="requested_discount" />
                                     <field name="monthly_fee_after_requested" readonly="1"/>
                                     <div class="alert alert-warning" invisible="requested_discount &lt;= max_total_discount">
-                Le pourcentage sollicité ne doit pas dépasser la réduction maximale !
+                                        Le pourcentage sollicité ne doit pas dépasser la réduction maximale !
                                     </div>
                                 </group>
                             </div>
@@ -193,8 +193,6 @@
                                 </div>
                             </group>
                         </page>
-
-
 
                         <!-- ==================== Page 4 : Réduction complémentaire ==================== -->
                         <page string="Réduction complémentaire">
@@ -398,7 +396,7 @@
                             </group>
 
                             <!-- 2. Cas particuliers -->
-                            <separator string="2. Cas particuliers (réductions complémentaires ou solidarité)"/>
+                            <separator string="2. Cas particuliers (réduction complémentaire ou solidarité)"/>
                             <group string="Adaptation du montant selon cas particulier">
                                 <div invisible="solidarity_request != 'yes'">
                                     <strong>Solidarité : </strong>
@@ -446,46 +444,48 @@
                             </div>
 
                             <!-- 4. TARIF PROPOSÉ (montant proposé par la famille) -->
-                            <separator string="4. TARIF PROPOSÉ (montant proposé par la famille)"/>
-                            <group string="Mensuel">
-                                <field name="proposed_monthly_total" string="Total mensuel proposé (CHF)" readonly="1"/>
-                            </group>
-                            <group string="Annuel">
-                                <field name="membership_fee_amount" string="Cotisation annuelle (CHF)" readonly="1"/>
-                                <field name="deposit_amount" string="Dépôt (CHF)" readonly="1"/>
-                                <field name="proposed_annual_total" string="Total annuel proposé (CHF)" readonly="1" decoration-danger="proposed_income_percentage &lt; 14"/>
+                            <div invisible="solidarity_request != 'yes' and not additional_reduction_request">
+                                <separator string="4. TARIF PROPOSÉ (montant proposé par la famille)"/>
+                                <group string="Mensuel">
+                                    <field name="proposed_monthly_total" string="Total mensuel proposé (CHF)" readonly="1"/>
+                                </group>
+                                <group string="Annuel">
+                                    <field name="membership_fee_amount" string="Cotisation annuelle (CHF)" readonly="1"/>
+                                    <field name="deposit_amount" string="Dépôt (CHF)" readonly="1"/>
+                                    <field name="proposed_annual_total" string="Total annuel proposé (CHF)" readonly="1" decoration-danger="proposed_income_percentage &lt; 14"/>
 
-                                <!-- Revenu annuel global -->
-                                <div>
-                                    <strong>Revenu annuel global : </strong>
-                                    <field name="proposal_annual_income" class="oe_inline"/>
+                                    <!-- Revenu annuel global -->
+                                    <div>
+                                        <strong>Revenu annuel global : </strong>
+                                        <field name="proposal_annual_income" class="oe_inline"/>
+ CHF
+                                    </div>
+
+                                    <!-- Pourcentage du revenu -->
+                                    <div>
+                                        <span class="text-danger" invisible="proposed_income_percentage &gt;= 14">
+                                            <strong>Pourcentage du revenu : </strong>
+                                            <field name="proposed_income_percentage" readonly="1" widget="percentage" class="oe_inline"/>
+                                        </span>
+                                        <span invisible="proposed_income_percentage &lt; 14">
+                                            <strong>Pourcentage du revenu : </strong>
+                                            <field name="proposed_income_percentage" readonly="1" widget="percentage" class="oe_inline"/>
+                                        </span>
+                                    </div>
+
+                                    <!-- Warning si < 14% -->
+                                    <div class="text-danger" invisible="proposed_income_percentage &gt;= 14 or proposal_annual_income == 0">
+                                        <i class="fa fa-exclamation-triangle"></i>
+                                        <strong>Attention :</strong> La proposition représente moins de 14% du revenu annuel global.
+                                    </div>
+                                </group>
+
+                                <!-- Déduction 2% pour paiement annuel sur le proposé -->
+                                <div class="alert alert-success" invisible="payment_terms != 'annually' or additional_reduction_request">
+                                    <strong>TOTAL ANNUEL PROPOSÉ + DÉDUCTION 2% : </strong>
+                                    <field name="proposed_annual_with_discount" readonly="1"/>
  CHF
                                 </div>
-
-                                <!-- Pourcentage du revenu -->
-                                <div>
-                                    <span class="text-danger" invisible="proposed_income_percentage &gt;= 14">
-                                        <strong>Pourcentage du revenu : </strong>
-                                        <field name="proposed_income_percentage" readonly="1" widget="percentage" class="oe_inline"/>
-                                    </span>
-                                    <span invisible="proposed_income_percentage &lt; 14">
-                                        <strong>Pourcentage du revenu : </strong>
-                                        <field name="proposed_income_percentage" readonly="1" widget="percentage" class="oe_inline"/>
-                                    </span>
-                                </div>
-
-                                <!-- Warning si < 14% -->
-                                <div class="text-danger" invisible="proposed_income_percentage &gt;= 14 or proposal_annual_income == 0">
-                                    <i class="fa fa-exclamation-triangle"></i>
-                                    <strong>Attention :</strong> La proposition représente moins de 14% du revenu annuel global.
-                                </div>
-                            </group>
-
-                            <!-- Déduction 2% pour paiement annuel sur le proposé -->
-                            <div class="alert alert-success" invisible="payment_terms != 'annually' or additional_reduction_request">
-                                <strong>TOTAL ANNUEL PROPOSÉ + DÉDUCTION 2% : </strong>
-                                <field name="proposed_annual_with_discount" readonly="1"/>
- CHF
                             </div>
 
                             <!-- 5. Conditions générales -->
@@ -504,6 +504,20 @@
                         </page>
 
                     </notebook>
+
+                    <!-- ============================================================ -->
+                    <!-- CHAMPS CACHÉS POUR LA RÉINITIALISATION OBLIGATOIRES -->
+                    <!-- ============================================================ -->
+                    <field name="proposed_monthly_amount" invisible="1"/>
+                    <field name="proposed_monthly_fee_cef" invisible="1"/>
+                    <field name="proposal_type" invisible="1"/>
+                    <field name="proposal_annual_income" invisible="1"/>
+                    <field name="previous_cef_agreement" invisible="1"/>
+                    <field name="previous_monthly_fee" invisible="1"/>
+                    <field name="apply_solidarity_increase" invisible="1"/>
+                    <field name="solidarity_percentage" invisible="1"/>
+                    <field name="solidarity_total_amount" invisible="1"/>
+
                 </sheet>
             </form>
         </field>
