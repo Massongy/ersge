@@ -139,6 +139,52 @@ class PortalEcolage(http.Controller):
             'csrf_token': request.csrf_token(),
         })
 
+    # ==================== CRÉATION D'UNE FAMILLE (AJOUT) ====================
+
+    @http.route('/my/ecolage/family/create', type='http', auth='user', website=True, methods=['POST'])
+    def create_family(self, **kwargs):
+        partner = request.env.user.partner_id
+        name = kwargs.get('name', '').strip()
+        is_teacher = kwargs.get('is_teacher') == '1'  # ← Récupération du champ
+
+        if not name:
+            return request.render('ersge_portal_ecolage.portal_famille_create', {
+                'error': 'Le nom de la famille est obligatoire.',
+                'csrf_token': request.csrf_token(),
+            })
+
+        # Vérifier si la famille existe déjà
+        existing = request.env['ersge.family'].sudo().search([('name', '=', name)], limit=1)
+        if existing:
+            return request.render('ersge_portal_ecolage.portal_famille_create', {
+                'error': 'Une famille avec ce nom existe déjà.',
+                'csrf_token': request.csrf_token(),
+            })
+
+        # Création de la famille
+        family = request.env['ersge.family'].sudo().create({
+            'name': name,
+            'is_teacher': is_teacher,  # ← Ajout du champ
+            'partner_ids': [(4, partner.id)],
+        })
+
+        # Récupérer le rôle
+        role = kwargs.get('my_role', 'parent1')
+        if role not in ['parent1', 'parent2', 'tutor']:
+            role = 'parent1'
+
+        # Créer un dossier pour cette famille
+        dossier = request.env['ersge.dossier.famille'].sudo().with_context(
+            default_family_id=family.id
+        ).create({
+            'annee_scolaire': request.env['ersge.dossier.famille']._get_current_school_year(),
+            'state': 'incomplet',
+            'family_id': family.id,
+        })
+        dossier.add_acces(partner, role=role)
+
+        return request.redirect(f'/my/ecolage/{dossier.id}/acces?just_created=1')
+
     # ==================== ANCIENNES ROUTES ====================
 
     @http.route('/my/ecolage/new', type='http', auth='user', website=True)
@@ -195,7 +241,8 @@ class PortalEcolage(http.Controller):
 
     def _add_partner_to_family(self, partner, dossier):
         family = dossier.family_id
-        if family and partner not in family.partner_ids:
+        if family:
+            # Ajouter le partenaire même s'il est déjà présent (évite les doublons)
             family.write({'partner_ids': [(4, partner.id)]})
 
     @http.route('/my/ecolage/join/<string:token>', type='http', auth='public', website=True)
