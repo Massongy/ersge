@@ -31,6 +31,15 @@ class DossierFamille(models.Model):
         "ersge.family", string="Famille", required=False, ondelete="restrict"
     )
 
+    # === FAMILLE ENSEIGNANTE (related vers ersge.family) ===
+    is_teacher_family = fields.Boolean(
+        string="Famille enseignante",
+        related="family_id.is_teacher",
+        readonly=False,
+        store=True,
+        help="La famille est-elle composée d'enseignants de l'école ?"
+    )
+
     # === PREFILL ===
     prefilled_from_previous = fields.Boolean(default=False)
     prefilled_info = fields.Html(
@@ -57,9 +66,9 @@ class DossierFamille(models.Model):
     # === REPRÉSENTATION LÉGALE ===
     legal_representation = fields.Selection(
         [
-            ("both", "Père et Mère ayant la pleine autorité parentale"),
-            ("mother_only", "Mère ayant seule la pleine autorité parentale"),
-            ("father_only", "Père ayant seul la pleine autorité parentale"),
+            ("both", "Parent 1 et Parent 2 ayant la pleine autorité parentale"),
+            ("father_only", "Parent 1 ayant seul la pleine autorité parentale"),   # Parent 1 d'abord
+            ("mother_only", "Parent 2 ayant seule la pleine autorité parentale"),  # Parent 2 ensuite
             ("other", "Autre"),
         ],
         string="Représentation légale",
@@ -1026,6 +1035,11 @@ class DossierFamille(models.Model):
                 self.after_school_line_ids = lines
         elif self.after_school_request == "no":
             self.after_school_line_ids = [(5, 0, 0)]
+            
+    @api.onchange('legal_representation')
+    def _onchange_legal_representation(self):
+        """Force le rafraîchissement de l'interface backend quand on change la représentation légale"""
+        pass
 
     # =====================================================================
     # SURCHARGE DE write POUR RÉINITIALISER LES CHAMPS

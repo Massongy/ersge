@@ -17,6 +17,7 @@
                         <field name="name"/>
                         <field name="annee_scolaire"/>
                         <field name="family_id" options="{'no_create': True, 'no_create_edit': True}" readonly="1"/>
+                        <field name="is_teacher_family" widget="boolean_toggle"/>
                         <field name="date_soumission"/>
                         <field name="state" widget="badge"/>
                     </group>
@@ -41,8 +42,8 @@
  CHF
                             </div>
 
-                            <!-- Parent 1 -->
-                            <group string="Parent 1 (ou représentant principal)" invisible="legal_representation == 'other'">
+                            <!-- Parent 1 - caché si Mère seule OU Autre -->
+                            <group string="Parent 1" invisible="legal_representation == 'mother_only' or legal_representation == 'other'">
                                 <field name="parent1_firstname" />
                                 <field name="parent1_lastname" />
                                 <field name="parent1_email" widget="email" />
@@ -57,7 +58,7 @@
                                 <field name="parent1_employeur"/>
                             </group>
 
-                            <!-- Parent 2 -->
+                            <!-- Parent 2 - caché si Père seul OU Autre -->
                             <group string="Parent 2" invisible="legal_representation == 'father_only' or legal_representation == 'other'">
                                 <field name="parent2_firstname" />
                                 <field name="parent2_lastname" />
@@ -74,7 +75,7 @@
                                 <field name="parent2_employeur"/>
                             </group>
 
-                            <!-- Autre représentant -->
+                            <!-- Autre représentant - affiché seulement si Autre -->
                             <group string="Autre représentant légal" invisible="legal_representation != 'other'">
                                 <field name="other_firstname"/>
                                 <field name="other_lastname"/>
@@ -91,10 +92,10 @@
                             </group>
 
                             <!-- Dépôt -->
-                            <group string="Dépôt">
-                                <div class="alert alert-info">Toute nouvelle famille doit verser un dépôt de 1000 CHF</div>
-                                <field name="deposit_status" widget="radio"/>
-                                <field name="deposit_amount" readonly="1"/>
+                            <group string="Dépôt" class="mt-4">
+                                <div class="alert alert-info col-12">Toute nouvelle famille doit verser un dépôt de 1000 CHF</div>
+                                <field name="deposit_status" widget="radio" class="col-12"/>
+                                <field name="deposit_amount" readonly="1" class="col-12"/>
                             </group>
 
                             <!-- Familles liées (recomposition) -->
@@ -111,8 +112,8 @@
                                     <list editable="bottom" create="1" delete="1">
                                         <field name="student_id" string="Élève" domain="[('family_id', '=', parent.family_id)]" options="{'no_create': False, 'no_create_edit': False, 'always_reload': True}" context="{'form_view_ref': 'ersge_portal_ecolage.view_ersge_student_form', 'default_family_id': parent.family_id}"/>
                                         <field name="sexe" />
-                                        <field name="image_rights" widget="boolean_toggle"/>
-                                        <field name="forfait_id" options="{'no_create': True}"/>
+                                        <field name="image_rights" widget="boolean_favorite"/>
+                                        <field name="forfait_id" options="{'no_create': True}" domain="[('active', '=', True)]"/>
                                         <field name="forfait_montant_mensuel" readonly="1"/>
                                     </list>
                                 </field>
@@ -156,7 +157,7 @@
                             </group>
 
                             <div invisible="not reduction_requested">
-                                <group string="Réduction nombre d'enfants">
+                                <group string="Réduction nombre d'enfants" class="mt-3">
                                     <field name="actual_children_count" readonly="1"/>
                                     <field name="max_children_discount" readonly="1"/>
                                     <field name="apply_children_discount" widget="boolean_toggle"/>
@@ -164,7 +165,7 @@
                                     <field name="monthly_fee_after_children" readonly="1" invisible="not apply_children_discount"/>
                                 </group>
 
-                                <group string="Réduction ancienneté">
+                                <group string="Réduction ancienneté" class="mt-3">
                                     <field name="seniority_years" widget="radio"/>
                                     <field name="max_seniority_discount" readonly="1"/>
                                     <field name="apply_seniority_discount" widget="boolean_toggle"/>
@@ -172,7 +173,7 @@
                                     <field name="monthly_fee_after_seniority" readonly="1" invisible="not apply_seniority_discount"/>
                                 </group>
 
-                                <group string="Ajustement de la réduction">
+                                <group string="Ajustement de la réduction" class="mt-3">
                                     <field name="max_total_discount" readonly="1"/>
                                     <field name="monthly_fee_at_max" readonly="1"/>
                                     <field name="requested_discount" />
@@ -187,6 +188,11 @@
                             <group string="Solidarité">
                                 <field name="solidarity_request" widget="radio" options="{'horizontal': true}"/>
                                 <div invisible="solidarity_request != 'yes'">
+                                    <div class="alert alert-info">
+                                        <i class="fa fa-info-circle"></i>
+                                        La solidarité permet d'augmenter volontairement votre contribution pour soutenir les familles en difficulté.
+                                        Indiquez le pourcentage d'augmentation que vous souhaitez appliquer à votre écolage de base.
+                                    </div>
                                     <field name="apply_solidarity_increase" widget="boolean_toggle"/>
                                     <field name="solidarity_percentage" invisible="not apply_solidarity_increase"/>
                                     <field name="solidarity_total_amount" readonly="1"/>
@@ -196,30 +202,38 @@
 
                         <!-- ==================== Page 4 : Réduction complémentaire ==================== -->
                         <page string="Réduction complémentaire">
-                            <group>
+                            <div class="alert alert-warning" invisible="solidarity_request != 'yes'">
+                                <i class="fa fa-exclamation-triangle"></i>
+                                <strong>Attention :</strong> La demande de réduction complémentaire n'est pas disponible lorsque la solidarité est activée.
+                            </div>
+
+                            <group invisible="solidarity_request == 'yes'">
                                 <field name="additional_reduction_request" widget="boolean_toggle"/>
                                 <label for="additional_reduction_request" string="Demander une réduction complémentaire"/>
                             </group>
 
-                            <div invisible="not additional_reduction_request">
+                            <div invisible="not additional_reduction_request or solidarity_request == 'yes'">
                                 <div class="alert alert-info">
                                     <i class="fa fa-info-circle"></i>
                                     Merci de prendre impérativement connaissance de ce document :
                                     <a href="/ersge_portal_ecolage/static/src/Procedure-demande-reduction-ecolage-2025-26.pdf" target="_blank">Demande de réduction d'écolage</a>
                                 </div>
 
+                                <group string="Accord CEF année précédente">
+                                    <field name="previous_cef_agreement" widget="boolean_toggle"/>
+                                    <field name="previous_monthly_fee" invisible="not previous_cef_agreement"/>
+                                </group>
+
                                 <group string="Proposition d'écolage">
                                     <field name="proposal_type" widget="radio"/>
                                     <field name="proposed_monthly_amount" invisible="proposal_type == 'cef'"/>
                                     <field name="proposal_annual_income" invisible="proposal_type == 'cef'"/>
-                                    <field name="previous_monthly_fee" invisible="proposal_type != 'cef'"/>
                                     <field name="proposed_monthly_fee_cef" invisible="proposal_type != 'cef'"/>
-                                    <field name="previous_cef_agreement" invisible="proposal_type != 'cef'"/>
                                 </group>
 
                                 <group string="Justificatifs">
-                                    <field name="tax_notice_attachment" filename="tax_notice_filename" help="Dernier avis de taxation (PDF, max 4MB)" nolabel="1"/>
-                                    <field name="payslip_ids" widget="many2many_binary" help="Trois dernières fiches de salaire (max 8MB)" nolabel="1"/>
+                                    <field name="tax_notice_attachment" filename="tax_notice_filename" help="Téléchargez votre dernier avis de taxation officiel (PDF, max 4MB)" nolabel="1"/>
+                                    <field name="payslip_ids" widget="many2many_binary" help="Téléchargez vos trois dernières fiches de salaire (PDF, max 8MB)" nolabel="1"/>
                                 </group>
 
                                 <group string="Lettre explicative">
@@ -240,6 +254,7 @@
                                     <field name="budget_line_ids" nolabel="1" invisible="budget_method != 'online'">
                                         <list editable="bottom" create="false" delete="false">
                                             <field name="category_id" string="Catégorie" readonly="1"/>
+                                            <field name="type" string="Type" readonly="1"/>
                                             <field name="montant_madame" string="Madame" widget="monetary"/>
                                             <field name="montant_monsieur" string="Monsieur" widget="monetary"/>
                                         </list>
@@ -358,18 +373,9 @@
                             <group string="Facturation divisée">
                                 <field name="multi_billing_request" widget="radio" options="{'horizontal': true}"/>
 
-                                <style>
-            .o_field_html .table-responsive .table {
-                min-width: 500px;
-            }
-            .o_field_html .table-responsive .table th,
-            .o_field_html .table-responsive .table td {
-                white-space: nowrap;
-                padding: 4px 10px;
-            }
-                                </style>
-
-                                <field name="billing_recipients_html" readonly="1" nolabel="1"/>
+                                <div invisible="not multi_billing_request">
+                                    <field name="billing_recipients_html" readonly="1" nolabel="1"/>
+                                </div>
                             </group>
 
                             <group string="Mode de paiement">
@@ -395,57 +401,9 @@
                                 <field name="monthly_fee_after_requested" string="Total après réductions standard" readonly="1"/>
                             </group>
 
-                            <!-- 2. Cas particuliers -->
-                            <separator string="2. Cas particuliers (réduction complémentaire ou solidarité)"/>
-                            <group string="Adaptation du montant selon cas particulier">
-                                <div invisible="solidarity_request != 'yes'">
-                                    <strong>Solidarité : </strong>
-                                    <field name="solidarity_total_amount" string="Total mensuel après solidarité" readonly="1"/>
-                                </div>
-                                <div invisible="not additional_reduction_request or proposal_type != 'simple'">
-                                    <strong>Réduction complémentaire (proposition simple) : </strong>
-                                    <field name="proposed_monthly_amount" string="Montant mensuel proposé" readonly="1"/>
-                                    <span invisible="proposal_annual_income == 0">
-                                        Pourcentage du revenu : <field name="proposed_income_percentage" widget="percentage" readonly="1"/>
-                                    </span>
-                                </div>
-                                <div invisible="not additional_reduction_request or proposal_type != 'cef'">
-                                    <strong>Réduction complémentaire (CEF) : </strong>
-                                    <field name="proposed_monthly_fee_cef" string="Nouveau montant CEF proposé" readonly="1"/>
-                                    <span invisible="proposal_annual_income == 0">
-                                        Pourcentage du revenu : <field name="proposed_income_percentage" widget="percentage" readonly="1"/>
-                                    </span>
-                                </div>
-                                <div invisible="solidarity_request == 'yes' or additional_reduction_request">
-                                    <span>Aucun cas particulier demandé.</span>
-                                </div>
-                            </group>
-
-                            <!-- 3. TARIF STANDARD -->
-                            <separator string="3. TARIF STANDARD (après réductions standard)"/>
-                            <group string="Mensuel">
-                                <field name="total_monthly_tuition" string="Écolage mensuel (CHF)" readonly="1"/>
-                                <field name="total_monthly_after_school" string="Parascolaire mensuel (CHF)" readonly="1"/>
-                                <field name="total_monthly" string="TOTAL MENSUEL STANDARD (CHF)" readonly="1"/>
-                            </group>
-                            <group string="Annuel">
-                                <field name="total_annual_tuition" string="Écolage x 12 mois (CHF)" readonly="1"/>
-                                <field name="total_annual_after_school" string="Parascolaire x 12 mois (CHF)" readonly="1"/>
-                                <field name="membership_fee_amount" string="Cotisation annuelle (CHF)" readonly="1"/>
-                                <field name="deposit_amount" string="Dépôt (CHF)" readonly="1"/>
-                                <field name="total_annual" string="TOTAL ANNUEL STANDARD (CHF)" readonly="1"/>
-                            </group>
-
-                            <!-- Déduction 2% pour paiement annuel -->
-                            <div class="alert alert-success" invisible="payment_terms != 'annually' or additional_reduction_request">
-                                <strong>TOTAL ANNUEL STANDARD + DÉDUCTION 2% : </strong>
-                                <field name="total_annual_with_discount" readonly="1"/>
- CHF
-                            </div>
-
-                            <!-- 4. TARIF PROPOSÉ (montant proposé par la famille) -->
+                            <!-- 2. TARIF PROPOSÉ (montant proposé par la famille) -->
                             <div invisible="solidarity_request != 'yes' and not additional_reduction_request">
-                                <separator string="4. TARIF PROPOSÉ (montant proposé par la famille)"/>
+                                <separator string="2. TARIF PROPOSÉ (montant proposé par la famille)"/>
                                 <group string="Mensuel">
                                     <field name="proposed_monthly_total" string="Total mensuel proposé (CHF)" readonly="1"/>
                                 </group>
@@ -488,8 +446,30 @@
                                 </div>
                             </div>
 
-                            <!-- 5. Conditions générales -->
-                            <separator string="5. Conditions générales"/>
+                            <!-- 3. TARIF STANDARD -->
+                            <separator string="3. TARIF STANDARD (après réductions standard)"/>
+                            <group string="Mensuel">
+                                <field name="total_monthly_tuition" string="Écolage mensuel (CHF)" readonly="1"/>
+                                <field name="total_monthly_after_school" string="Parascolaire mensuel (CHF)" readonly="1"/>
+                                <field name="total_monthly" string="TOTAL MENSUEL STANDARD (CHF)" readonly="1"/>
+                            </group>
+                            <group string="Annuel">
+                                <field name="total_annual_tuition" string="Écolage x 12 mois (CHF)" readonly="1"/>
+                                <field name="total_annual_after_school" string="Parascolaire x 12 mois (CHF)" readonly="1"/>
+                                <field name="membership_fee_amount" string="Cotisation annuelle (CHF)" readonly="1"/>
+                                <field name="deposit_amount" string="Dépôt (CHF)" readonly="1"/>
+                                <field name="total_annual" string="TOTAL ANNUEL STANDARD (CHF)" readonly="1"/>
+                            </group>
+
+                            <!-- Déduction 2% pour paiement annuel -->
+                            <div class="alert alert-success" invisible="payment_terms != 'annually' or additional_reduction_request">
+                                <strong>TOTAL ANNUEL STANDARD + DÉDUCTION 2% : </strong>
+                                <field name="total_annual_with_discount" readonly="1"/>
+ CHF
+                            </div>
+
+                            <!-- 4. Conditions générales -->
+                            <separator string="4. Conditions générales"/>
                             <group>
                                 <field name="terms_accepted" widget="boolean_toggle"/>
                                 <field name="signature_text" placeholder="Nom et prénom du signataire"/>
@@ -497,11 +477,7 @@
 
                         </page>
 
-                        <!-- ==================== Page 8 : Mentions ==================== -->
-                        <page string="Mentions">
-                            <field name="legal_notice" widget="html" readonly="1"/>
-                            <field name="technical_contact" widget="html" readonly="1"/>
-                        </page>
+                        <!-- ==================== Page 8 : Mentions - SUPPRIMÉE ==================== -->
 
                     </notebook>
 
@@ -531,6 +507,7 @@
             <list>
                 <field name="display_name"/>
                 <field name="annee_scolaire"/>
+                <field name="is_teacher_family" widget="boolean_favorite"/>
                 <field name="state" widget="badge"/>
                 <field name="date_soumission"/>
                 <field name="family_id"/>
