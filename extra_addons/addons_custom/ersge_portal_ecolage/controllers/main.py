@@ -90,9 +90,7 @@ class PortalEcolage(http.Controller):
                 ('family_id', '=', family.id)
             ], order='create_date desc', limit=1)
 
-            if not last_dossier:
-                partner_dossiers = self._get_partner_dossiers(partner)
-                last_dossier = partner_dossiers.sorted('create_date', reverse=True)[:1]
+        
 
             if last_dossier:
                 # Copie du dossier avec les contextes pour désactiver la création automatique des lignes budget
